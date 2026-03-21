@@ -580,6 +580,10 @@ input[type="radio"]:focus-visible {
   color: var(--rl-accent);
 }
 
+/* ─── Brand text helper ─────────────────────────────────────────────────── */
+.rl-brand-red  { color: var(--rl-accent); }
+.rl-brand-white { color: var(--rl-text-primary); }
+
 /* ─── Members panel ──────────────────────────────────────────────────────── */
 #members-panel {
   width: 14rem;

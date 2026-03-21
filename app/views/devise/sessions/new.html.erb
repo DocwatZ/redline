@@ -3,12 +3,13 @@
 <div class="auth-card">
   <div class="auth-brand">
     <div class="auth-brand-icon" aria-hidden="true">
-      <svg width="32" height="32" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+      <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+        <text x="6" y="23" font-family="system-ui,sans-serif" font-weight="700" font-size="18" fill="#e53e3e">R</text>
+        <text x="17" y="23" font-family="system-ui,sans-serif" font-weight="700" font-size="18" fill="#f0f2f7">L</text>
       </svg>
     </div>
     <h1 style="font-size:1.5rem;font-weight:700;color:var(--rl-text-primary)">Welcome back</h1>
-    <p style="color:var(--rl-text-muted);font-size:.875rem;margin-top:.25rem">Sign in to REDLINE</p>
+    <p style="color:var(--rl-text-muted);font-size:.875rem;margin-top:.25rem">Sign in to <%= redline_brand_text %></p>
   </div>
 
   <%= form_for(resource, as: resource_name, url: session_path(resource_name),
