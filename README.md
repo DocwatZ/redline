@@ -22,6 +22,19 @@ REDLINE is a production-ready, self-hosted communication platform built for team
 
 ---
 
+## 📸 Screenshots
+
+### Sign In
+![Sign In](docs/screenshots/login.png)
+
+### Chat Room
+![Chat Room](docs/screenshots/chat.png)
+
+### Room Discovery
+![Room Discovery](docs/screenshots/rooms.png)
+
+---
+
 ## 🛠️ Technology Stack
 
 | Layer | Technology |
