@@ -140,9 +140,15 @@ REDLINE is built **accessibility-first**:
 
 1. Deploy using the included `docker-compose.yml`
 2. Reverse proxy with NGINX or Traefik for HTTPS/WSS
-3. Configure LiveKit with STUN/TURN for external call reliability
-4. See `livekit.yaml` for LiveKit SFU configuration
+3. **Deploy a TURN server** for reliable voice/video outside your LAN — most users will need this
+4. Configure LiveKit with STUN/TURN for external call reliability (see `livekit.yaml`)
 5. Unraid-specific end-to-end instructions: [Ultimate Unraid Setup Guide](Ultimate%20Unraid%20Setup%20Guide.md)
+
+### ⚠️ Voice/Video Outside Your LAN Requires TURN
+
+WebRTC (LiveKit) relies on direct peer or SFU connections. Users behind strict NAT or typical home/office routers will experience voice/video failures without a TURN relay server.
+
+**Recommended for Unraid:** install [`ich777/stun-turn-server`](https://hub.docker.com/r/ich777/stun-turn-server) from Community Apps, then configure LiveKit to use it. See the [Ultimate Unraid Setup Guide](Ultimate%20Unraid%20Setup%20Guide.md) — specifically the **TURN Server Setup** section — for full step-by-step instructions.
 
 ---
 

@@ -9,6 +9,7 @@ It covers:
 - Docker Compose deployment
 - Docker service and storage planning
 - LiveKit and reverse proxy requirements
+- **TURN server setup for external voice/video** (ich777/stun-turn-server)
 - First-run verification
 - Admin promotion
 - Guidance for porting REDLINE to Unraid Community Apps
@@ -27,6 +28,7 @@ A working REDLINE server on Unraid includes these services:
 | PostgreSQL | Primary database | `db` |
 | Redis | ActionCable/pub-sub/cache | `redis` |
 | LiveKit | Voice/video backend | `livekit` |
+| TURN server | WebRTC relay for external users | `turn` (recommended) |
 
 REDLINE also expects:
 
@@ -66,7 +68,7 @@ Optional but strongly recommended:
 
 - Community Applications plugin
 - A reverse proxy stack such as NGINX Proxy Manager, Traefik, or SWAG
-- A TURN-capable public setup for better voice/video reliability outside your LAN
+- A TURN-capable public setup for better voice/video reliability outside your LAN — see [Section 9: TURN Server Setup](#9-turn-server-setup-ich777stun-turn-server) for the recommended approach using `ich777/stun-turn-server`
 
 ---
 
@@ -78,6 +80,9 @@ Optional but strongly recommended:
 | `7880` | LiveKit HTTP/WebSocket | Yes | Client signaling and health reachability |
 | `7881` | LiveKit RTC TCP | Recommended | Useful for clients that cannot use UDP |
 | `7882/udp` | LiveKit RTC UDP | Yes | Best media performance |
+| `3478/udp+tcp` | TURN/STUN (coturn) | Recommended | Standard STUN/TURN port — needed for external voice/video |
+| `5349/udp+tcp` | TURNS (TURN over TLS) | Recommended | Encrypted TURN — preferred for browser clients |
+| `49152–65535/udp` | TURN relay range | Recommended | Per-session relay ports allocated by coturn |
 
 If you use a reverse proxy:
 
@@ -334,11 +339,168 @@ logging:
 
 Replace `YOUR_LIVEKIT_API_KEY_HERE` and `YOUR_LIVEKIT_API_SECRET_HERE` with the exact values from `.env`.
 
-If you expect remote users behind strict NAT or firewalls, plan a proper TURN-capable deployment. LiveKit can work on a LAN without extra TURN setup, but internet voice/video reliability is better when you complete your public networking correctly.
+If you expect remote users behind strict NAT or firewalls, you need a TURN server. See [Section 9: TURN Server Setup](#9-turn-server-setup-ich777stun-turn-server) for the recommended `ich777/stun-turn-server` approach and how to complete the `turn:` block in this file. LiveKit can work on a LAN without TURN, but internet voice/video reliability requires it.
 
 ---
 
-## 9. Start REDLINE on Unraid
+## 9. TURN Server Setup (ich777/stun-turn-server)
+
+### Why you need a TURN server
+
+WebRTC — the technology LiveKit uses for voice and video — tries to establish a direct connection between the client and the LiveKit SFU. On a local network this usually works without any additional infrastructure. On the public internet, most users are behind NAT routers or firewalls that block direct connections. When that happens, voice/video will fail silently or not connect at all.
+
+A TURN (Traversal Using Relays around NAT) server acts as a relay. When a direct or STUN-assisted connection cannot be made, the client and LiveKit relay media through the TURN server instead. Without TURN, most of your users outside your LAN will not have reliable voice or video.
+
+**If you intend to use REDLINE outside your own LAN, deploy a TURN server before expecting voice/video to work reliably.**
+
+---
+
+### Recommended: ich777/stun-turn-server
+
+For Unraid, the easiest TURN server to deploy is [`ich777/stun-turn-server`](https://hub.docker.com/r/ich777/stun-turn-server). It is available directly from the **Unraid Community Applications** plugin and is based on [coturn](https://github.com/coturn/coturn), the most widely deployed open-source TURN server.
+
+- **Unraid Community Apps:** search for `stun-turn-server` by `ich777`
+- **Docker Hub:** <https://hub.docker.com/r/ich777/stun-turn-server>
+- **GitHub:** <https://github.com/ich777/docker-stun-turn-server>
+
+---
+
+### Prerequisites for TURN to work publicly
+
+Before you configure the container, confirm:
+
+1. **You have a public IP address.** TURN only helps external users if the TURN server is reachable from the internet. If your ISP uses CGNAT, TURN over UDP may still fail — consider a TURN-over-TLS (port 5349) setup or a small VPS relay.
+2. **Your router forwards the required ports** to your Unraid server:
+   - `3478/udp` and `3478/tcp` — standard STUN/TURN
+   - `5349/udp` and `5349/tcp` — TURNS (TURN over TLS, required by most browsers in production)
+   - `49152–65535/udp` — the relay port range coturn allocates per session
+3. **You have a domain name pointing to your public IP** (strongly recommended for TURNS/TLS). Dynamic DNS services work fine.
+
+---
+
+### Step 1: Install ich777/stun-turn-server on Unraid
+
+**Via Community Applications (recommended):**
+
+1. Open the **Apps** tab in the Unraid UI.
+2. Search for `stun-turn-server`.
+3. Click the `ich777` result and select **Install**.
+4. Set the environment variables listed below before clicking **Apply**.
+
+**Via Docker Compose** (if you prefer to keep everything in one stack):
+
+Add this service to your `/mnt/user/appdata/redline/compose/docker-compose.yml`:
+
+```yaml
+  turn:
+    image: ich777/stun-turn-server:latest
+    container_name: redline-turn
+    restart: unless-stopped
+    environment:
+      TURN_SECRET: replace-with-a-strong-random-secret
+      TURN_REALM: turn.yourdomain.com        # your public domain or public IP
+      MIN_PORT: 49152
+      MAX_PORT: 65535
+    ports:
+      - "3478:3478/udp"
+      - "3478:3478/tcp"
+      - "5349:5349/udp"
+      - "5349:5349/tcp"
+      - "49152-65535:49152-65535/udp"
+    volumes:
+      - /mnt/user/appdata/redline/turn:/data
+    networks:
+      - redline
+```
+
+Replace `turn.yourdomain.com` with your public hostname or IP, and set `TURN_SECRET` to a long random value:
+
+```bash
+openssl rand -hex 32
+```
+
+---
+
+### Step 2: Key environment variables
+
+| Variable | Required | Description |
+| --- | --- | --- |
+| `TURN_SECRET` | Yes | Shared secret for time-limited credential generation. Must match `livekit.yaml`. |
+| `TURN_REALM` | Yes | Your public domain name or public IP. This is what TURN uses as its realm. |
+| `MIN_PORT` | Recommended | Start of the UDP relay port range. Default: `49152`. |
+| `MAX_PORT` | Recommended | End of the UDP relay port range. Default: `65535`. |
+
+> The `ich777/stun-turn-server` image uses coturn with a time-limited credential approach. `TURN_SECRET` is the shared secret — LiveKit uses this to generate short-lived credentials per session, so you never expose a plain username/password to clients.
+
+---
+
+### Step 3: Configure LiveKit to use TURN
+
+Edit `/mnt/user/appdata/redline/compose/livekit.yaml` and uncomment the `turn:` block:
+
+```yaml
+port: 7880
+
+rtc:
+  tcp_port: 7881
+  udp_port: 7882
+  use_external_ip: true   # required when LiveKit is publicly exposed
+
+keys:
+  "YOUR_LIVEKIT_API_KEY": "YOUR_LIVEKIT_API_SECRET"
+
+logging:
+  level: info
+
+turn:
+  enabled: true
+  domain: turn.yourdomain.com   # must match TURN_REALM in the TURN container
+  tls_port: 5349
+  udp_port: 3478
+  credential: replace-with-a-strong-random-secret   # must match TURN_SECRET
+```
+
+The `credential` value in `livekit.yaml` **must exactly match** the `TURN_SECRET` you set in the TURN container. LiveKit uses this shared secret to generate short-lived TURN credentials for each client session.
+
+Also set `use_external_ip: true` under `rtc:` — this tells LiveKit to advertise its public IP to clients rather than a Docker-internal address.
+
+---
+
+### Step 4: Verify TURN is working
+
+After starting both containers, test TURN connectivity from a browser using a WebRTC tester such as [https://webrtc.github.io/samples/src/content/peerconnection/trickle-ice/](https://webrtc.github.io/samples/src/content/peerconnection/trickle-ice/).
+
+Enter your TURN server details:
+- **STUN or TURN URI:** `turn:turn.yourdomain.com:3478` or `turns:turn.yourdomain.com:5349`
+- **Username:** leave blank (time-limited credentials are handled by LiveKit automatically)
+- **Password:** leave blank
+
+You should see `relay` candidates appear in the ICE candidate output. If only `host` and `srflx` candidates appear, your ports may not be forwarded correctly.
+
+You can also check coturn logs from Unraid:
+
+```bash
+docker logs redline-turn
+```
+
+A successful TURN relay session will show lines like `session allocated`, `peer connected`, or `relay allocated`.
+
+---
+
+### Summary: TURN checklist
+
+- [ ] `ich777/stun-turn-server` container deployed and running
+- [ ] `TURN_SECRET` set to a strong random value
+- [ ] `TURN_REALM` set to your public domain or public IP
+- [ ] Router port forwarding: `3478/udp+tcp`, `5349/udp+tcp`, `49152–65535/udp`
+- [ ] `livekit.yaml` `turn:` block enabled with matching `credential` and `domain`
+- [ ] `rtc.use_external_ip: true` set in `livekit.yaml`
+- [ ] LiveKit container restarted after config change
+- [ ] TURN connectivity verified from a browser outside your LAN
+
+---
+
+## 10. Start REDLINE on Unraid
 
 ### Option A: Unraid CLI with Docker Compose
 
@@ -370,7 +532,7 @@ If the UI stack manager complains about relative paths, use the absolute bind-mo
 
 ---
 
-## 10. Confirm the containers are healthy
+## 11. Confirm the containers are healthy
 
 In the CLI:
 
@@ -404,7 +566,7 @@ http://YOUR-UNRAID-IP:3000/health
 
 ---
 
-## 11. First web login and initial setup
+## 12. First web login and initial setup
 
 Open REDLINE in a browser:
 
@@ -431,7 +593,7 @@ If chat works but voice/video does not, revisit:
 
 ---
 
-## 12. Promote your first user to admin
+## 13. Promote your first user to admin
 
 REDLINE does not ship with a default admin account.
 
@@ -458,7 +620,7 @@ Now refresh the REDLINE UI and verify the admin area is available.
 
 ---
 
-## 13. Reverse proxy guidance for a real production deployment
+## 14. Reverse proxy guidance for a real production deployment
 
 REDLINE production mode forces SSL behavior, so a reverse proxy is strongly recommended for anything beyond local testing.
 
@@ -498,7 +660,7 @@ That is the simplest starting point, but it is not the best option for public in
 
 ---
 
-## 14. Unraid UI workflow summary
+## 15. Unraid UI workflow summary
 
 If you want the shortest all-UI-friendly path, use this order:
 
@@ -512,10 +674,12 @@ If you want the shortest all-UI-friendly path, use this order:
 8. **Browser**: open `http://YOUR-UNRAID-IP:3000`
 9. **Terminal**: promote your first user to admin
 10. **Reverse proxy UI**: add HTTPS and WebSocket support for public access
+11. **Community Apps**: install `ich777/stun-turn-server` and configure LiveKit to use it ([Section 9](#9-turn-server-setup-ich777stun-turn-server))
+12. **Router**: forward TURN ports (`3478`, `5349`, `49152–65535/udp`) to your Unraid server
 
 ---
 
-## 15. Unraid CLI command reference
+## 16. Unraid CLI command reference
 
 Use these as your main operating commands:
 
@@ -549,7 +713,7 @@ docker compose up -d --build
 
 ---
 
-## 16. What “fully working” should mean before you call the install complete
+## 17. What “fully working” should mean before you call the install complete
 
 Before you consider the install complete, verify all of these:
 
@@ -562,6 +726,7 @@ Before you consider the install complete, verify all of these:
 - [ ] Your first user is promoted to admin
 - [ ] Admin pages load
 - [ ] LiveKit connectivity works for your intended network model
+- [ ] TURN server is running and verified if you need external voice/video access
 - [ ] Data survives a container restart
 
 Persistence test:
@@ -579,7 +744,7 @@ Then confirm:
 
 ---
 
-## 17. Troubleshooting
+## 18. Troubleshooting
 
 ### REDLINE web container will not start
 
@@ -610,7 +775,28 @@ Common causes:
 - `LIVEKIT_API_KEY` and `LIVEKIT_API_SECRET` do not match `livekit.yaml`
 - `LIVEKIT_URL` points to the wrong hostname or protocol
 - `7882/udp` is blocked
-- external clients need TURN/public networking adjustments
+- external clients need TURN/public networking adjustments — see [Section 9](#9-turn-server-setup-ich777stun-turn-server)
+
+### Voice or video fails only for users outside the LAN
+
+This is the most common sign of a missing or misconfigured TURN server.
+
+Steps to diagnose:
+
+1. Confirm TURN container is running:
+   ```bash
+   docker logs redline-turn
+   ```
+2. Check that `3478/udp`, `3478/tcp`, `5349/tcp`, and `49152–65535/udp` are forwarded on your router.
+3. Verify `livekit.yaml` has `turn.enabled: true` and the `credential` matches `TURN_SECRET` in the TURN container.
+4. Verify `rtc.use_external_ip: true` is set in `livekit.yaml`.
+5. Restart LiveKit after any config change:
+   ```bash
+   docker compose restart livekit
+   ```
+6. Test with a WebRTC ICE tester from a device outside your LAN (for example, a phone on mobile data) and look for `relay` candidates.
+
+If relay candidates do not appear, your ports are not forwarded or coturn is not starting correctly.
 
 ### `/health` is degraded
 
@@ -635,7 +821,7 @@ Make sure:
 
 ---
 
-## 18. Guidance for porting REDLINE to Unraid Community Apps
+## 19. Guidance for porting REDLINE to Unraid Community Apps
 
 This is the important limitation:
 
@@ -662,6 +848,7 @@ That means:
    - PostgreSQL
    - Redis
    - LiveKit
+   - TURN server (`ich777/stun-turn-server` — already available in Community Apps)
 4. Map the same environment variables already documented in this guide.
 5. Map the same persistent paths under `/mnt/user/appdata/redline/...`.
 6. Keep all four containers on the same custom Docker network.
@@ -726,6 +913,25 @@ That means:
 - Extra parameters:
   - `--config /etc/livekit.yaml`
 
+### TURN Server (ich777/stun-turn-server)
+
+`ich777/stun-turn-server` is already in Community Apps — search for it by name in the Apps tab.
+
+- Image: `ich777/stun-turn-server:latest`
+- Ports:
+  - `3478/udp`
+  - `3478/tcp`
+  - `5349/udp`
+  - `5349/tcp`
+  - `49152-65535/udp` (relay range)
+- Path:
+  - `/data` → `/mnt/user/appdata/redline/turn`
+- Variables:
+  - `TURN_SECRET` — must match `credential` in `livekit.yaml`
+  - `TURN_REALM` — your public domain or IP
+  - `MIN_PORT=49152`
+  - `MAX_PORT=65535`
+
 If you want a polished Community Apps experience, the right long-term path is:
 
 1. publish a stable REDLINE image
@@ -736,14 +942,15 @@ Until then, Compose remains the cleanest and most supportable Unraid deployment 
 
 ---
 
-## 19. Final recommended deployment path
+## 20. Final recommended deployment path
 
 For most Unraid users, the best order is:
 
 1. Deploy REDLINE with Docker Compose
 2. Validate chat, admin access, and persistence
 3. Add reverse proxy and HTTPS
-4. Validate voice/video from real client devices
-5. Only then consider porting the deployment into Community Apps templates
+4. Deploy `ich777/stun-turn-server` and configure LiveKit to use it ([Section 9](#9-turn-server-setup-ich777stun-turn-server))
+5. Validate voice/video from real client devices **outside your LAN** (e.g., on mobile data)
+6. Only then consider porting the deployment into Community Apps templates
 
-That gives you the highest chance of getting to a fully working REDLINE server quickly and repeatably.
+That gives you the highest chance of getting to a fully working REDLINE server — including reliable voice/video for all users — quickly and repeatably.

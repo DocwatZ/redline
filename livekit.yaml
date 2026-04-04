@@ -5,7 +5,8 @@ port: 7880
 rtc:
   tcp_port: 7881
   udp_port: 7882
-  # Uncomment and set your public IP / TURN for external access:
+  # Required for external (internet) access so LiveKit advertises its real public IP.
+  # Uncomment when deploying beyond your LAN:
   # use_external_ip: true
 
 keys:
@@ -15,10 +16,21 @@ keys:
 logging:
   level: info
 
-# TURN server (uncomment and configure for external call reliability)
+# ─── TURN Server ──────────────────────────────────────────────────────────────
+# A TURN server is required for reliable voice/video for clients behind strict
+# NAT or firewalls (most public internet users).
+#
+# Recommended for Unraid: install ich777/stun-turn-server from Community Apps.
+#   Docker Hub: https://hub.docker.com/r/ich777/stun-turn-server
+#   GitHub:     https://github.com/ich777/docker-stun-turn-server
+#
+# After deploying the TURN container, uncomment and fill in the values below.
+# The domain/IP must be your publicly reachable hostname or IP address.
+# The credential must match TURN_SECRET (or TURN_PASS) set in the TURN container.
+#
 # turn:
 #   enabled: true
-#   domain: turn.yourdomain.com
-#   tls_port: 5349
-#   udp_port: 3478
-#   credential: your-turn-credential
+#   domain: turn.yourdomain.com   # public domain or IP of your TURN server
+#   tls_port: 5349                # TURNS (TURN over TLS) — recommended for browsers
+#   udp_port: 3478                # standard STUN/TURN UDP port
+#   credential: your-turn-credential  # must match TURN_SECRET in the TURN container
