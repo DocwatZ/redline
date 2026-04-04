@@ -75,6 +75,12 @@ docker compose up -d
 open http://localhost:3000
 ```
 
+### Unraid users
+
+If you are deploying on Unraid, use the dedicated guide:
+
+- [Ultimate Unraid Setup Guide](Ultimate%20Unraid%20Setup%20Guide.md)
+
 ---
 
 ## ⚙️ Environment Variables
@@ -136,6 +142,7 @@ REDLINE is built **accessibility-first**:
 2. Reverse proxy with NGINX or Traefik for HTTPS/WSS
 3. Configure LiveKit with STUN/TURN for external call reliability
 4. See `livekit.yaml` for LiveKit SFU configuration
+5. Unraid-specific end-to-end instructions: [Ultimate Unraid Setup Guide](Ultimate%20Unraid%20Setup%20Guide.md)
 
 ---
 
