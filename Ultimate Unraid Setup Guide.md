@@ -126,7 +126,6 @@ Open the Unraid terminal and run:
 
 ```bash
 cd /mnt/user/appdata/redline
-# Verify the repository URL if REDLINE is ever moved or renamed.
 git clone https://github.com/DocwatZ/REDLINE.git source
 cp source/.env.example compose/.env
 cp source/livekit.yaml compose/livekit.yaml
@@ -264,7 +263,7 @@ Edit:
 At minimum, set:
 
 ```env
-SECRET_KEY_BASE=PASTE-OUTPUT-OF-openssl-rand-hex-64-HERE
+SECRET_KEY_BASE=YOUR_SECRET_KEY_HERE
 POSTGRES_DB=redline
 POSTGRES_USER=redline
 POSTGRES_PASSWORD=replace-with-a-strong-password
@@ -325,13 +324,13 @@ rtc:
   udp_port: 7882
 
 keys:
-  examplekey123: examplesecret123
+  "YOUR_LIVEKIT_API_KEY_HERE": "YOUR_LIVEKIT_API_SECRET_HERE"
 
 logging:
   level: info
 ```
 
-Replace `examplekey123` and `examplesecret123` with the exact values from `.env`.
+Replace `YOUR_LIVEKIT_API_KEY_HERE` and `YOUR_LIVEKIT_API_SECRET_HERE` with the exact values from `.env`.
 
 If you expect remote users behind strict NAT or firewalls, plan a proper TURN-capable deployment. LiveKit can work on a LAN without extra TURN setup, but internet voice/video reliability is better when you complete your public networking correctly.
 
@@ -651,10 +650,10 @@ That means:
 2. Replace the `web` service in Compose with something like:
 
    ```yaml
-   image: ghcr.io/your-published-namespace/redline:latest
+   image: ghcr.io/your_published_namespace/redline:latest
    ```
 
-   Replace `your-published-namespace` with the namespace where you publish your REDLINE image.
+   Replace `your_published_namespace` with the namespace where you publish your REDLINE image.
 
 3. Create separate CA templates for:
    - REDLINE web
