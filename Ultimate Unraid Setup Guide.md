@@ -268,7 +268,7 @@ POSTGRES_DB=redline
 POSTGRES_USER=redline
 POSTGRES_PASSWORD=replace-with-a-strong-password
 REDIS_PASSWORD=replace-with-a-strong-password
-LIVEKIT_URL=ws://192.168.1.100:7880
+LIVEKIT_URL=ws://YOUR-UNRAID-IP:7880
 LIVEKIT_API_KEY=replace-with-your-livekit-key
 LIVEKIT_API_SECRET=replace-with-your-livekit-secret
 DEVISE_MAILER_FROM=redline@yourdomain.com
@@ -290,6 +290,8 @@ Use them like this:
 - `REDIS_PASSWORD`: long random string
 - `LIVEKIT_API_KEY`: random value
 - `LIVEKIT_API_SECRET`: random value
+
+For example, if your Unraid server is `192.168.1.100`, then `LIVEKIT_URL` would be `ws://192.168.1.100:7880`.
 
 Optional variables:
 
@@ -650,10 +652,10 @@ That means:
 2. Replace the `web` service in Compose with something like:
 
    ```yaml
-   image: ghcr.io/your_published_namespace/redline:latest
+   image: ghcr.io/YOUR_GHCR_NAMESPACE/redline:latest
    ```
 
-   Replace `your_published_namespace` with the namespace where you publish your REDLINE image.
+   Replace `YOUR_GHCR_NAMESPACE` with the GitHub or registry namespace where you publish your REDLINE image.
 
 3. Create separate CA templates for:
    - REDLINE web
