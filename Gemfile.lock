@@ -271,6 +271,7 @@ GEM
     responders (3.2.0)
       actionpack (>= 7.0)
       railties (>= 7.0)
+    rexml (3.4.4)
     ruby-openid (2.9.2)
     securerandom (0.4.1)
     snaky_hash (2.0.3)
@@ -336,6 +337,7 @@ DEPENDENCIES
   rack-attack (~> 6.7)
   rails (~> 7.1.5)
   redis (>= 4.0.1)
+  rexml
   sprockets-rails
   stimulus-rails
   tailwindcss-rails

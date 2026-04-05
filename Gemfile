@@ -11,6 +11,7 @@ gem "turbo-rails"
 gem "stimulus-rails"
 gem "tailwindcss-rails"
 gem "jbuilder"
+gem "rexml"
 
 # Redis for ActionCable and caching
 gem "redis", ">= 4.0.1"
