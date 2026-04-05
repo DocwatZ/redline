@@ -69,8 +69,6 @@ services:
     image: livekit/livekit-server:latest
     restart: unless-stopped
     command: --config /etc/livekit.yaml
-    environment:
-      - LIVEKIT_CONFIG=/etc/livekit.yaml
     volumes:
       - ./livekit.yaml:/etc/livekit.yaml:ro
     ports:

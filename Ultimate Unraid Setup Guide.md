@@ -232,8 +232,6 @@ services:
     container_name: redline-livekit
     restart: unless-stopped
     command: --config /etc/livekit.yaml
-    environment:
-      LIVEKIT_CONFIG: /etc/livekit.yaml
     volumes:
       - /mnt/user/appdata/redline/compose/livekit.yaml:/etc/livekit.yaml:ro
     ports:
