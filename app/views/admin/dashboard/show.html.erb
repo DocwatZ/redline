@@ -2,6 +2,26 @@
 
 <h1 style="font-size:1.5rem;font-weight:700;color:var(--rl-text-primary);margin-bottom:1.5rem">Admin Dashboard</h1>
 
+<%# Signup status banner %>
+<% signup_enabled = AppSetting.instance.self_signup_enabled? %>
+<div style="display:flex;align-items:center;justify-content:space-between;padding:.875rem 1.25rem;
+            background:var(--rl-surface);border:1px solid var(--rl-border);
+            border-left:3px solid <%= signup_enabled ? 'var(--rl-success)' : 'var(--rl-danger)' %>;
+            border-radius:var(--rl-radius-md);margin-bottom:1.5rem">
+  <div style="display:flex;align-items:center;gap:.75rem">
+    <span style="width:.625rem;height:.625rem;border-radius:50%;
+                 background:<%= signup_enabled ? 'var(--rl-success)' : 'var(--rl-danger)' %>"></span>
+    <span style="font-size:.875rem;color:var(--rl-text-primary)">
+      Self-signup is currently
+      <strong style="color:<%= signup_enabled ? 'var(--rl-success)' : 'var(--rl-danger)' %>">
+        <%= signup_enabled ? "enabled" : "disabled" %>
+      </strong>
+    </span>
+  </div>
+  <%= link_to "Manage Settings", admin_settings_path,
+        style: "font-size:.75rem;color:var(--rl-accent);text-decoration:none" %>
+</div>
+
 <%# Stats %>
 <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-bottom:2rem">
   <div style="padding:1.25rem;background:var(--rl-surface);border:1px solid var(--rl-border);border-radius:var(--rl-radius-md)">

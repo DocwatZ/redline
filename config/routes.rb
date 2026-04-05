@@ -23,6 +23,9 @@ Rails.application.routes.draw do
     put  "keys",          to: "keys#update", as: :keys
   end
 
+  # Registration closed landing page (shown when self-signup is disabled)
+  get "registration_closed", to: "registrations_closed#show", as: :registration_closed
+
   # Admin namespace
   namespace :admin do
     get "/", to: "dashboard#show", as: :dashboard
@@ -35,7 +38,8 @@ Rails.application.routes.draw do
     end
     resources :rooms, only: [:index, :show, :destroy]
     resources :audit_logs, only: [:index]
-    get "system", to: "system#show", as: :system
+    get  "system",   to: "system#show",    as: :system
+    resource :settings, only: [:show, :update]
   end
 
   # Rooms

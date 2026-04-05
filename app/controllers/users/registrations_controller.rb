@@ -3,6 +3,8 @@
 class Users::RegistrationsController < Devise::RegistrationsController
   respond_to :html, :turbo_stream
 
+  before_action :check_signup_enabled!, only: [:new, :create]
+
   def create
     super do |resource|
       if resource.persisted?
@@ -29,5 +31,13 @@ class Users::RegistrationsController < Devise::RegistrationsController
 
   def after_inactive_sign_up_path_for(resource)
     new_user_session_path
+  end
+
+  private
+
+  def check_signup_enabled!
+    unless AppSetting.instance.self_signup_enabled?
+      redirect_to registration_closed_path
+    end
   end
 end

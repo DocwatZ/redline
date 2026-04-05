@@ -1,0 +1,49 @@
+<% content_for :title, "Settings" %>
+
+<h1 style="font-size:1.5rem;font-weight:700;color:var(--rl-text-primary);margin-bottom:1.5rem">Settings</h1>
+
+<div style="max-width:36rem">
+  <%= form_with model: @settings, url: admin_settings_path, method: :patch,
+                html: { novalidate: false } do |f| %>
+
+    <%# Self-signup toggle %>
+    <div style="padding:1.25rem;background:var(--rl-surface);border:1px solid var(--rl-border);border-radius:var(--rl-radius-md);margin-bottom:1rem">
+      <h2 style="font-size:1rem;font-weight:600;color:var(--rl-text-primary);margin-bottom:.25rem">
+        Self-Signup
+      </h2>
+      <p style="font-size:.875rem;color:var(--rl-text-muted);margin-bottom:1rem">
+        When disabled, the registration page is blocked server-side and a branded
+        landing page is shown instead. Existing users can still sign in.
+      </p>
+
+      <label style="display:flex;align-items:center;gap:.75rem;cursor:pointer">
+        <%= f.check_box :self_signup_enabled,
+              style: "width:1rem;height:1rem;accent-color:var(--rl-accent);cursor:pointer" %>
+        <span style="font-size:.875rem;color:var(--rl-text-primary)">
+          Allow new users to register
+        </span>
+      </label>
+    </div>
+
+    <%# Request Access URL %>
+    <div style="padding:1.25rem;background:var(--rl-surface);border:1px solid var(--rl-border);border-radius:var(--rl-radius-md);margin-bottom:1.5rem">
+      <h2 style="font-size:1rem;font-weight:600;color:var(--rl-text-primary);margin-bottom:.25rem">
+        Request Access URL
+      </h2>
+      <p style="font-size:.875rem;color:var(--rl-text-muted);margin-bottom:1rem">
+        Shown as a "Request Access" button on the landing page when signup is disabled.
+        Can be a website, a Steam community link, an email (<code>mailto:</code>), etc.
+        Leave blank to hide the button.
+      </p>
+
+      <%= f.text_field :request_access_url,
+            class: "input-field",
+            placeholder: "https://example.com/join  or  mailto:admin@example.com",
+            "aria-label": "Request Access URL",
+            maxlength: 2048 %>
+    </div>
+
+    <%= f.submit "Save Settings",
+          class: "btn btn-primary" %>
+  <% end %>
+</div>

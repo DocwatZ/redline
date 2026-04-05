@@ -1,0 +1,45 @@
+<% content_for :title, "Account Creation Closed" %>
+
+<div class="auth-card">
+  <%# REDLINE brand %>
+  <div class="auth-brand" style="text-align:center">
+    <div class="auth-brand-icon" aria-hidden="true" style="justify-content:center">
+      <svg width="48" height="48" viewBox="0 0 32 32" fill="none">
+        <rect width="32" height="32" rx="8" fill="var(--rl-surface-elevated)"/>
+        <text x="6" y="23" font-family="system-ui,sans-serif" font-weight="700" font-size="18" fill="#e53e3e">R</text>
+        <text x="17" y="23" font-family="system-ui,sans-serif" font-weight="700" font-size="18" fill="#f0f2f7">L</text>
+      </svg>
+    </div>
+
+    <h1 style="font-size:1.75rem;font-weight:700;color:var(--rl-text-primary);margin-top:1rem">
+      <%= redline_brand_text %>
+    </h1>
+
+    <p style="font-size:.875rem;color:var(--rl-accent);font-weight:600;letter-spacing:.08em;text-transform:uppercase;margin-top:.25rem">
+      Security via Obscurity
+    </p>
+
+    <p style="color:var(--rl-text-muted);font-size:.875rem;margin-top:1rem;line-height:1.6">
+      Account creation is currently closed.<br>
+      Only registered users may sign in.
+    </p>
+  </div>
+
+  <div style="display:flex;flex-direction:column;gap:.75rem;margin-top:1.75rem">
+    <%= link_to new_user_session_path,
+          class: "btn btn-primary",
+          style: "width:100%;justify-content:center;text-align:center" do %>
+      Sign In
+    <% end %>
+
+    <% if @settings.request_access_url.present? %>
+      <%= link_to @settings.request_access_url,
+            class: "btn",
+            style: "width:100%;justify-content:center;text-align:center",
+            target: "_blank",
+            rel: "noopener noreferrer" do %>
+        Request Access
+      <% end %>
+    <% end %>
+  </div>
+</div>
