@@ -45,11 +45,14 @@ Rails.application.configure do
   # config.action_cable.allowed_request_origins = [ "http://example.com", /http:\/\/example.*/ ]
 
   # Assume all access to the app is happening through a SSL-terminating reverse proxy.
-  # Can be used together with config.force_ssl for Strict-Transport-Security and secure cookies.
-  # config.assume_ssl = true
+  # When behind a TLS-terminating proxy (the default self-hosted setup), this tells Rails
+  # the connection is already SSL so secure cookies and HSTS work correctly.
+  config.assume_ssl = ENV.fetch("RAILS_ASSUME_SSL", "true") == "true"
 
   # Force all access to the app over SSL, use Strict-Transport-Security, and use secure cookies.
-  config.force_ssl = true
+  # Disabled by default — SSL is managed by the reverse proxy in self-hosted setups.
+  # Enable via RAILS_FORCE_SSL=true if Rails should enforce HTTPS redirects itself.
+  config.force_ssl = ENV.fetch("RAILS_FORCE_SSL", "false") == "true"
 
   # Log to STDOUT by default
   config.logger = ActiveSupport::Logger.new(STDOUT)
