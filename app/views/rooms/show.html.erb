@@ -14,7 +14,7 @@
       </span>
       <div class="flex-1 min-w-0">
         <h1 class="font-semibold text-primary truncate"><%= @room.name %></h1>
-        <% if @room.description.present? %>
+        <% if @room.description.present? && !@room.announcement? %>
           <p class="text-xs text-muted truncate"><%= @room.description %></p>
         <% end %>
       </div>
@@ -94,6 +94,20 @@
          aria-relevant="additions"
          data-controller="chat"
          data-chat-room-id-value="<%= @room.id %>">
+
+      <% if @room.announcement? && @room.description.present? %>
+        <div class="bg-surface-elevated border border-border rounded-lg p-4 mb-4"
+             role="region"
+             aria-label="Announcement">
+          <div class="flex items-center gap-2 mb-2">
+            <span class="text-xl" aria-hidden="true">📢</span>
+            <h2 class="font-semibold text-primary text-sm">Announcement</h2>
+          </div>
+          <div class="text-secondary text-sm leading-relaxed whitespace-pre-wrap">
+            <%= @room.description %>
+          </div>
+        </div>
+      <% end %>
 
       <% @messages.each do |message| %>
         <%= render "messages/message", message: message %>

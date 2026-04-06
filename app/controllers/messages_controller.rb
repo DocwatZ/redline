@@ -11,7 +11,7 @@ class MessagesController < ApplicationController
 
     if @message.save
       ActionCable.server.broadcast("chat_#{@room.id}", render_message(@message))
-      head :ok
+      render json: render_message(@message), status: :created
     else
       render json: { errors: @message.errors.full_messages }, status: :unprocessable_entity
     end

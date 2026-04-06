@@ -57,8 +57,10 @@ export default class extends Controller {
       })
 
       if (response.ok) {
+        const data = await response.json()
         this.fieldTarget.value = ""
         this.fieldTarget.style.height = "auto"
+        this.displaySentMessage(data)
       } else {
         const data = await response.json().catch(() => ({}))
         this.announceError(data.errors?.join(", ") ?? "Failed to send message")
@@ -81,5 +83,51 @@ export default class extends Controller {
     }
     region.textContent = msg
     setTimeout(() => { region.textContent = "" }, 5000)
+  }
+
+  displaySentMessage(data) {
+    // Skip if the message was already appended by ActionCable
+    if (document.getElementById(`message-${data.id}`)) return
+
+    const time = new Date(data.created_at)
+    const displayTime = time.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+    const isoTime = time.toISOString()
+
+    const article = document.createElement("article")
+    article.id = `message-${data.id}`
+    article.className = "message-item"
+    article.setAttribute("aria-label",
+      `Message from ${data.display_name} at ${displayTime}`)
+
+    article.innerHTML = `
+      <div class="avatar avatar-md" style="background-color:${this.escapeHtml(data.avatar_color)}" aria-hidden="true">
+        ${this.escapeHtml(data.initials)}
+      </div>
+      <div style="flex:1;min-width:0">
+        <div class="flex items-baseline gap-2">
+          <span class="font-semibold text-sm text-primary">${this.escapeHtml(data.display_name)}</span>
+          <time datetime="${isoTime}" class="text-xs text-muted">${displayTime}</time>
+        </div>
+        <div class="message-body">
+          ${this.escapeHtml(data.body)}
+        </div>
+      </div>
+    `
+
+    const anchor = document.getElementById("messages-end")
+    if (anchor) {
+      anchor.before(article)
+      // Auto-scroll to bottom
+      const container = document.getElementById("messages")
+      if (container) {
+        container.scrollTo({ top: container.scrollHeight, behavior: "smooth" })
+      }
+    }
+  }
+
+  escapeHtml(str) {
+    const div = document.createElement("div")
+    div.appendChild(document.createTextNode(String(str ?? "")))
+    return div.innerHTML
   }
 }

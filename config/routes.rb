@@ -47,9 +47,9 @@ Rails.application.routes.draw do
     member do
       post :join
       delete :leave
+      get "livekit_token", to: "livekit#token", as: :livekit_token
     end
     resources :messages, only: [ :create, :update, :destroy ]
-    get "livekit_token", to: "livekit#token", as: :livekit_token
   end
 
   # Direct Messages
