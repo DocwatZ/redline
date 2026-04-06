@@ -59,7 +59,6 @@ services:
       - rails_storage:/rails/storage
     command: >
       bash -c "bundle exec rails db:prepare &&
-               bundle exec rails assets:precompile &&
                bundle exec rails server -b 0.0.0.0 -p 3000"
     networks:
       - redline
