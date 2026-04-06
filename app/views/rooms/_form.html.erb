@@ -49,7 +49,8 @@
       <% [
         ["chat", "# Chat", "Text channel for messages, links, GIFs, and emojis"],
         ["voice", "🔊 Voice Channel", "Real-time voice & video with instant join — click to connect"],
-        ["both", "#/🔊 Chat + Voice", "Combined text and voice channel in one space"]
+        ["both", "#/🔊 Chat + Voice", "Combined text and voice channel in one space"],
+        ["announcement", "📢 Announcement", "One-way broadcasts only"]
       ].each do |value, label, desc| %>
         <label class="flex items-start gap-3 p-3 bg-surface-elevated border border-border rounded-lg
                       cursor-pointer hover:border-accent/50 transition-colors
@@ -61,30 +62,6 @@
           <div>
             <span class="font-medium text-primary text-sm"><%= label %></span>
             <p id="channel-<%= value %>-desc" class="text-xs text-muted"><%= desc %></p>
-          </div>
-        </label>
-      <% end %>
-    </fieldset>
-  </div>
-
-  <div class="form-group">
-    <%= f.label :room_type, class: "form-label" do %>
-      Room Type <span class="text-danger" aria-hidden="true">*</span>
-      <span class="sr-only">(required)</span>
-    <% end %>
-    <fieldset class="mt-2 space-y-2">
-      <legend class="sr-only">Room type</legend>
-      <% [["text", "# Text", "Real-time text chat"], ["voice", "🔊 Voice", "Voice & video calls"], ["announcement", "📢 Announcement", "One-way broadcasts only"]].each do |value, label, desc| %>
-        <label class="flex items-start gap-3 p-3 bg-surface-elevated border border-border rounded-lg
-                      cursor-pointer hover:border-accent/50 transition-colors
-                      has-[:checked]:border-accent has-[:checked]:bg-accent/5">
-          <%= f.radio_button :room_type, value,
-                class: "mt-0.5 w-4 h-4 text-accent border-border bg-surface-elevated
-                        focus:ring-2 focus:ring-accent focus:ring-offset-2 focus:ring-offset-base",
-                "aria-describedby": "#{value}-desc" %>
-          <div>
-            <span class="font-medium text-primary text-sm"><%= label %></span>
-            <p id="<%= value %>-desc" class="text-xs text-muted"><%= desc %></p>
           </div>
         </label>
       <% end %>

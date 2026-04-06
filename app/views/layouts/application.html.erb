@@ -51,14 +51,37 @@
             <%
               # Categorise user's top-level rooms
               user_rooms   = current_user.rooms.top_level.by_position.includes(:subchannels)
-              private_rooms = user_rooms.select { |r| r.private? || r.e2ee? }
-              voice_rooms   = user_rooms.select { |r| r.voice_channel? && !r.private? && !r.e2ee? }
-              chat_rooms    = user_rooms.select { |r| r.chat? && !r.voice_channel? && !r.private? && !r.e2ee? }
+              announcement_rooms = user_rooms.select { |r| r.announcement? }
+              private_rooms = user_rooms.select { |r| (r.private? || r.e2ee?) && !r.announcement? }
+              voice_rooms   = user_rooms.select { |r| r.voice_channel? && !r.private? && !r.e2ee? && !r.announcement? }
+              chat_rooms    = user_rooms.select { |r| r.chat? && !r.voice_channel? && !r.private? && !r.e2ee? && !r.announcement? }
             %>
+
+            <%# Announcements — pinned to the top %>
+            <% if announcement_rooms.any? %>
+              <section aria-labelledby="nav-announcements-heading">
+                <div style="display:flex;align-items:center;justify-content:space-between;padding:.25rem .75rem">
+                  <h2 id="nav-announcements-heading" class="nav-section-heading" style="margin:0">Announcements <span aria-hidden="true">📢</span></h2>
+                </div>
+                <ul role="list" style="margin:.25rem 0 0;padding:0 .5rem;list-style:none">
+                  <% announcement_rooms.each do |room| %>
+                    <li>
+                      <%= link_to room_path(room),
+                            class: "nav-item #{"active" if @room&.slug == room.slug}",
+                            aria: { current: @room&.slug == room.slug ? "page" : nil,
+                                    label: "Announcement: #{room.name}" } do %>
+                        <span aria-hidden="true" style="flex-shrink:0"><%= room.display_icon %></span>
+                        <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap"><%= room.name %></span>
+                      <% end %>
+                    </li>
+                  <% end %>
+                </ul>
+              </section>
+            <% end %>
 
             <%# Private channels/chats — shown first %>
             <% if private_rooms.any? %>
-              <section aria-labelledby="nav-private-heading">
+              <section aria-labelledby="nav-private-heading" style="<%= 'margin-top:1rem' if announcement_rooms.any? %>">
                 <div style="display:flex;align-items:center;justify-content:space-between;padding:.25rem .75rem">
                   <h2 id="nav-private-heading" class="nav-section-heading" style="margin:0">Private <span aria-hidden="true">🗝️🔐</span></h2>
                 </div>
@@ -79,7 +102,7 @@
             <% end %>
 
             <%# Channels (voice) with subchannels %>
-            <section aria-labelledby="nav-channels-heading" style="<%= 'margin-top:1rem' if private_rooms.any? %>">
+            <section aria-labelledby="nav-channels-heading" style="<%= 'margin-top:1rem' if private_rooms.any? || announcement_rooms.any? %>">
               <div style="display:flex;align-items:center;justify-content:space-between;padding:.25rem .75rem">
                 <h2 id="nav-channels-heading" class="nav-section-heading" style="margin:0">Channels <span aria-hidden="true">🔊</span></h2>
                 <%= link_to new_room_path,
