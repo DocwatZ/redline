@@ -18,8 +18,13 @@
            aria-label="Admin navigation">
         <div style="height:3.5rem;display:flex;align-items:center;padding:0 1rem;border-bottom:1px solid var(--rl-border)">
           <%= link_to admin_dashboard_path,
-                style: "font-weight:700;font-size:1rem;color:var(--rl-accent);text-decoration:none" do %>
-            RL Admin
+                style: "font-weight:700;font-size:1rem;color:var(--rl-accent);text-decoration:none;display:flex;align-items:center;gap:.5rem" do %>
+            <svg aria-hidden="true" width="24" height="24" viewBox="0 0 32 32" fill="none">
+              <rect width="32" height="32" rx="8" fill="var(--rl-surface-elevated)"/>
+              <text x="6" y="23" font-family="system-ui,sans-serif" font-weight="700" font-size="18" fill="var(--rl-accent)">R</text>
+              <text x="17" y="23" font-family="system-ui,sans-serif" font-weight="700" font-size="18" fill="var(--rl-text-primary)">L</text>
+            </svg>
+            Admin
           <% end %>
         </div>
 
