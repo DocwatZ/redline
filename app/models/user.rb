@@ -3,10 +3,16 @@
 class User < ApplicationRecord
   attr_accessor :login
 
+  # Build provider list based on what's actually configured via env vars
+  OMNIAUTH_PROVIDERS = [].tap do |providers|
+    providers << :github if ENV["GITHUB_CLIENT_ID"].present? && ENV["GITHUB_CLIENT_SECRET"].present?
+    providers << :steam  if ENV["STEAM_API_KEY"].present?
+  end.freeze
+
   devise :database_authenticatable, :registerable,
          :recoverable, :rememberable, :validatable,
          :lockable, :trackable,
-         :omniauthable, omniauth_providers: %i[github steam]
+         :omniauthable, omniauth_providers: OMNIAUTH_PROVIDERS
 
   has_many :room_memberships, dependent: :destroy
   has_many :rooms, through: :room_memberships
