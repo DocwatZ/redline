@@ -1,33 +1,33 @@
-<% content_for :title, "Rooms" %>
+<% content_for :title, "Channels" %>
 
 <div class="flex flex-col h-full">
   <%# Header %>
   <header class="h-14 border-b border-border px-6 flex items-center justify-between flex-shrink-0"
           role="banner">
-    <h1 class="text-lg font-semibold text-primary">Discover Rooms</h1>
-    <%= link_to "New Room", new_room_path,
+    <h1 class="text-lg font-semibold text-primary">Discover Channels</h1>
+    <%= link_to "New Channel", new_room_path,
           class: "btn-primary text-sm",
-          aria: { label: "Create a new room" } %>
+          aria: { label: "Create a new channel" } %>
   </header>
 
   <div class="flex-1 overflow-y-auto p-6">
-    <%# My rooms %>
+    <%# My channels — hierarchical tree view %>
     <% if @my_rooms.any? %>
-      <section aria-labelledby="my-rooms-heading" class="mb-8">
-        <h2 id="my-rooms-heading" class="text-sm font-semibold text-muted uppercase tracking-wider mb-3">
-          My Rooms
+      <section aria-labelledby="my-channels-heading" class="mb-8">
+        <h2 id="my-channels-heading" class="text-sm font-semibold text-muted uppercase tracking-wider mb-3">
+          My Channels
         </h2>
-        <ul role="list" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+        <ul role="list" class="space-y-2">
           <% @my_rooms.each do |room| %>
             <li>
               <%= link_to room_path(room),
                     class: "block bg-surface-elevated border border-border rounded-lg p-4
                             hover:border-accent/50 transition-colors
                             focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 focus:ring-offset-base",
-                    aria: { label: "#{room.name} room, #{room.room_type} type" } do %>
+                    aria: { label: "#{room.name} channel, #{room.channel_type || room.room_type} type" } do %>
                 <div class="flex items-start gap-3">
                   <span class="text-2xl" aria-hidden="true">
-                    <%= room.voice? ? "🔊" : (room.announcement? ? "📢" : "#") %>
+                    <%= room.display_icon %>
                   </span>
                   <div class="flex-1 min-w-0">
                     <p class="font-medium text-primary truncate"><%= room.name %></p>
@@ -41,11 +41,41 @@
                       </span>
                       <% if room.private? %>
                         <span class="text-xs bg-yellow-900/50 text-yellow-300 px-1.5 py-0.5 rounded"
-                              aria-label="private room">🔒 Private</span>
+                              aria-label="private channel">🗝️ Private</span>
+                      <% end %>
+                      <% if room.e2ee? %>
+                        <span class="text-xs bg-blue-900/50 text-blue-300 px-1.5 py-0.5 rounded"
+                              aria-label="end-to-end encrypted">🔐 E2EE</span>
+                      <% end %>
+                      <% if room.combined? %>
+                        <span class="text-xs bg-purple-900/50 text-purple-300 px-1.5 py-0.5 rounded"
+                              aria-label="combined chat and voice">Chat + Voice</span>
                       <% end %>
                     </div>
                   </div>
                 </div>
+              <% end %>
+
+              <%# Render subchannels under voice channels %>
+              <% if room.voice_channel? && room.subchannels.any? %>
+                <ul role="list" class="ml-8 mt-1 space-y-1 border-l-2 border-border pl-3">
+                  <% room.subchannels.by_position.each do |sub| %>
+                    <li>
+                      <%= link_to room_path(sub),
+                            class: "flex items-center gap-2 px-3 py-2 rounded
+                                    bg-surface border border-border
+                                    hover:border-accent/50 transition-colors text-sm
+                                    focus:outline-none focus:ring-2 focus:ring-accent",
+                            aria: { label: "Subchannel #{sub.name}" } do %>
+                        <span class="text-sm" aria-hidden="true">🔊</span>
+                        <span class="text-secondary truncate"><%= sub.name %></span>
+                        <span class="ml-auto text-xs text-muted">
+                          <%= sub.members.count %> <%= "member".pluralize(sub.members.count) %>
+                        </span>
+                      <% end %>
+                    </li>
+                  <% end %>
+                </ul>
               <% end %>
             </li>
           <% end %>
@@ -53,36 +83,54 @@
       </section>
     <% end %>
 
-    <%# Discover public rooms %>
-    <section aria-labelledby="public-rooms-heading">
-      <h2 id="public-rooms-heading" class="text-sm font-semibold text-muted uppercase tracking-wider mb-3">
-        Public Rooms
+    <%# Discover public channels %>
+    <section aria-labelledby="public-channels-heading">
+      <h2 id="public-channels-heading" class="text-sm font-semibold text-muted uppercase tracking-wider mb-3">
+        Public Channels
       </h2>
       <% public_rooms = @rooms.reject { |r| current_user.rooms.include?(r) } %>
       <% if public_rooms.any? %>
-        <ul role="list" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+        <ul role="list" class="space-y-2">
           <% public_rooms.each do |room| %>
             <li>
               <div class="bg-surface-elevated border border-border rounded-lg p-4
                           hover:border-accent/30 transition-colors">
                 <div class="flex items-start gap-3">
                   <span class="text-2xl" aria-hidden="true">
-                    <%= room.voice? ? "🔊" : (room.announcement? ? "📢" : "#") %>
+                    <%= room.display_icon %>
                   </span>
                   <div class="flex-1 min-w-0">
                     <p class="font-medium text-primary truncate"><%= room.name %></p>
                     <% if room.description.present? %>
                       <p class="text-sm text-muted truncate mt-0.5"><%= room.description %></p>
                     <% end %>
-                    <p class="text-xs text-muted mt-2">
-                      <%= room.members.count %> <%= "member".pluralize(room.members.count) %>
-                    </p>
+                    <div class="flex items-center gap-2 mt-2">
+                      <span class="text-xs text-muted">
+                        <%= room.members.count %> <%= "member".pluralize(room.members.count) %>
+                      </span>
+                      <% if room.combined? %>
+                        <span class="text-xs bg-purple-900/50 text-purple-300 px-1.5 py-0.5 rounded"
+                              aria-label="combined chat and voice">Chat + Voice</span>
+                      <% end %>
+                    </div>
                   </div>
                 </div>
                 <%= button_to join_room_path(room), method: :post,
                       class: "btn-ghost w-full text-sm mt-3",
-                      aria: { label: "Join #{room.name} room" } do %>
-                  Join Room
+                      aria: { label: "Join #{room.name} channel" } do %>
+                  Join Channel
+                <% end %>
+
+                <%# Show subchannels for voice channels %>
+                <% if room.voice_channel? && room.subchannels.any? %>
+                  <div class="ml-8 mt-2 space-y-1 border-l-2 border-border pl-3">
+                    <% room.subchannels.by_position.each do |sub| %>
+                      <div class="flex items-center gap-2 px-2 py-1 text-xs text-muted">
+                        <span aria-hidden="true">🔊</span>
+                        <span><%= sub.name %></span>
+                      </div>
+                    <% end %>
+                  </div>
                 <% end %>
               </div>
             </li>
@@ -90,7 +138,7 @@
         </ul>
       <% else %>
         <div class="text-center py-12" role="status">
-          <p class="text-muted text-lg">No public rooms yet.</p>
+          <p class="text-muted text-lg">No public channels yet.</p>
           <p class="text-muted text-sm mt-1">
             <%= link_to "Create the first one", new_room_path,
                   class: "text-accent hover:underline

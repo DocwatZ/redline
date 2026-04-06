@@ -1,14 +1,19 @@
 <% content_for :title, @room.name %>
 
 <div style="margin-bottom:1.5rem">
-  <%= link_to "← Back to Rooms", admin_rooms_path, style: "font-size:.875rem;color:var(--rl-text-muted)" %>
+  <%= link_to "← Back to Channels", admin_rooms_path, style: "font-size:.875rem;color:var(--rl-text-muted)" %>
 </div>
 
-<h1 style="font-size:1.5rem;font-weight:700;color:var(--rl-text-primary);margin-bottom:.25rem"><%= @room.name %></h1>
+<h1 style="font-size:1.5rem;font-weight:700;color:var(--rl-text-primary);margin-bottom:.25rem">
+  <%= @room.display_icon %> <%= @room.name %>
+</h1>
 <p style="color:var(--rl-text-muted);font-size:.875rem;margin-bottom:2rem">
-  <%= @room.room_type %> · <%= @room.private? ? "Private" : "Public" %> · <%= @message_count %> messages
+  <%= @room.channel_type || @room.room_type %> · <%= @room.private? ? "Private 🗝️" : "Public" %> · <%= @message_count %> messages
   <% if @room.e2ee_enabled? %>
-    · 🔒 E2EE
+    · 🔐 E2EE
+  <% end %>
+  <% if @room.parent %>
+    · Subchannel of <strong><%= @room.parent.name %></strong>
   <% end %>
 </p>
 
@@ -28,12 +33,30 @@
     </ul>
   </div>
 
-  <div style="background:var(--rl-surface);border:1px solid var(--rl-border);border-radius:var(--rl-radius-md);padding:1.25rem">
-    <h2 style="font-size:.875rem;font-weight:600;color:var(--rl-text-primary);margin-bottom:1rem">Actions</h2>
-    <%= button_to "Delete Room", admin_room_path(@room),
-          method: :delete,
-          class: "btn",
-          style: "color:var(--rl-danger);width:100%;justify-content:center",
-          data: { turbo_confirm: "Delete '#{@room.name}'? This permanently removes all messages." } %>
+  <div>
+    <%# Subchannels section %>
+    <% subchannels = @room.subchannels %>
+    <% if subchannels.any? %>
+      <div style="background:var(--rl-surface);border:1px solid var(--rl-border);border-radius:var(--rl-radius-md);padding:1.25rem;margin-bottom:1.5rem">
+        <h2 style="font-size:.875rem;font-weight:600;color:var(--rl-text-primary);margin-bottom:1rem">Subchannels (<%= subchannels.count %>)</h2>
+        <ul style="list-style:none;padding:0;margin:0">
+          <% subchannels.each do |sub| %>
+            <li style="padding:.375rem 0;display:flex;align-items:center;gap:.5rem;border-bottom:1px solid var(--rl-border)">
+              <span>🔊</span>
+              <%= link_to sub.name, admin_room_path(sub), style: "color:var(--rl-accent);font-size:.875rem" %>
+            </li>
+          <% end %>
+        </ul>
+      </div>
+    <% end %>
+
+    <div style="background:var(--rl-surface);border:1px solid var(--rl-border);border-radius:var(--rl-radius-md);padding:1.25rem">
+      <h2 style="font-size:.875rem;font-weight:600;color:var(--rl-text-primary);margin-bottom:1rem">Actions</h2>
+      <%= button_to "Delete Channel", admin_room_path(@room),
+            method: :delete,
+            class: "btn",
+            style: "color:var(--rl-danger);width:100%;justify-content:center",
+            data: { turbo_confirm: "Delete '#{@room.name}'? This permanently removes all messages." } %>
+    </div>
   </div>
 </div>

@@ -2,7 +2,7 @@
   <% if room.errors.any? %>
     <div role="alert" class="p-4 bg-red-900/30 border border-red-700 rounded-lg">
       <h2 class="text-sm font-semibold text-red-300 mb-2">
-        <%= pluralize(room.errors.count, "error") %> prevented this room from being saved:
+        <%= pluralize(room.errors.count, "error") %> prevented this channel from being saved:
       </h2>
       <ul class="list-disc list-inside space-y-1">
         <% room.errors.full_messages.each do |message| %>
@@ -14,7 +14,7 @@
 
   <div class="form-group">
     <%= f.label :name, class: "form-label" do %>
-      Room Name <span class="text-danger" aria-hidden="true">*</span>
+      Channel Name <span class="text-danger" aria-hidden="true">*</span>
       <span class="sr-only">(required)</span>
     <% end %>
     <%= f.text_field :name,
@@ -34,9 +34,37 @@
     <%= f.text_area :description,
           class: "input-field w-full",
           rows: 3,
-          placeholder: "What's this room about?",
+          placeholder: "What's this channel about?",
           "aria-describedby": "desc-hint" %>
     <p id="desc-hint" class="text-xs text-muted mt-1">Optional. Shown to members.</p>
+  </div>
+
+  <div class="form-group">
+    <%= f.label :channel_type, class: "form-label" do %>
+      Channel Type <span class="text-danger" aria-hidden="true">*</span>
+      <span class="sr-only">(required)</span>
+    <% end %>
+    <fieldset class="mt-2 space-y-2">
+      <legend class="sr-only">Channel type</legend>
+      <% [
+        ["chat", "# Chat", "Text channel for messages, links, GIFs, and emojis"],
+        ["voice", "🔊 Voice Channel", "Real-time voice & video with instant join — click to connect"],
+        ["both", "#/🔊 Chat + Voice", "Combined text and voice channel in one space"]
+      ].each do |value, label, desc| %>
+        <label class="flex items-start gap-3 p-3 bg-surface-elevated border border-border rounded-lg
+                      cursor-pointer hover:border-accent/50 transition-colors
+                      has-[:checked]:border-accent has-[:checked]:bg-accent/5">
+          <%= f.radio_button :channel_type, value,
+                class: "mt-0.5 w-4 h-4 text-accent border-border bg-surface-elevated
+                        focus:ring-2 focus:ring-accent focus:ring-offset-2 focus:ring-offset-base",
+                "aria-describedby": "channel-#{value}-desc" %>
+          <div>
+            <span class="font-medium text-primary text-sm"><%= label %></span>
+            <p id="channel-<%= value %>-desc" class="text-xs text-muted"><%= desc %></p>
+          </div>
+        </label>
+      <% end %>
+    </fieldset>
   </div>
 
   <div class="form-group">
@@ -63,6 +91,28 @@
     </fieldset>
   </div>
 
+  <%# Parent channel picker for voice subchannels %>
+  <% voice_channels = local_assigns[:voice_channels] || [] %>
+  <% if voice_channels.any? %>
+    <div class="form-group">
+      <%= f.label :parent_id, class: "form-label" %>
+      <p class="text-xs text-muted mb-2">
+        Optionally nest this as a subchannel under a voice channel (e.g., Counter-Strike 2 → Terrorists).
+      </p>
+      <%= f.select :parent_id,
+            options_for_select(
+              [["— None (Top-level channel) —", nil]] + voice_channels.map { |vc| [vc.name, vc.id] },
+              room.parent_id
+            ),
+            {},
+            class: "input-field w-full",
+            "aria-describedby": "parent-hint" %>
+      <p id="parent-hint" class="text-xs text-muted mt-1">
+        Only voice channels can have subchannels. Subchannels must also be voice type.
+      </p>
+    </div>
+  <% end %>
+
   <div class="form-group">
     <div class="flex items-start gap-3">
       <%= f.check_box :private,
@@ -71,11 +121,11 @@
             id: "room_private",
             "aria-describedby": "private-hint" %>
       <div>
-        <%= f.label :private, "Private Room",
+        <%= f.label :private, "Private Channel 🗝️",
               class: "font-medium text-primary text-sm cursor-pointer",
               for: "room_private" %>
         <p id="private-hint" class="text-xs text-muted">
-          Only invited members can see and join this room.
+          Only invited members can see and join this channel.
         </p>
       </div>
     </div>
@@ -89,18 +139,18 @@
             id: "room_e2ee_enabled",
             "aria-describedby": "e2ee-hint" %>
       <div>
-        <%= f.label :e2ee_enabled, "End-to-End Encrypted",
+        <%= f.label :e2ee_enabled, "End-to-End Encrypted 🔐",
               class: "font-medium text-primary text-sm cursor-pointer",
               for: "room_e2ee_enabled" %>
         <p id="e2ee-hint" class="text-xs text-muted">
-          Enable E2EE for this room. Messages are encrypted client-side; the server never sees plaintext.
+          Enable E2EE for this channel. Messages are encrypted client-side; the server never sees plaintext.
         </p>
       </div>
     </div>
   </div>
 
   <div class="flex gap-3 pt-2">
-    <%= f.submit room.persisted? ? "Save Changes" : "Create Room",
+    <%= f.submit room.persisted? ? "Save Changes" : "Create Channel",
           class: "btn-primary" %>
     <%= link_to "Cancel",
           room.persisted? ? room_path(room) : rooms_path,

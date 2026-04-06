@@ -4,7 +4,7 @@ class Admin::RoomsController < Admin::BaseController
   before_action :set_room, only: [:show, :destroy]
 
   def index
-    @rooms = Room.order(created_at: :desc).includes(:owner)
+    @rooms = Room.order(created_at: :desc).includes(:owner, :parent)
   end
 
   def show
@@ -19,7 +19,7 @@ class Admin::RoomsController < Admin::BaseController
       metadata: { room_id: @room.id, room_name: @room.name }
     )
     @room.destroy
-    redirect_to admin_rooms_path, notice: "Room deleted."
+    redirect_to admin_rooms_path, notice: "Channel deleted."
   end
 
   private
