@@ -19,9 +19,15 @@ class DirectMessagesController < ApplicationController
     conversation_key = [ current_user.id, @partner.id ].sort.join("_")
     ActionCable.server.broadcast("dm_#{conversation_key}", render_dm(@dm))
 
-    head :ok
+    respond_to do |format|
+      format.html { redirect_to user_direct_messages_path(@partner) }
+      format.json { head :ok }
+    end
   rescue ActiveRecord::RecordInvalid => e
-    render json: { errors: e.record.errors.full_messages }, status: :unprocessable_entity
+    respond_to do |format|
+      format.html { redirect_to user_direct_messages_path(@partner), alert: e.record.errors.full_messages.join(", ") }
+      format.json { render json: { errors: e.record.errors.full_messages }, status: :unprocessable_entity }
+    end
   end
 
   private

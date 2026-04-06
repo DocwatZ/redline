@@ -13,16 +13,25 @@ class MessagesController < ApplicationController
     # Check permissions based on message context
     membership = @room.membership_for(current_user)
     unless membership&.can_send_messages?(@room)
-      render json: { error: "You do not have permission to send messages" }, status: :forbidden
+      respond_to do |format|
+        format.html { redirect_to room_path(@room), alert: "You do not have permission to send messages" }
+        format.json { render json: { error: "You do not have permission to send messages" }, status: :forbidden }
+      end
       return
     end
 
     if @message.save
       broadcast_channel = @message.in_call? ? "voice_chat_#{@room.id}" : "chat_#{@room.id}"
       ActionCable.server.broadcast(broadcast_channel, render_message(@message))
-      render json: render_message(@message), status: :created
+      respond_to do |format|
+        format.html { redirect_to room_path(@room) }
+        format.json { render json: render_message(@message), status: :created }
+      end
     else
-      render json: { errors: @message.errors.full_messages }, status: :unprocessable_entity
+      respond_to do |format|
+        format.html { redirect_to room_path(@room), alert: @message.errors.full_messages.join(", ") }
+        format.json { render json: { errors: @message.errors.full_messages }, status: :unprocessable_entity }
+      end
     end
   end
 
@@ -62,7 +71,10 @@ class MessagesController < ApplicationController
 
   def require_membership!
     unless @room.member?(current_user) || !@room.private?
-      render json: { error: "Access denied" }, status: :forbidden
+      respond_to do |format|
+        format.html { redirect_to rooms_path, alert: "Access denied" }
+        format.json { render json: { error: "Access denied" }, status: :forbidden }
+      end
     end
   end
 

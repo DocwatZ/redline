@@ -177,17 +177,20 @@
     <% if @room.chat? && @room.member?(current_user) %>
       <div class="border-t border-border p-3 flex-shrink-0">
         <form id="message-form"
+              method="post"
+              action="<%= room_messages_path(@room) %>"
               data-controller="message-input"
               data-action="submit->message-input#send"
               data-turbo="false"
               aria-label="Send a message to <%= @room.name %>">
+          <%= hidden_field_tag :authenticity_token, form_authenticity_token %>
           <div class="flex items-end gap-2">
             <div class="flex-1 relative">
               <label for="message-body" class="sr-only">
                 Message <%= @room.name %>
               </label>
               <textarea id="message-body"
-                        name="body"
+                        name="message[body]"
                         rows="1"
                         maxlength="4000"
                         placeholder="Message <%= @room.display_icon %><%= @room.name %>"

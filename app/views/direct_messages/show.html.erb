@@ -50,17 +50,20 @@
   <%# Input %>
   <div class="border-t border-border p-3 flex-shrink-0">
     <form id="dm-form"
+          method="post"
+          action="<%= user_direct_messages_path(@partner) %>"
           data-controller="dm-input"
           data-action="submit->dm-input#send"
           data-turbo="false"
           aria-label="Send a direct message to <%= @partner.display_name %>">
+      <%= hidden_field_tag :authenticity_token, form_authenticity_token %>
       <div class="flex items-end gap-2">
         <div class="flex-1 relative">
           <label for="dm-body" class="sr-only">
             Message <%= @partner.display_name %>
           </label>
           <textarea id="dm-body"
-                    name="body"
+                    name="direct_message[body]"
                     rows="1"
                     maxlength="4000"
                     placeholder="Message <%= @partner.display_name %>"
