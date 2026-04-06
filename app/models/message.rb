@@ -8,6 +8,11 @@ class Message < ApplicationRecord
 
   MESSAGE_TYPES = %w[text system].freeze
 
+  # Message context: indicates where/how the message was sent
+  # standard   = regular text channel message
+  # in_call    = message sent via voice channel in-call text chat (LiveKit DataChannel)
+  MESSAGE_CONTEXTS = %w[standard in_call].freeze
+
   validates :body, presence: true, length: { maximum: 4000 }, unless: :e2ee_message?
   validates :ciphertext, presence: true, if: :e2ee_message?
   validates :message_type, inclusion: { in: MESSAGE_TYPES }
@@ -16,6 +21,8 @@ class Message < ApplicationRecord
 
   scope :recent, -> { order(created_at: :asc) }
   scope :visible, -> { where(deleted: false) }
+  scope :standard_messages, -> { where(message_context: [nil, "standard"]) }
+  scope :in_call_messages, -> { where(message_context: "in_call") }
 
   def display_body
     return "[message deleted]" if deleted?
@@ -29,6 +36,10 @@ class Message < ApplicationRecord
 
   def system?
     message_type == "system"
+  end
+
+  def in_call?
+    message_context == "in_call"
   end
 
   private
