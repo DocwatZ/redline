@@ -52,6 +52,7 @@
     <form id="dm-form"
           data-controller="dm-input"
           data-action="submit->dm-input#send"
+          data-turbo="false"
           aria-label="Send a direct message to <%= @partner.display_name %>">
       <div class="flex items-end gap-2">
         <div class="flex-1 relative">

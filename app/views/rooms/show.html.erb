@@ -179,6 +179,7 @@
         <form id="message-form"
               data-controller="message-input"
               data-action="submit->message-input#send"
+              data-turbo="false"
               aria-label="Send a message to <%= @room.name %>">
           <div class="flex items-end gap-2">
             <div class="flex-1 relative">
