@@ -7,6 +7,7 @@ import DmInputController      from "controllers/dm_input_controller"
 import LivekitController      from "controllers/livekit_controller"
 import PasswordToggleController from "controllers/password_toggle_controller"
 import SidebarController      from "controllers/sidebar_controller"
+import LinkPreviewController  from "controllers/link_preview_controller"
 
 application.register("chat",            ChatController)
 application.register("dm-chat",         DmChatController)
@@ -15,3 +16,4 @@ application.register("dm-input",        DmInputController)
 application.register("livekit",         LivekitController)
 application.register("password-toggle", PasswordToggleController)
 application.register("sidebar",         SidebarController)
+application.register("link-preview",    LinkPreviewController)

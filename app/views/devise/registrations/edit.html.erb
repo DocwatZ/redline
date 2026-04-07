@@ -57,6 +57,20 @@
         </div>
       </fieldset>
 
+      <fieldset style="border:1px solid var(--rl-border);border-radius:.5rem;padding:1rem">
+        <legend style="font-size:.875rem;font-weight:500;color:var(--rl-text-secondary);padding:0 .25rem">
+          Text &amp; Images
+        </legend>
+        <div style="display:flex;align-items:center;gap:.75rem;margin-top:.5rem">
+          <%= f.check_box :link_previews_enabled,
+                id: "link-previews-toggle",
+                style: "width:1.125rem;height:1.125rem;accent-color:var(--rl-accent)" %>
+          <%= f.label :link_previews_enabled, "Show website preview info from links pasted in chat",
+                for: "link-previews-toggle",
+                style: "font-size:.875rem;color:var(--rl-text-secondary);cursor:pointer" %>
+        </div>
+      </fieldset>
+
       <hr style="border:none;border-top:1px solid var(--rl-border);margin:.5rem 0">
       <h2 style="font-size:1rem;font-weight:600;color:var(--rl-text-primary)">Change Password</h2>
       <p style="font-size:.75rem;color:var(--rl-text-muted)">Leave blank to keep your current password.</p>

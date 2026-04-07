@@ -34,7 +34,19 @@ export default class extends Controller {
 
     if (existing) {
       // Update existing message (edit / delete)
-      existing.querySelector(".message-body").textContent = data.body
+      // Replace the message-body element to re-trigger link-preview controller
+      const oldBody = existing.querySelector(".message-body")
+      if (oldBody) {
+        const newBody = document.createElement("div")
+        newBody.className = data.deleted
+          ? "message-body deleted"
+          : "message-body"
+        if (!data.deleted) {
+          newBody.setAttribute("data-controller", "link-preview")
+        }
+        newBody.textContent = data.body
+        oldBody.replaceWith(newBody)
+      }
       return
     }
 
@@ -71,7 +83,7 @@ export default class extends Controller {
           <time datetime="${isoTime}" class="text-xs text-muted">${displayTime}</time>
           ${data.edited ? '<span class="text-xs text-muted" aria-label="edited">(edited)</span>' : ""}
         </div>
-        <div class="message-body${data.deleted ? " deleted" : ""}">
+        <div class="message-body${data.deleted ? " deleted" : ""}"${data.deleted ? "" : ' data-controller="link-preview"'}>
           ${this.escapeHtml(data.body)}
         </div>
       </div>

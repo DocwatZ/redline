@@ -108,7 +108,7 @@ export default class extends Controller {
           <span class="font-semibold text-sm text-primary">${this.escapeHtml(data.display_name)}</span>
           <time datetime="${isoTime}" class="text-xs text-muted">${displayTime}</time>
         </div>
-        <div class="message-body text-sm text-secondary mt-0.5 leading-relaxed whitespace-pre-wrap break-words">
+        <div class="message-body text-sm text-secondary mt-0.5 leading-relaxed whitespace-pre-wrap break-words" data-controller="link-preview">
           ${this.escapeHtml(data.body)}
         </div>
       </div>

@@ -13,6 +13,9 @@ Rails.application.routes.draw do
   get  "recovery_codes", to: "recovery_codes#show", as: :recovery_codes
   post "recovery_codes", to: "recovery_codes#create", as: :regenerate_recovery_codes
 
+  # Link previews
+  get "link_previews", to: "link_previews#show"
+
   # Health check
   get "health", to: "health#show", as: :health
   get "up" => "rails/health#show", as: :rails_health_check

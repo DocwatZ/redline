@@ -22,7 +22,7 @@
     </script>
   </head>
 
-  <body>
+  <body data-link-previews="<%= user_signed_in? && current_user.link_previews_enabled? ? 'true' : 'false' %>">
     <%# Skip navigation link — first focusable element, visible on focus %>
     <a href="#main-content" aria-label="Skip to main content">Skip to main content</a>
 

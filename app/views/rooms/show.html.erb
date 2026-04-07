@@ -238,7 +238,7 @@
           <div class="in-call-message py-1 px-2 text-sm" role="listitem">
             <span class="font-semibold text-xs text-primary"><%= message.user.display_name %></span>
             <time class="text-xs text-muted ml-1"><%= message.created_at.strftime('%H:%M') %></time>
-            <div class="text-secondary text-sm break-words whitespace-pre-wrap"><%= message.display_body %></div>
+            <div class="text-secondary text-sm break-words whitespace-pre-wrap" data-controller="link-preview"><%= message.display_body %></div>
           </div>
         <% end %>
       </div>

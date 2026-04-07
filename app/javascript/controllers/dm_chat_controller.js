@@ -49,7 +49,7 @@ export default class extends Controller {
           <span class="font-semibold text-sm text-primary">${this.escapeHtml(data.display_name)}</span>
           <time datetime="${time.toISOString()}" class="text-xs text-muted">${displayTime}</time>
         </div>
-        <div class="message-body">${this.escapeHtml(data.body)}</div>
+        <div class="message-body" data-controller="link-preview">${this.escapeHtml(data.body)}</div>
       </div>
     `
     return article

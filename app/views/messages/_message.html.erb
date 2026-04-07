@@ -29,7 +29,8 @@
     </div>
 
     <div class="message-body text-sm text-secondary mt-0.5 leading-relaxed whitespace-pre-wrap break-words
-                <%= "italic text-muted" if message.deleted? %>">
+                <%= "italic text-muted" if message.deleted? %>"
+         <% unless message.deleted? %>data-controller="link-preview"<% end %>>
       <%= message.display_body %>
     </div>
   </div>
