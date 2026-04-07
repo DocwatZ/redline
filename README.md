@@ -60,8 +60,8 @@ REDLINE is a production-ready, self-hosted communication platform built for team
 
 ```bash
 # 1. Clone and configure
-git clone https://github.com/DocwatZ/REDLINE.git
-cd REDLINE
+git clone https://github.com/DocwatZ/redline.git
+cd redline
 cp .env.example .env
 # Edit .env — fill in SECRET_KEY_BASE, POSTGRES_PASSWORD, REDIS_PASSWORD, LIVEKIT keys
 
