@@ -202,5 +202,7 @@ export default class extends Controller {
       .replace(/'/g, "&#39;")
       .replace(/</g, "&lt;")
       .replace(/>/g, "&gt;")
+      .replace(/\n/g, "&#10;")
+      .replace(/\r/g, "&#13;")
   }
 }

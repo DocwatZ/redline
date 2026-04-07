@@ -20,7 +20,7 @@
     </div>
     <div class="text-sm text-secondary mt-0.5 leading-relaxed whitespace-pre-wrap break-words
                 <%= "italic text-muted" if dm.deleted? %>"
-         data-controller="link-preview">
+         <% unless dm.deleted? %>data-controller="link-preview"<% end %>>
       <%= dm.display_body %>
     </div>
   </div>

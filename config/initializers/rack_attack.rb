@@ -34,6 +34,11 @@ class Rack::Attack
     req.ip if req.path.start_with?("/admin")
   end
 
+  # Throttle link preview requests (server-side URL fetching)
+  throttle("link_previews/ip", limit: 60, period: 1.minute) do |req|
+    req.ip if req.path == "/link_previews" && req.get?
+  end
+
   # Throttle general API requests
   throttle("req/ip", limit: 300, period: 5.minutes) do |req|
     req.ip unless req.path.start_with?("/assets", "/packs")

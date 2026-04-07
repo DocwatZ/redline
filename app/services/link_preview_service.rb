@@ -4,6 +4,7 @@ require "net/http"
 require "uri"
 require "cgi"
 require "openssl"
+require "ipaddr"
 
 class LinkPreviewService
   FETCH_TIMEOUT = 3 # seconds
@@ -67,7 +68,21 @@ class LinkPreviewService
 
     def valid_url?(url)
       uri = URI.parse(url)
-      %w[http https].include?(uri.scheme) && uri.host.present?
+      return false unless %w[http https].include?(uri.scheme) && uri.host.present?
+
+      # Reject private/reserved IP addresses to prevent SSRF
+      begin
+        ip = IPAddr.new(uri.host)
+        return false if ip.private? || ip.loopback? || ip.link_local?
+      rescue IPAddr::InvalidAddressError
+        # Not an IP address, check hostname
+      end
+
+      # Reject localhost and other dangerous hostnames
+      return false if %w[localhost].include?(uri.host.downcase)
+      return false if uri.host.downcase.end_with?(".local", ".internal")
+
+      true
     rescue URI::InvalidURIError
       false
     end
@@ -101,6 +116,9 @@ class LinkPreviewService
         # Resolve relative redirects
         redirect_uri = URI.parse(location)
         redirect_uri = URI.join(uri, location) unless redirect_uri.host
+
+        # Validate redirect target against SSRF
+        return nil unless valid_url?(redirect_uri.to_s)
 
         fetch_html(redirect_uri.to_s, redirects_remaining - 1)
       else
