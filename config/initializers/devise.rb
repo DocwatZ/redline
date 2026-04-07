@@ -16,6 +16,7 @@ Devise.setup do |config|
   config.sign_out_via = :delete
   config.responder.error_status = :unprocessable_entity
   config.responder.redirect_status = :see_other
+  config.navigational_formats = ['*/*', :html, :turbo_stream]
 
   # Support login via username or email
   config.authentication_keys = [ :login ]
