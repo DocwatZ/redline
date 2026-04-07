@@ -1,1 +1,1 @@
-export { default as presence } from "./presence_channel"
+export { default as presence } from "channels/presence_channel"

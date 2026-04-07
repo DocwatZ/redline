@@ -144,6 +144,27 @@ REDLINE is built **accessibility-first**:
 4. Configure LiveKit with STUN/TURN for external call reliability (see `livekit.yaml`)
 5. Unraid-specific end-to-end instructions: [Ultimate Unraid Setup Guide](Ultimate%20Unraid%20Setup%20Guide.md)
 
+### ⚠️ Updating REDLINE — Always Rebuild the Image
+
+REDLINE's JavaScript is served via Rails importmap (ES modules, no bundler). Asset fingerprints are baked into the Docker image during `assets:precompile` at build time.
+
+**After every `git pull`, you must rebuild the image** — a simple container restart is not enough:
+
+```bash
+git pull
+docker compose down
+docker compose build --no-cache
+docker compose up -d
+docker exec -it redline-web bin/rails db:migrate
+```
+
+> Running `docker compose up -d` without `build` will reuse the old image and serve stale JavaScript.
+> This causes features that depend on JavaScript (link previews, real-time chat, form submission) to silently stop working even though the Rails server responds normally.
+
+#### For contributors
+
+JavaScript modules use bare module specifiers (e.g. `import consumer from "channels/consumer"`) so that the importmap resolves them to the correct fingerprinted asset URLs. **Do not use relative imports** (e.g. `./consumer`) inside `app/javascript/` — the browser resolves relative imports from the fingerprinted file URL, not via the importmap, resulting in a 404 that silently breaks all JavaScript.
+
 ### ⚠️ Voice/Video Outside Your LAN Requires TURN
 
 WebRTC (LiveKit) relies on direct peer or SFU connections. Users behind strict NAT or typical home/office routers will experience voice/video failures without a TURN relay server.

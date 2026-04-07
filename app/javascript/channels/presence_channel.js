@@ -1,4 +1,4 @@
-import consumer from "./consumer"
+import consumer from "channels/consumer"
 
 // Presence channel — keeps user status in sync
 const presenceSubscription = consumer.subscriptions.create("PresenceChannel", {
