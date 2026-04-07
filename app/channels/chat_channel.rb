@@ -45,6 +45,7 @@ class ChatChannel < ApplicationCable::Channel
       avatar_color: message.user.avatar_color,
       created_at: message.created_at.iso8601,
       edited: message.edited,
+      deleted: message.deleted,
       message_context: message.message_context
     }
   end

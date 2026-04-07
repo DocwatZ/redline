@@ -21,7 +21,18 @@ export default class extends Controller {
   connect() {
     if (this.processedValue) return
     this.processedValue = true
+    // Reset processedValue before Turbo caches this page so that when the
+    // cached snapshot is restored, controllers re-run link linkification.
+    this._beforeCacheHandler = () => { this.processedValue = false }
+    document.addEventListener("turbo:before-cache", this._beforeCacheHandler)
     this.linkifyAndPreview()
+  }
+
+  disconnect() {
+    if (this._beforeCacheHandler) {
+      document.removeEventListener("turbo:before-cache", this._beforeCacheHandler)
+      this._beforeCacheHandler = null
+    }
   }
 
   linkifyAndPreview() {
