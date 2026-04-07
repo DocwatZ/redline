@@ -16,9 +16,8 @@ class LinkPreviewService
   # Matches http:// and https:// URLs.
   URL_PATTERN = %r{
     https?://                           # scheme
-    [a-zA-Z0-9\-]+                      # domain start
-    (?:\.[a-zA-Z0-9\-]+)*              # subdomains/domain parts
-    (?:\.[a-zA-Z]{2,})                  # TLD
+    (?:[a-zA-Z0-9\-]+\.)+               # domain segments (each followed by a dot)
+    [a-zA-Z]{2,}                        # TLD
     (?::\d{1,5})?                       # optional port
     (?:/[^\s<>\"\)\]\}]*)?              # optional path
   }x
