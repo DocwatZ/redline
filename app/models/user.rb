@@ -47,6 +47,12 @@ class User < ApplicationRecord
     status == "online"
   end
 
+  def link_previews_enabled?
+    # Treat nil as true so that previews are on by default even if the
+    # column value was never explicitly persisted or the migration is pending.
+    self[:link_previews_enabled] != false
+  end
+
   def admin?
     role == "admin"
   end
