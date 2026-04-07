@@ -146,7 +146,7 @@
             <%# Chats (text) %>
             <section aria-labelledby="nav-chats-heading" style="margin-top:1rem">
               <div style="display:flex;align-items:center;justify-content:space-between;padding:.25rem .75rem">
-                <h2 id="nav-chats-heading" class="nav-section-heading" style="margin:0">Chats <span aria-hidden="true">#</span></h2>
+                <h2 id="nav-chats-heading" class="nav-section-heading" style="margin:0">Chats <span aria-hidden="true">#️⃣</span></h2>
               </div>
               <ul role="list" style="margin:.25rem 0 0;padding:0 .5rem;list-style:none">
                 <% chat_rooms.each do |room| %>
@@ -155,7 +155,7 @@
                           class: "nav-item #{"active" if @room&.slug == room.slug}",
                           aria: { current: @room&.slug == room.slug ? "page" : nil,
                                   label: "Chat: #{room.name}" } do %>
-                      <span aria-hidden="true" style="flex-shrink:0">#</span>
+                      <span aria-hidden="true" style="flex-shrink:0">#️⃣</span>
                       <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap"><%= room.name %></span>
                     <% end %>
                   </li>

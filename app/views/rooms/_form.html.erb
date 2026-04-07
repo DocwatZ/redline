@@ -47,9 +47,8 @@
     <fieldset class="mt-2 space-y-2">
       <legend class="sr-only">Channel type</legend>
       <% [
-        ["chat", "# Chat", "Text channel for messages, links, GIFs, and emojis"],
-        ["voice", "🔊 Voice Channel", "Real-time voice & video with instant join — click to connect"],
-        ["both", "#/🔊 Chat + Voice", "Combined text and voice channel in one space"],
+        ["chat", "#️⃣ Chat", "Persistent text chat — messages, links, GIFs, and emojis"],
+        ["both", "🔊 Channel", "Real-time voice & video with persistent text chat"],
         ["announcement", "📢 Announcement", "One-way broadcasts only"]
       ].each do |value, label, desc| %>
         <label class="flex items-start gap-3 p-3 bg-surface-elevated border border-border rounded-lg

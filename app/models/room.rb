@@ -15,11 +15,10 @@ class Room < ApplicationRecord
   ROOM_TYPES = %w[text voice announcement dm public private].freeze
 
   # Channel types determine the primary communication mode
-  # chat         = text channel (marked with #)
-  # voice        = voice channel (marked with 🔊)
-  # both         = combined chat + voice channel (marked with #/🔊)
+  # chat         = persistent text chat (marked with #️⃣)
+  # both         = real-time voice & video with persistent text chat (marked with 🔊)
   # announcement = one-way broadcast channel (marked with 📢)
-  CHANNEL_TYPES = %w[chat voice both announcement].freeze
+  CHANNEL_TYPES = %w[chat both announcement].freeze
 
   validates :name, presence: true, length: { minimum: 2, maximum: 64 },
             format: { with: /\A[a-zA-Z0-9\-_\s]+\z/, message: "only letters, numbers, spaces, hyphens, underscores" }
@@ -42,7 +41,7 @@ class Room < ApplicationRecord
   scope :e2ee, -> { where(e2ee_enabled: true) }
   scope :top_level, -> { where(parent_id: nil) }
   scope :chats, -> { where(channel_type: %w[chat both]) }
-  scope :voice_channels, -> { where(channel_type: %w[voice both]) }
+  scope :voice_channels, -> { where(channel_type: "both") }
   scope :announcements, -> { where(channel_type: "announcement") }
 
   # --- Channel type queries ---
@@ -52,7 +51,7 @@ class Room < ApplicationRecord
   end
 
   def voice_channel?
-    channel_type == "voice" || channel_type == "both"
+    channel_type == "both"
   end
 
   def combined?
@@ -95,12 +94,10 @@ class Room < ApplicationRecord
   def channel_icon
     if announcement?
       "📢"
-    elsif combined?
-      "#/🔊"
     elsif voice_channel?
       "🔊"
     else
-      "#"
+      "#️⃣"
     end
   end
 
@@ -164,7 +161,7 @@ class Room < ApplicationRecord
     # Auto-derive room_type from channel_type when channel_type is set
     if channel_type.present? && room_type.blank?
       self.room_type = case channel_type
-      when "voice" then "voice"
+      when "both" then "voice"
       when "announcement" then "announcement"
       else "text"
       end
@@ -174,7 +171,7 @@ class Room < ApplicationRecord
     return if channel_type.present?
 
     self.channel_type = case room_type
-    when "voice" then "voice"
+    when "voice" then "both"
     when "announcement" then "announcement"
     when "text", "dm", "public", "private" then "chat"
     end
@@ -189,10 +186,10 @@ class Room < ApplicationRecord
     end
   end
 
-  # Only voice subchannels are allowed (matching the spec hierarchy)
+  # Only voice (both) subchannels are allowed
   def subchannel_must_be_voice
-    unless channel_type == "voice"
-      errors.add(:channel_type, "subchannels must be voice channels")
+    unless channel_type == "both"
+      errors.add(:channel_type, "subchannels must be 🔊 Channel type")
     end
   end
 
