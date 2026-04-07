@@ -49,12 +49,12 @@ export default class extends Controller {
    * Returns array of { url, suppressed } objects.
    */
   extractUrls(text) {
-    const urlPattern = /https?:\/\/[a-zA-Z0-9\-]+(?:\.[a-zA-Z0-9\-]+)*(?:\.[a-zA-Z]{2,})(?::\d{1,5})?(?:\/[^\s<>")\]\}]*)?/g
+    const urlPattern = /https?:\/\/(?:[a-zA-Z0-9\-]+\.)+[a-zA-Z]{2,}(?::\d{1,5})?(?:\/[^\s<>")\]\}]*)?/g
     const results = []
     const seen = new Set()
 
     // Find angle-bracket-wrapped URLs (suppressed)
-    const suppressedPattern = /<(https?:\/\/[a-zA-Z0-9\-]+(?:\.[a-zA-Z0-9\-]+)*(?:\.[a-zA-Z]{2,})(?::\d{1,5})?(?:\/[^\s<>")\]\}]*)?)>/g
+    const suppressedPattern = /<(https?:\/\/(?:[a-zA-Z0-9\-]+\.)+[a-zA-Z]{2,}(?::\d{1,5})?(?:\/[^\s<>")\]\}]*)?)>/g
     let match
     while ((match = suppressedPattern.exec(text)) !== null) {
       if (!seen.has(match[1])) {
