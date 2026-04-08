@@ -1,8 +1,6 @@
 # frozen_string_literal: true
 
 class Users::SessionsController < Devise::SessionsController
-  respond_to :html, :turbo_stream
-
   after_action :log_sign_in, only: :create
   after_action :log_sign_out, only: :destroy
 

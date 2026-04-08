@@ -1,8 +1,6 @@
 # frozen_string_literal: true
 
 class Users::RegistrationsController < Devise::RegistrationsController
-  respond_to :html, :turbo_stream
-
   before_action :check_signup_enabled!, only: [:new, :create]
 
   def create
