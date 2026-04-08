@@ -4,6 +4,12 @@ class Users::RegistrationsController < Devise::RegistrationsController
   before_action :check_signup_enabled!, only: [:new, :create]
 
   def create
+    # Turbo Drive sends Accept: text/vnd.turbo-stream.html, causing Rails to
+    # negotiate turbo_stream format. The responders gem only renders the form
+    # template for HTML format; for other formats it returns an empty 422 body,
+    # which Turbo cannot process and displays a generic error page.
+    request.format = :html
+
     super do |resource|
       if resource.persisted?
         @recovery_codes = RecoveryCodeService.generate(resource)
