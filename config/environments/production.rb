@@ -45,9 +45,10 @@ Rails.application.configure do
   # config.action_cable.allowed_request_origins = [ "http://example.com", /http:\/\/example.*/ ]
 
   # Assume all access to the app is happening through a SSL-terminating reverse proxy.
-  # When behind a TLS-terminating proxy (the default self-hosted setup), this tells Rails
-  # the connection is already SSL so secure cookies and HSTS work correctly.
-  config.assume_ssl = ENV.fetch("RAILS_ASSUME_SSL", "true") == "true"
+  # Defaults to false so the app works out-of-the-box with docker-compose (no proxy).
+  # Set RAILS_ASSUME_SSL=true when running behind a TLS-terminating proxy (Nginx, Caddy, etc.)
+  # that does NOT set the X-Forwarded-Proto header.
+  config.assume_ssl = ENV.fetch("RAILS_ASSUME_SSL", "false") == "true"
 
   # Force all access to the app over SSL, use Strict-Transport-Security, and use secure cookies.
   # Disabled by default — SSL is managed by the reverse proxy in self-hosted setups.
