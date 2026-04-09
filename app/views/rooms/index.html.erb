@@ -1,16 +1,25 @@
 <% content_for :title, "Channels" %>
 
-<div class="flex flex-col h-full">
+<div class="page-layout">
   <%# Header %>
-  <header class="h-14 border-b border-border px-6 flex items-center justify-between flex-shrink-0"
-          role="banner">
-    <h1 class="text-lg font-semibold text-primary">Discover Channels</h1>
+  <header class="page-header" role="banner">
+    <%# Mobile hamburger menu — wired to sidebar controller on the app shell %>
+    <button class="btn-icon sidebar-toggle-btn"
+            aria-label="Open navigation"
+            aria-expanded="false"
+            data-action="click->sidebar#toggle">
+      <svg aria-hidden="true" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/>
+      </svg>
+    </button>
+    <h1>Discover Channels</h1>
     <%= link_to "New Channel", new_room_path,
-          class: "btn-primary text-sm",
+          class: "btn-accent ml-auto",
+          style: "font-size:.875rem",
           aria: { label: "Create a new channel" } %>
   </header>
 
-  <div class="flex-1 overflow-y-auto p-6">
+  <div class="page-body">
     <%# My channels — hierarchical tree view %>
     <% if @my_rooms.any? %>
       <section aria-labelledby="my-channels-heading" class="mb-8">
@@ -23,7 +32,7 @@
               <%= link_to room_path(room),
                     class: "block bg-surface-elevated border border-border rounded-lg p-4
                             hover:border-accent/50 transition-colors
-                            focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 focus:ring-offset-base",
+                            focus:outline-none focus:ring-2 focus:ring-accent",
                     aria: { label: "#{room.name} channel, #{room.channel_type || room.room_type} type" } do %>
                 <div class="flex items-start gap-3">
                   <span class="text-2xl" aria-hidden="true">
@@ -32,9 +41,9 @@
                   <div class="flex-1 min-w-0">
                     <p class="font-medium text-primary truncate"><%= room.name %></p>
                     <% if room.description.present? %>
-                      <p class="text-sm text-muted truncate mt-0.5"><%= room.description %></p>
+                      <p class="text-sm text-muted truncate mt-1"><%= room.description %></p>
                     <% end %>
-                    <div class="flex items-center gap-2 mt-2">
+                    <div class="flex items-center gap-2 mt-2 flex-wrap">
                       <span class="text-xs text-muted">
                         <%= room.members.count %>
                         <%= "member".pluralize(room.members.count) %>
@@ -58,7 +67,7 @@
 
               <%# Render subchannels under voice channels %>
               <% if room.voice_channel? && room.subchannels.any? %>
-                <ul role="list" class="ml-8 mt-1 space-y-1 border-l-2 border-border pl-3">
+                <ul role="list" class="ml-8 mt-1 space-y-1 border-l-2 pl-3">
                   <% room.subchannels.by_position.each do |sub| %>
                     <li>
                       <%= link_to room_path(sub),
@@ -102,7 +111,7 @@
                   <div class="flex-1 min-w-0">
                     <p class="font-medium text-primary truncate"><%= room.name %></p>
                     <% if room.description.present? %>
-                      <p class="text-sm text-muted truncate mt-0.5"><%= room.description %></p>
+                      <p class="text-sm text-muted truncate mt-1"><%= room.description %></p>
                     <% end %>
                     <div class="flex items-center gap-2 mt-2">
                       <span class="text-xs text-muted">
@@ -123,9 +132,9 @@
 
                 <%# Show subchannels for voice channels %>
                 <% if room.voice_channel? && room.subchannels.any? %>
-                  <div class="ml-8 mt-2 space-y-1 border-l-2 border-border pl-3">
+                  <div class="ml-8 mt-2 space-y-1 border-l-2 pl-3">
                     <% room.subchannels.by_position.each do |sub| %>
-                      <div class="flex items-center gap-2 px-2 py-1 text-xs text-muted">
+                      <div class="flex items-center gap-2 p-2 text-xs text-muted">
                         <span aria-hidden="true">🔊</span>
                         <span><%= sub.name %></span>
                       </div>

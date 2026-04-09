@@ -27,8 +27,8 @@
     <a href="#main-content" aria-label="Skip to main content">Skip to main content</a>
 
     <% if user_signed_in? %>
-      <%# App Shell %>
-      <div role="application" aria-label="REDLINE application" style="display:flex;height:100vh;overflow:hidden">
+      <%# App Shell — sidebar controller on root so hamburger buttons anywhere in the tree can trigger it %>
+      <div role="application" aria-label="REDLINE application" data-controller="sidebar" style="display:flex;height:100vh;overflow:hidden">
 
         <%# Mobile sidebar overlay/backdrop %>
         <div id="sidebar-backdrop"
@@ -37,7 +37,7 @@
              aria-hidden="true"></div>
 
         <%# Sidebar %>
-        <nav id="sidebar" aria-label="Main navigation" data-controller="sidebar">
+        <nav id="sidebar" aria-label="Main navigation">
           <%# Brand %>
           <div style="height:3.5rem;display:flex;align-items:center;padding:0 1rem;border-bottom:1px solid var(--rl-border);flex-shrink:0">
             <%= link_to rooms_path,
@@ -257,6 +257,23 @@
               <%= alert %>
             </div>
           <% end %>
+
+          <%# Mobile-only top bar — shown on non-channel pages that have no channel header %>
+          <%# Channel pages (rooms/show) suppress this via content_for :channel_header %>
+          <% unless content_for?(:channel_header) %>
+            <div class="mobile-nav-bar" aria-label="Navigation" role="banner">
+              <button class="btn-icon sidebar-toggle-btn"
+                      aria-label="Open navigation"
+                      aria-expanded="false"
+                      data-action="click->sidebar#toggle">
+                <svg aria-hidden="true" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/>
+                </svg>
+              </button>
+              <span class="mobile-nav-bar-title"><%= yield(:title).presence || "REDLINE" %></span>
+            </div>
+          <% end %>
+
           <%= yield %>
         </main>
       </div>

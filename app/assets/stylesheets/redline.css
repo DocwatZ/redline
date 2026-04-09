@@ -231,6 +231,26 @@ body > main[id="main-content"] {
   font-weight: 600;
 }
 
+/* ─── Page Layout ─────────────────────────────────────────────────────────── */
+/* Generic full-height flex-column wrapper for non-channel pages */
+.page-layout {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+}
+
+.page-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1.5rem;
+  scrollbar-width: thin;
+  scrollbar-color: var(--rl-border) transparent;
+}
+.page-body::-webkit-scrollbar       { width: 4px; }
+.page-body::-webkit-scrollbar-track { background: transparent; }
+.page-body::-webkit-scrollbar-thumb { background: var(--rl-border); border-radius: 2px; }
+
 /* ─── Message list ───────────────────────────────────────────────────────── */
 #messages,
 #dm-messages {
@@ -1144,6 +1164,30 @@ input[type="radio"]:focus-visible {
   display: none;
 }
 
+/* ─── Mobile-only top navigation bar ────────────────────────────────────── */
+/* Shown on pages without their own channel header (e.g. rooms index, DM view) */
+.mobile-nav-bar {
+  display: none; /* hidden on desktop */
+  height: 3.5rem;
+  flex-shrink: 0;
+  align-items: center;
+  gap: .75rem;
+  padding: 0 .75rem;
+  border-bottom: 1px solid var(--rl-border);
+  background: var(--rl-surface);
+  z-index: 10;
+}
+.mobile-nav-bar-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--rl-text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1;
+  min-width: 0;
+}
+
 /* ─── Responsive: Mobile-first ──────────────────────────────────────────── */
 @media (max-width: 768px) {
   /* Sidebar: slide-in drawer */
@@ -1163,6 +1207,11 @@ input[type="radio"]:focus-visible {
 
   /* Show hamburger menu */
   .sidebar-toggle-btn {
+    display: flex;
+  }
+
+  /* Show mobile nav bar on non-channel pages */
+  .mobile-nav-bar {
     display: flex;
   }
 
@@ -1486,3 +1535,35 @@ input[type="radio"]:focus-visible {
 .h-14   { height: 3.5rem; }
 .pr-12  { padding-right: 3rem; }
 .p-2    { padding: .5rem; }
+
+/* Additional spacing/sizing utilities */
+.mt-0\.5  { margin-top: .125rem; }
+.mb-1     { margin-bottom: .25rem; }
+.ml-1     { margin-left: .25rem; }
+.ml-2     { margin-left: .5rem; }
+.ml-4     { margin-left: 1rem; }
+.ml-8     { margin-left: 2rem; }
+.px-1\.5  { padding-left: .375rem; padding-right: .375rem; }
+.py-0\.5  { padding-top: .125rem;  padding-bottom: .125rem; }
+.gap-1    { gap: .25rem; }
+.pl-3     { padding-left: .75rem; }
+.border-l-2 { border-left: 2px solid var(--rl-border); }
+.max-w-lg { max-width: 32rem; }
+
+/* Badge colour variants */
+.bg-blue-900\/50   { background: rgba(30,58,138,.5); }
+.text-blue-300     { color: #93c5fd; }
+.bg-purple-900\/50 { background: rgba(59,7,100,.5); }
+.text-purple-300   { color: #d8b4fe; }
+.bg-red-900\/30    { background: rgba(127,29,29,.3); }
+
+/* :has() based states for form radio/checkbox styling */
+.has-\[\:checked\]\:border-accent:has(:checked)  { border-color: var(--rl-accent); }
+.has-\[\:checked\]\:bg-accent\/5:has(:checked)   { background: rgba(229,62,62,.05); }
+
+/* Hover state: surface elevated at 50% opacity */
+.hover\:bg-surface-elevated\/50:hover { background: rgba(30,33,48,.5); }
+
+/* Focus ring offset helpers */
+.focus\:ring-offset-2:focus-visible       { box-shadow: 0 0 0 2px var(--rl-base), 0 0 0 4px var(--rl-accent); }
+.focus\:ring-offset-base:focus-visible    { box-shadow: 0 0 0 2px var(--rl-base), 0 0 0 4px var(--rl-accent); }

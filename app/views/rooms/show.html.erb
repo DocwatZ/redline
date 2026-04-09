@@ -1,4 +1,5 @@
 <% content_for :title, @room.name %>
+<% content_for :channel_header, true %>
 
 <%#
   Unified Channel Layout — mobile-first, responsive
@@ -6,10 +7,11 @@
   Voice channels use bottom control bar + bottom sheet chat
 %>
 <div class="channel-layout"
-     data-controller="channel"
+     data-controller="channel bottom-sheet"
      data-channel-room-slug-value="<%= @room.slug %>"
      data-channel-voice-value="<%= @room.voice_channel? %>"
-     data-channel-token-url-value="<%= @room.voice_channel? ? livekit_token_room_path(@room) : '' %>">
+     data-channel-token-url-value="<%= @room.voice_channel? ? livekit_token_room_path(@room) : '' %>"
+     data-bottom-sheet-panel-value="in-call-chat-panel">
 
   <%# Channel header %>
   <%= render "rooms/channel/header", room: @room, members: @members %>
