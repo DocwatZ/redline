@@ -21,10 +21,15 @@ pin "controllers/channel_controller", to: "controllers/channel_controller.js"
 pin "controllers/bottom_sheet_controller", to: "controllers/bottom_sheet_controller.js"
 pin "controllers/media_controls_controller", to: "controllers/media_controls_controller.js"
 
+pin "controllers/message_actions_controller", to: "controllers/message_actions_controller.js"
+pin "controllers/new_dm_controller",          to: "controllers/new_dm_controller.js"
+pin "controllers/status_picker_controller",   to: "controllers/status_picker_controller.js"
+
 # Channels
 pin "channels/consumer", to: "channels/consumer.js"
 pin "channels/index", to: "channels/index.js"
 pin "channels/presence_channel", to: "channels/presence_channel.js"
+pin "channels/user_notifications_channel", to: "channels/user_notifications_channel.js"
 pin "controllers", to: "controllers/index.js"
 pin "channels", to: "channels/index.js"
 

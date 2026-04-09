@@ -11,6 +11,9 @@ import LinkPreviewController  from "controllers/link_preview_controller"
 import ChannelController      from "controllers/channel_controller"
 import BottomSheetController  from "controllers/bottom_sheet_controller"
 import MediaControlsController from "controllers/media_controls_controller"
+import MessageActionsController from "controllers/message_actions_controller"
+import NewDmController        from "controllers/new_dm_controller"
+import StatusPickerController from "controllers/status_picker_controller"
 
 application.register("chat",            ChatController)
 application.register("dm-chat",         DmChatController)
@@ -23,3 +26,6 @@ application.register("link-preview",    LinkPreviewController)
 application.register("channel",         ChannelController)
 application.register("bottom-sheet",    BottomSheetController)
 application.register("media-controls",  MediaControlsController)
+application.register("message-actions", MessageActionsController)
+application.register("new-dm",          NewDmController)
+application.register("status-picker",   StatusPickerController)

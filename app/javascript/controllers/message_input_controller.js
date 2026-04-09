@@ -4,14 +4,24 @@ import { Controller } from "@hotwired/stimulus"
  * Message input controller — handles:
  *  - Enter to send, Shift+Enter for newline
  *  - Auto-resize textarea
- *  - Minimum 44px touch target preserved
+ *  - Reply-to state (banner + parent_id in request)
  *
  * Accessibility:
  *  - aria-describedby points to hint about keyboard shortcuts
  *  - Sends message via fetch, CSRF token included
  */
 export default class extends Controller {
-  static targets = ["field"]
+  static targets = ["field", "replyBanner", "replyAuthor", "replyPreview"]
+
+  connect() {
+    this._replyParentId = null
+    this._onReply = this.#handleReply.bind(this)
+    document.addEventListener("message:reply", this._onReply)
+  }
+
+  disconnect() {
+    document.removeEventListener("message:reply", this._onReply)
+  }
 
   get roomId() {
     const url = window.location.pathname
@@ -38,6 +48,13 @@ export default class extends Controller {
     this.sendMessage()
   }
 
+  clearReply() {
+    this._replyParentId = null
+    if (this.hasReplyBannerTarget) {
+      this.replyBannerTarget.classList.add("hidden")
+    }
+  }
+
   async sendMessage() {
     const body = this.fieldTarget.value.trim()
     if (!body) return
@@ -46,6 +63,9 @@ export default class extends Controller {
     if (!roomSlug) return
 
     const csrf = document.querySelector('meta[name="csrf-token"]')?.content
+    const payload = { body }
+    if (this._replyParentId) payload.parent_id = this._replyParentId
+
     try {
       const response = await fetch(`/rooms/${roomSlug}/messages`, {
         method: "POST",
@@ -54,13 +74,14 @@ export default class extends Controller {
           "Accept": "application/json",
           "X-CSRF-Token": csrf ?? ""
         },
-        body: JSON.stringify({ message: { body } })
+        body: JSON.stringify({ message: payload })
       })
 
       if (response.ok) {
         const data = await response.json()
         this.fieldTarget.value = ""
         this.fieldTarget.style.height = "auto"
+        this.clearReply()
         this.displaySentMessage(data)
       } else {
         const data = await response.json().catch(() => ({}))
@@ -72,7 +93,6 @@ export default class extends Controller {
   }
 
   announceError(msg) {
-    // Use an aria-live region for accessible error feedback
     let region = document.getElementById("message-error-announce")
     if (!region) {
       region = document.createElement("div")
@@ -96,29 +116,80 @@ export default class extends Controller {
 
     const article = document.createElement("article")
     article.id = `message-${data.id}`
-    article.className = "message-item"
-    article.setAttribute("aria-label",
-      `Message from ${data.display_name} at ${displayTime}`)
+    article.className = "flex gap-3 py-1 px-2 rounded hover:bg-surface-elevated/50 group relative"
+    article.setAttribute("aria-label", `Message from ${data.display_name} at ${displayTime}`)
+    article.setAttribute("data-controller", "message-actions")
+    article.setAttribute("data-message-actions-message-id-value", data.id)
+    article.setAttribute("data-message-actions-is-own-value", "true")
+    article.setAttribute("data-message-actions-body-value", data.body)
+    article.setAttribute("data-message-actions-type-value", "channel")
+
+    const parentQuote = data.parent
+      ? `<div class="message-reply-quote">
+           <span class="message-reply-quote-author">${this.escapeHtml(data.parent.display_name)}</span>
+           <span class="message-reply-quote-body">${this.escapeHtml(data.parent.body)}</span>
+         </div>`
+      : ""
 
     article.innerHTML = `
-      <div class="avatar avatar-md" style="background-color:${this.escapeHtml(data.avatar_color)}" aria-hidden="true">
-        ${this.escapeHtml(data.initials)}
+      <div class="flex-shrink-0 mt-0.5" aria-hidden="true">
+        <div class="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold"
+             style="background-color:${this.escapeHtml(data.avatar_color)}">
+          ${this.escapeHtml(data.initials)}
+        </div>
       </div>
       <div style="flex:1;min-width:0">
-        <div class="flex items-baseline gap-2">
-          <span class="font-semibold text-sm text-primary">${this.escapeHtml(data.display_name)}</span>
+        ${parentQuote}
+        <div class="flex items-baseline gap-2 msg-time-row">
+          <span class="font-semibold text-sm text-primary msg-author">${this.escapeHtml(data.display_name)}</span>
           <time datetime="${isoTime}" class="text-xs text-muted">${displayTime}</time>
         </div>
-        <div class="message-body text-sm text-secondary mt-0.5 leading-relaxed whitespace-pre-wrap break-words" data-controller="link-preview">
+        <div class="message-body text-sm text-secondary mt-0.5 leading-relaxed whitespace-pre-wrap break-words"
+             data-controller="link-preview"
+             data-message-actions-target="bodyDiv">
           ${this.escapeHtml(data.body)}
         </div>
+        <div class="hidden" data-message-actions-target="editForm">
+          <textarea class="input-field w-full resize-none mt-1" rows="2" maxlength="4000"
+                    aria-label="Edit message"
+                    data-message-actions-target="editField"
+                    data-action="keydown->message-actions#handleEditKeydown"></textarea>
+          <div class="flex gap-2 mt-1">
+            <button type="button" class="btn btn-primary" style="min-height:1.75rem;padding:.25rem .75rem;font-size:.75rem"
+                    data-action="click->message-actions#saveEdit">Save</button>
+            <button type="button" class="btn btn-ghost" style="min-height:1.75rem;padding:.25rem .75rem;font-size:.75rem"
+                    data-action="click->message-actions#cancelEdit">Cancel</button>
+          </div>
+        </div>
+      </div>
+      <div class="message-actions-row" role="group" aria-label="Message actions">
+        <button type="button" class="btn-icon btn-icon-xs" title="Reply"
+                aria-label="Reply to this message"
+                data-action="click->message-actions#reply">
+          <svg aria-hidden="true" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M3 10h10a8 8 0 018 8v2M3 10l6 6M3 10l6-6"/>
+          </svg>
+        </button>
+        <button type="button" class="btn-icon btn-icon-xs" title="Edit"
+                aria-label="Edit this message"
+                data-action="click->message-actions#startEdit">
+          <svg aria-hidden="true" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+          </svg>
+        </button>
+        <button type="button" class="btn-icon btn-icon-xs" title="Delete"
+                aria-label="Delete this message"
+                data-action="click->message-actions#confirmDelete">
+          <svg aria-hidden="true" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+          </svg>
+        </button>
       </div>
     `
 
     const anchor = document.getElementById("messages-end")
     if (anchor) {
       anchor.before(article)
-      // Auto-scroll to bottom
       const container = document.getElementById("messages")
       if (container) {
         container.scrollTo({ top: container.scrollHeight, behavior: "smooth" })
@@ -130,5 +201,21 @@ export default class extends Controller {
     const div = document.createElement("div")
     div.appendChild(document.createTextNode(String(str ?? "")))
     return div.innerHTML
+  }
+
+  // ── Private ────────────────────────────────────────────────────────────────
+  #handleReply(event) {
+    this._replyParentId = event.detail.messageId
+    if (this.hasReplyBannerTarget) {
+      this.replyBannerTarget.classList.remove("hidden")
+    }
+    if (this.hasReplyAuthorTarget) {
+      this.replyAuthorTarget.textContent = event.detail.displayName
+    }
+    if (this.hasReplyPreviewTarget) {
+      const preview = String(event.detail.body ?? "").slice(0, 80)
+      this.replyPreviewTarget.textContent = preview
+    }
+    this.fieldTarget.focus()
   }
 }

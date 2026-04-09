@@ -238,6 +238,29 @@ export default class extends Controller {
       }
     })
 
+    // Handle reconnection events for unstable connections (especially mobile)
+    this.livekitRoom.on(LK.RoomEvent.Reconnecting, () => {
+      this.updateStatusDot("connecting")
+      this.announce("Reconnecting to voice channel...")
+    })
+
+    this.livekitRoom.on(LK.RoomEvent.Reconnected, () => {
+      this.updateStatusDot("connected")
+      this.announce("Reconnected to voice channel")
+    })
+
+    this.livekitRoom.on(LK.RoomEvent.Disconnected, (reason) => {
+      console.warn("LiveKit disconnected:", reason)
+      this.updateStatusDot("disconnected")
+      this.announce("Disconnected from voice channel")
+      this.leaveCall()
+    })
+
+    // Handle track cleanup when remote participants stop publishing
+    this.livekitRoom.on(LK.RoomEvent.TrackUnsubscribed, (track) => {
+      track.detach().forEach(el => el.remove())
+    })
+
     await this.livekitRoom.connect(url, token)
     await this.livekitRoom.localParticipant.setMicrophoneEnabled(true)
     this.renderLocalParticipant()

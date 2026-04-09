@@ -1,7 +1,12 @@
 <% is_own = dm.sender == current_user %>
 <article id="dm-<%= dm.id %>"
-         class="flex gap-3 py-1 px-2 rounded hover:bg-surface-elevated/50"
-         aria-label="Message from <%= dm.sender.display_name %> at <%= dm.created_at.strftime('%H:%M') %>">
+         class="flex gap-3 py-1 px-2 rounded hover:bg-surface-elevated/50 group relative"
+         aria-label="Message from <%= dm.sender.display_name %> at <%= dm.created_at.strftime('%H:%M') %>"
+         data-controller="message-actions"
+         data-message-actions-message-id-value="<%= dm.id %>"
+         data-message-actions-is-own-value="<%= is_own %>"
+         data-message-actions-body-value="<%= dm.deleted? ? '' : dm.body %>"
+         data-message-actions-type-value="dm">
   <div class="flex-shrink-0 mt-0.5" aria-hidden="true">
     <div class="w-8 h-8 rounded-full flex items-center justify-center
                 text-white text-xs font-bold"
@@ -10,18 +15,62 @@
     </div>
   </div>
   <div class="flex-1 min-w-0">
-    <div class="flex items-baseline gap-2 flex-wrap">
-      <span class="font-semibold text-sm text-primary"><%= dm.sender.display_name %></span>
+    <div class="flex items-baseline gap-2 flex-wrap msg-time-row">
+      <span class="font-semibold text-sm text-primary msg-author"><%= dm.sender.display_name %></span>
       <time datetime="<%= dm.created_at.iso8601 %>"
             class="text-xs text-muted"
             title="<%= dm.created_at.strftime('%B %-d, %Y at %H:%M UTC') %>">
         <%= dm.created_at.strftime('%H:%M') %>
       </time>
+      <% if dm.edited? && !dm.deleted? %>
+        <span class="text-xs text-muted italic msg-edited" aria-label="edited">(edited)</span>
+      <% end %>
     </div>
-    <div class="text-sm text-secondary mt-0.5 leading-relaxed whitespace-pre-wrap break-words
+    <div class="message-body text-sm text-secondary mt-0.5 leading-relaxed whitespace-pre-wrap break-words
                 <%= "italic text-muted" if dm.deleted? %>"
+         data-message-actions-target="bodyDiv"
          <% unless dm.deleted? %>data-controller="link-preview"<% end %>>
       <%= dm.display_body %>
     </div>
+
+    <%# Inline edit form %>
+    <% if is_own && !dm.deleted? %>
+      <div class="hidden" data-message-actions-target="editForm">
+        <textarea class="input-field w-full resize-none mt-1"
+                  rows="2"
+                  maxlength="4000"
+                  aria-label="Edit message"
+                  data-message-actions-target="editField"
+                  data-action="keydown->message-actions#handleEditKeydown"></textarea>
+        <div class="flex gap-2 mt-1">
+          <button type="button" class="btn btn-primary"
+                  style="min-height:1.75rem;padding:.25rem .75rem;font-size:.75rem"
+                  data-action="click->message-actions#saveEdit">Save</button>
+          <button type="button" class="btn btn-ghost"
+                  style="min-height:1.75rem;padding:.25rem .75rem;font-size:.75rem"
+                  data-action="click->message-actions#cancelEdit">Cancel</button>
+        </div>
+      </div>
+    <% end %>
   </div>
+
+  <%# Action buttons %>
+  <% if is_own && !dm.deleted? %>
+    <div class="message-actions-row" role="group" aria-label="Message actions">
+      <button type="button" class="btn-icon btn-icon-xs" title="Edit"
+              aria-label="Edit this message"
+              data-action="click->message-actions#startEdit">
+        <svg aria-hidden="true" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+        </svg>
+      </button>
+      <button type="button" class="btn-icon btn-icon-xs" title="Delete"
+              aria-label="Delete this message"
+              data-action="click->message-actions#confirmDelete">
+        <svg aria-hidden="true" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+        </svg>
+      </button>
+    </div>
+  <% end %>
 </article>

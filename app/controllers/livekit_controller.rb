@@ -49,17 +49,27 @@ class LivekitController < ApplicationController
     api_key    = ENV.fetch("LIVEKIT_API_KEY", "devkey")
     api_secret = ENV.fetch("LIVEKIT_API_SECRET", "devsecret")
 
-    can_publish = true
+    can_publish = membership&.can_speak?(room) != false
     can_subscribe = true
     can_publish_data = true  # Required for in-call DataChannel chat
     can_screen_share = membership&.can_screen_share?(room) || false
+    can_publish_video = membership&.can_video?(room) != false
+
+    # Build the list of allowed publish sources based on permissions.
+    # LiveKit uses canPublishSources to restrict which tracks a user can send.
+    allowed_sources = []
+    allowed_sources << "microphone" if can_publish
+    allowed_sources << "camera" if can_publish_video
+    allowed_sources << "screen_share" if can_screen_share
+    allowed_sources << "screen_share_audio" if can_screen_share
 
     grants = {
       roomJoin: true,
       room: room.livekit_room_name,
-      canPublish: can_publish,
+      canPublish: can_publish || can_publish_video,
       canSubscribe: can_subscribe,
-      canPublishData: can_publish_data
+      canPublishData: can_publish_data,
+      canPublishSources: allowed_sources
     }
 
     token = JWT.encode(

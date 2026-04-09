@@ -51,6 +51,16 @@ class RoomMembership < ApplicationRecord
     has_permission?(channel, :connect)
   end
 
+  # Can this member speak (transmit audio) in voice?
+  def can_speak?(channel = room)
+    has_permission?(channel, :speak)
+  end
+
+  # Can this member transmit video?
+  def can_video?(channel = room)
+    has_permission?(channel, :video)
+  end
+
   # Can this member share their screen?
   def can_screen_share?(channel = room)
     has_permission?(channel, :screen_share)

@@ -55,8 +55,11 @@ Rails.application.routes.draw do
     resources :messages, only: [ :create, :update, :destroy ]
   end
 
+  # Individual direct-message actions (edit / delete)
+  resources :direct_messages, only: [ :update, :destroy ]
+
   # Direct Messages
-  resources :users, only: [ :show ] do
+  resources :users, only: [ :show, :index ] do
     resource :direct_messages, only: [ :show, :create ]
     post "status", to: "users#update_status", on: :collection
   end
