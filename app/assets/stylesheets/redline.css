@@ -1118,9 +1118,9 @@ input[type="radio"]:focus-visible {
   }
 
   /* Members panel: hidden on mobile */
-  .channel-members-panel,
-  #members-panel {
-    display: none !important;
+  .channel-layout .channel-members-panel,
+  .channel-layout #members-panel {
+    display: none;
   }
 
   /* Members toggle: hidden on mobile (use channel header actions) */

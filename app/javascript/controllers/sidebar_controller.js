@@ -14,6 +14,7 @@ export default class extends Controller {
     this.sidebar = document.getElementById("sidebar")
     this.backdrop = document.getElementById("sidebar-backdrop")
     this._onKeydown = this.onKeydown.bind(this)
+    this._toggleButtons = document.querySelectorAll("[data-action*='sidebar#toggle']")
   }
 
   toggle() {
@@ -32,7 +33,7 @@ export default class extends Controller {
     document.addEventListener("keydown", this._onKeydown)
 
     // Update all toggle buttons
-    document.querySelectorAll("[data-action*='sidebar#toggle']").forEach(btn => {
+    this._toggleButtons.forEach(btn => {
       btn.setAttribute("aria-expanded", "true")
     })
   }
@@ -45,7 +46,7 @@ export default class extends Controller {
     document.removeEventListener("keydown", this._onKeydown)
 
     // Update all toggle buttons
-    document.querySelectorAll("[data-action*='sidebar#toggle']").forEach(btn => {
+    this._toggleButtons.forEach(btn => {
       btn.setAttribute("aria-expanded", "false")
     })
   }

@@ -20,6 +20,8 @@ export default class extends Controller {
     panel: String
   }
 
+  static ANIMATION_MS = 200
+
   connect() {
     this.isOpen = false
     this.startY = 0
@@ -80,7 +82,7 @@ export default class extends Controller {
       if (!this.isOpen) {
         panel.classList.add("hidden")
       }
-    }, 200)
+    }, this.constructor.ANIMATION_MS)
 
     this.removeBackdrop()
     document.removeEventListener("keydown", this._onKeydown)
@@ -159,7 +161,7 @@ export default class extends Controller {
     if (!backdrop) return
 
     backdrop.classList.remove("bottom-sheet-backdrop-visible")
-    setTimeout(() => backdrop.remove(), 200)
+    setTimeout(() => backdrop.remove(), this.constructor.ANIMATION_MS)
   }
 
   handleKeydown(event) {

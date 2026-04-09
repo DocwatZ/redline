@@ -19,6 +19,8 @@ export default class extends Controller {
     tokenUrl: String
   }
 
+  static MOBILE_BREAKPOINT = 769
+
   connect() {
     this.livekitRoom = null
     this._LK = null
@@ -27,6 +29,7 @@ export default class extends Controller {
     this.screenSharing = false
     this.canScreenShare = false
     this.inCall = false
+    this._escapeEl = null
 
     this.membersVisible = !this.isMobile()
     this.updateMembersPanel()
@@ -44,7 +47,7 @@ export default class extends Controller {
   // ─── Layout ──────────────────────────────────────────────────
 
   isMobile() {
-    return window.innerWidth < 769
+    return window.innerWidth < this.constructor.MOBILE_BREAKPOINT
   }
 
   handleResize() {
@@ -401,8 +404,10 @@ export default class extends Controller {
   }
 
   escapeHtml(str) {
-    const div = document.createElement("div")
-    div.appendChild(document.createTextNode(String(str ?? "")))
-    return div.innerHTML
+    if (!this._escapeEl) {
+      this._escapeEl = document.createElement("div")
+    }
+    this._escapeEl.textContent = String(str ?? "")
+    return this._escapeEl.innerHTML
   }
 }
