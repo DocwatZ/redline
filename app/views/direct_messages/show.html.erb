@@ -36,7 +36,8 @@
        aria-label="Direct messages with <%= @partner.display_name %>"
        aria-relevant="additions"
        data-controller="dm-chat"
-       data-dm-chat-partner-id-value="<%= @partner.id %>">
+       data-dm-chat-partner-id-value="<%= @partner.id %>"
+       data-dm-chat-current-user-id-value="<%= current_user.id %>">
 
     <% if @messages.empty? %>
       <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;text-align:center;padding:2rem" role="status">

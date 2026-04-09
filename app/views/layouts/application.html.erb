@@ -28,7 +28,7 @@
 
     <% if user_signed_in? %>
       <%# App Shell — sidebar controller on root so hamburger buttons anywhere in the tree can trigger it %>
-      <div role="application" aria-label="REDLINE application" data-controller="sidebar" style="display:flex;height:100vh;overflow:hidden">
+      <div role="application" aria-label="REDLINE application" data-controller="sidebar new-dm" style="display:flex;height:100vh;overflow:hidden">
 
         <%# Mobile sidebar overlay/backdrop %>
         <div id="sidebar-backdrop"
@@ -44,9 +44,9 @@
                   style: "display:flex;align-items:center;gap:.5rem;font-weight:700;font-size:1.125rem;letter-spacing:.05em;text-decoration:none;border-radius:4px",
                   aria: { label: "REDLINE home" } do %>
               <svg aria-hidden="true" width="24" height="24" viewBox="0 0 32 32" fill="none">
-                <rect width="32" height="32" rx="8" fill="var(--rl-surface-elevated)"/>
-                <text x="6" y="23" font-family="system-ui,sans-serif" font-weight="700" font-size="18" fill="var(--rl-accent)">R</text>
-                <text x="17" y="23" font-family="system-ui,sans-serif" font-weight="700" font-size="18" fill="var(--rl-text-primary)">L</text>
+                <rect width="32" height="32" rx="8" fill="#1e2130"/>
+                <text x="6" y="23" font-family="system-ui,sans-serif" font-weight="700" font-size="18" fill="#e53e3e">R</text>
+                <text x="17" y="23" font-family="system-ui,sans-serif" font-weight="700" font-size="18" fill="#f0f2f7">L</text>
               </svg>
               <%= redline_brand_text %>
             <% end %>
@@ -171,23 +171,38 @@
 
             <%# Direct Messages %>
             <section aria-labelledby="nav-dms-heading" style="margin-top:1.5rem">
-              <h2 id="nav-dms-heading" class="nav-section-heading">Direct Messages</h2>
+              <div style="display:flex;align-items:center;justify-content:space-between;padding:.25rem .75rem">
+                <h2 id="nav-dms-heading" class="nav-section-heading" style="margin:0">Direct Messages</h2>
+                <button type="button"
+                        style="color:var(--rl-text-muted);display:flex;border-radius:4px;border:none;background:transparent;cursor:pointer;padding:.125rem"
+                        aria-label="Start a new direct message"
+                        title="New direct message"
+                        data-action="click->new-dm#open">
+                  <svg aria-hidden="true" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
+                  </svg>
+                </button>
+              </div>
               <% dm_partners = (current_user.sent_direct_messages.includes(:recipient).map(&:recipient) +
                                 current_user.received_direct_messages.includes(:sender).map(&:sender))
                                .uniq.first(10) %>
               <ul role="list" style="margin:.25rem 0 0;padding:0 .5rem;list-style:none">
                 <% dm_partners.each do |partner| %>
+                  <% unread_count = @unread_dm_counts[partner.id].to_i %>
                   <li>
                     <%= link_to user_direct_messages_path(partner),
                           class: "nav-item",
-                          aria: { label: "Direct message with #{partner.display_name}, #{partner.status}" } do %>
+                          data: { "dm-partner-id": partner.id },
+                          aria: { label: "Direct message with #{partner.display_name}, #{partner.status}#{unread_count > 0 ? ", #{unread_count} unread" : ""}" } do %>
                       <div class="avatar avatar-sm" style="background-color:#{partner.avatar_color}" aria-hidden="true">
                         <%= partner.initials %>
                       </div>
                       <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1">
                         <%= partner.display_name %>
                       </span>
-                      <% if partner.online? %>
+                      <% if unread_count > 0 %>
+                        <span class="dm-unread-badge" aria-label="<%= unread_count %> unread"><%= unread_count > 99 ? "99+" : unread_count %></span>
+                      <% elsif partner.online? %>
                         <span class="status-dot status-online" aria-label="online" style="flex-shrink:0"></span>
                       <% end %>
                     <% end %>
@@ -212,13 +227,35 @@
               <div class="avatar avatar-md" style="background-color:<%= current_user.avatar_color %>" aria-hidden="true">
                 <%= current_user.initials %>
               </div>
-              <div style="flex:1;min-width:0">
-                <p style="font-size:.875rem;font-weight:500;color:var(--rl-text-primary);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">
-                  <%= current_user.display_name %>
-                </p>
-                <p style="font-size:.75rem;color:var(--rl-text-muted);text-transform:capitalize">
-                  @<%= current_user.username %> · <%= current_user.status %>
-                </p>
+              <%# Status picker dropdown %>
+              <div class="status-picker" style="flex:1;min-width:0" data-controller="status-picker">
+                <button type="button"
+                        class="status-picker-trigger"
+                        aria-haspopup="listbox"
+                        aria-label="Change status, currently <%= current_user.status %>"
+                        data-action="click->status-picker#toggle">
+                  <p style="font-size:.875rem;font-weight:500;color:var(--rl-text-primary);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">
+                    <%= current_user.display_name %>
+                  </p>
+                  <p style="font-size:.75rem;color:var(--rl-text-muted);display:flex;align-items:center;gap:.25rem">
+                    <span class="status-dot status-<%= current_user.status %>" data-status-picker-target="dot" aria-hidden="true"></span>
+                    <span data-status-picker-target="label" style="text-transform:capitalize"><%= current_user.status %></span>
+                  </p>
+                </button>
+                <div class="status-picker-dropdown hidden" data-status-picker-target="dropdown" role="listbox" aria-label="Select status">
+                  <button class="status-option" data-action="click->status-picker#select" data-status="online" role="option">
+                    <span class="status-dot status-online" aria-hidden="true"></span> Online
+                  </button>
+                  <button class="status-option" data-action="click->status-picker#select" data-status="away" role="option">
+                    <span class="status-dot status-away" aria-hidden="true"></span> Away
+                  </button>
+                  <button class="status-option" data-action="click->status-picker#select" data-status="busy" role="option">
+                    <span class="status-dot status-busy" aria-hidden="true"></span> Busy
+                  </button>
+                  <button class="status-option" data-action="click->status-picker#select" data-status="offline" role="option">
+                    <span class="status-dot status-offline" aria-hidden="true"></span> Offline
+                  </button>
+                </div>
               </div>
               <%= link_to edit_user_registration_path,
                     class: "btn-icon",
@@ -241,6 +278,37 @@
             </div>
           </div>
         </nav>
+
+        <%# New DM user picker modal %>
+        <%# Controlled by new-dm on the parent [role=application] div %>
+        <div class="new-dm-modal-backdrop hidden"
+             aria-modal="true"
+             aria-label="Start a direct message"
+             role="dialog"
+             data-new-dm-target="modal"
+             data-action="click->new-dm#closeOnBackdrop keydown->new-dm#keydown">
+          <div class="new-dm-modal">
+            <div class="new-dm-modal-header">
+              <h2 style="font-size:1rem;font-weight:600;color:var(--rl-text-primary)">New Direct Message</h2>
+              <button type="button" class="btn-icon" aria-label="Close" data-action="click->new-dm#close">
+                <svg aria-hidden="true" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+              </button>
+            </div>
+            <div style="padding:.75rem;border-bottom:1px solid var(--rl-border);flex-shrink:0">
+              <label for="new-dm-search" class="sr-only">Search members</label>
+              <input id="new-dm-search"
+                     type="search"
+                     placeholder="Find a member…"
+                     class="input-field w-full"
+                     autocomplete="off"
+                     data-new-dm-target="searchInput"
+                     data-action="input->new-dm#search">
+            </div>
+            <div class="new-dm-user-list" data-new-dm-target="userList" role="list"></div>
+          </div>
+        </div>
 
         <%# Main content %>
         <main id="main-content"

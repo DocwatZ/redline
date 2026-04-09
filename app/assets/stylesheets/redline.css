@@ -1567,3 +1567,216 @@ input[type="radio"]:focus-visible {
 /* Focus ring offset helpers */
 .focus\:ring-offset-2:focus-visible       { box-shadow: 0 0 0 2px var(--rl-base), 0 0 0 4px var(--rl-accent); }
 .focus\:ring-offset-base:focus-visible    { box-shadow: 0 0 0 2px var(--rl-base), 0 0 0 4px var(--rl-accent); }
+
+/* ─── Message Action Row ────────────────────────────────────────────────── */
+/* Hover action buttons that appear on message hover */
+.message-actions-row {
+  position: absolute;
+  top: .125rem;
+  right: .5rem;
+  display: none;
+  gap: .125rem;
+  background: var(--rl-surface-elevated);
+  border: 1px solid var(--rl-border);
+  border-radius: var(--rl-radius-md);
+  padding: .125rem;
+  box-shadow: 0 2px 8px rgba(0,0,0,.35);
+  z-index: 5;
+  align-items: center;
+}
+.group:hover .message-actions-row {
+  display: flex;
+}
+
+/* Smaller icon button variant for message actions */
+.btn-icon-xs {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 1.75rem;
+  min-width: 1.75rem;
+  padding: .25rem;
+  border: none;
+  border-radius: var(--rl-radius-sm);
+  background: transparent;
+  color: var(--rl-text-muted);
+  cursor: pointer;
+  transition: background-color var(--rl-base-t), color var(--rl-base-t);
+  font-family: inherit;
+}
+.btn-icon-xs:hover {
+  background: var(--rl-border);
+  color: var(--rl-text-primary);
+}
+
+/* ─── Reply Quote (inside message body) ────────────────────────────────── */
+.message-reply-quote {
+  display: flex;
+  align-items: baseline;
+  gap: .375rem;
+  border-left: 2px solid var(--rl-text-muted);
+  padding: .125rem .5rem;
+  margin-bottom: .25rem;
+  border-radius: 0 var(--rl-radius-sm) var(--rl-radius-sm) 0;
+  background: rgba(255,255,255,.025);
+  overflow: hidden;
+}
+.message-reply-quote-author {
+  font-size: .75rem;
+  font-weight: 600;
+  color: var(--rl-text-secondary);
+  flex-shrink: 0;
+}
+.message-reply-quote-body {
+  font-size: .75rem;
+  color: var(--rl-text-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ─── Reply Banner (compose area) ──────────────────────────────────────── */
+.message-reply-banner {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  padding: .375rem .75rem;
+  background: var(--rl-surface-elevated);
+  border-top: 1px solid var(--rl-border);
+  border-left: 3px solid var(--rl-accent);
+}
+
+/* ─── DM Unread Badge ───────────────────────────────────────────────────── */
+.dm-unread-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.25rem;
+  height: 1.25rem;
+  padding: 0 .25rem;
+  font-size: .6875rem;
+  font-weight: 700;
+  line-height: 1;
+  background: var(--rl-accent);
+  color: #fff;
+  border-radius: var(--rl-radius-full);
+  flex-shrink: 0;
+}
+
+/* ─── New DM Modal ──────────────────────────────────────────────────────── */
+.new-dm-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.6);
+  z-index: 50;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: 10vh;
+}
+.new-dm-modal-backdrop.hidden { display: none; }
+.new-dm-modal {
+  background: var(--rl-surface);
+  border: 1px solid var(--rl-border);
+  border-radius: var(--rl-radius-xl);
+  width: calc(100% - 2rem);
+  max-width: 24rem;
+  max-height: 70vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 20px 40px rgba(0,0,0,.5);
+  overflow: hidden;
+}
+.new-dm-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1rem .75rem;
+  border-bottom: 1px solid var(--rl-border);
+  flex-shrink: 0;
+}
+.new-dm-user-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: .5rem;
+  scrollbar-width: thin;
+  scrollbar-color: var(--rl-border) transparent;
+}
+.new-dm-user-item {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  padding: .5rem;
+  border-radius: var(--rl-radius-md);
+  text-decoration: none;
+  transition: background-color var(--rl-base-t);
+  cursor: pointer;
+}
+.new-dm-user-item:hover {
+  background: var(--rl-surface-elevated);
+  text-decoration: none;
+}
+.new-dm-user-name {
+  font-size: .875rem;
+  font-weight: 500;
+  color: var(--rl-text-primary);
+}
+.new-dm-user-username {
+  font-size: .75rem;
+  color: var(--rl-text-muted);
+}
+
+/* ─── Status Picker ─────────────────────────────────────────────────────── */
+.status-picker {
+  position: relative;
+}
+.status-picker-trigger {
+  display: block;
+  width: 100%;
+  text-align: left;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  border-radius: var(--rl-radius-sm);
+  transition: background-color var(--rl-base-t);
+}
+.status-picker-trigger:hover {
+  background: var(--rl-surface-elevated);
+}
+.status-picker-dropdown {
+  position: absolute;
+  bottom: calc(100% + .5rem);
+  left: -.5rem;
+  background: var(--rl-surface-elevated);
+  border: 1px solid var(--rl-border);
+  border-radius: var(--rl-radius-md);
+  padding: .25rem;
+  min-width: 10rem;
+  box-shadow: 0 -4px 16px rgba(0,0,0,.3);
+  z-index: 100;
+}
+.status-option {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  padding: .5rem .75rem;
+  border-radius: var(--rl-radius-sm);
+  border: none;
+  background: transparent;
+  color: var(--rl-text-secondary);
+  font-family: inherit;
+  font-size: .875rem;
+  cursor: pointer;
+  width: 100%;
+  text-align: left;
+  transition: background-color var(--rl-base-t), color var(--rl-base-t);
+}
+.status-option:hover {
+  background: var(--rl-surface);
+  color: var(--rl-text-primary);
+}
+
+/* Status dots for busy and other variants */
+.status-dot.status-busy { background-color: #e53e3e; }
+.status-dot.status-offline { background-color: #6b7280; }

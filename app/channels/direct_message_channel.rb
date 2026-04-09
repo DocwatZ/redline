@@ -39,7 +39,9 @@ class DirectMessageChannel < ApplicationCable::Channel
       display_name: dm.sender.display_name,
       initials: dm.sender.initials,
       avatar_color: dm.sender.avatar_color,
-      created_at: dm.created_at.iso8601
+      created_at: dm.created_at.iso8601,
+      edited: dm.edited,
+      deleted: dm.deleted
     }
   end
 end

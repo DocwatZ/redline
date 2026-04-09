@@ -1,6 +1,7 @@
 class ApplicationController < ActionController::Base
   before_action :authenticate_user!
   before_action :configure_permitted_parameters, if: :devise_controller?
+  before_action :load_unread_dm_counts, if: :user_signed_in?
 
   protected
 
@@ -16,5 +17,14 @@ class ApplicationController < ActionController::Base
 
   def after_sign_out_path_for(resource_or_scope)
     new_user_session_path
+  end
+
+  private
+
+  def load_unread_dm_counts
+    @unread_dm_counts = DirectMessage
+      .where(recipient: current_user, read: false)
+      .group(:sender_id)
+      .count
   end
 end
