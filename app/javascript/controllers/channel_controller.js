@@ -119,11 +119,7 @@ export default class extends Controller {
     backdrop.id = "members-backdrop"
     backdrop.className = "bottom-sheet-backdrop"
     backdrop.addEventListener("click", () => {
-      this.membersVisible = false
-      this.updateMembersPanel()
-      this.removeMembersBackdrop()
-      const btn = this.element.querySelector(".channel-members-toggle")
-      if (btn) btn.setAttribute("aria-expanded", "false")
+      this.toggleMembers()
     })
     document.body.appendChild(backdrop)
 
