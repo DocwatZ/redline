@@ -1,0 +1,35 @@
+<%# Video/Voice participant grid — shown when user joins a voice channel %>
+<% if room.voice_channel? %>
+  <div id="call-panel"
+       class="channel-call-panel hidden"
+       aria-live="polite"
+       aria-label="Voice channel panel">
+
+    <%# Loading skeleton (shown during connect, hidden after) %>
+    <div id="call-loading" class="channel-call-loading hidden" aria-label="Connecting to voice channel">
+      <div class="call-loading-spinner" aria-hidden="true"></div>
+      <span class="text-sm text-muted">Connecting...</span>
+    </div>
+
+    <%# Subchannels list %>
+    <% if subchannels&.any? %>
+      <div class="channel-subchannels">
+        <h3 class="text-xs font-semibold text-muted uppercase tracking-wider mb-2">Subchannels</h3>
+        <div class="flex flex-wrap gap-2">
+          <% subchannels.each do |sub| %>
+            <%= link_to room_path(sub),
+                  class: "channel-subchannel-link",
+                  aria: { label: "Join subchannel #{sub.name}" } do %>
+              <span aria-hidden="true">🔊</span>
+              <span class="text-secondary"><%= sub.name %></span>
+            <% end %>
+          <% end %>
+        </div>
+      </div>
+    <% end %>
+
+    <div id="call-participants" class="channel-participants-grid" role="list" aria-label="Channel participants">
+      <%# Populated by LiveKit JS %>
+    </div>
+  </div>
+<% end %>

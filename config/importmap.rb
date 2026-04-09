@@ -17,6 +17,9 @@ pin "controllers/livekit_controller", to: "controllers/livekit_controller.js"
 pin "controllers/password_toggle_controller", to: "controllers/password_toggle_controller.js"
 pin "controllers/sidebar_controller", to: "controllers/sidebar_controller.js"
 pin "controllers/link_preview_controller", to: "controllers/link_preview_controller.js"
+pin "controllers/channel_controller", to: "controllers/channel_controller.js"
+pin "controllers/bottom_sheet_controller", to: "controllers/bottom_sheet_controller.js"
+pin "controllers/media_controls_controller", to: "controllers/media_controls_controller.js"
 
 # Channels
 pin "channels/consumer", to: "channels/consumer.js"

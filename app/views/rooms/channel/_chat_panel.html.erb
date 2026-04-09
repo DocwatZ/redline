@@ -1,0 +1,78 @@
+<%# Chat panel — messages area + input %>
+<%# On mobile for voice channels: slides up as bottom sheet %>
+<%# On desktop for voice channels: right sidebar %>
+<%# For chat-only channels: always visible as main content %>
+
+<%# Main messages area %>
+<div id="messages"
+     class="channel-messages"
+     role="log"
+     aria-live="polite"
+     aria-label="Chat messages"
+     aria-relevant="additions"
+     data-controller="chat"
+     data-chat-room-id-value="<%= room.id %>">
+
+  <% if room.announcement? && room.description.present? %>
+    <div class="channel-announcement" role="region" aria-label="Announcement">
+      <div class="flex items-center gap-2 mb-2">
+        <span class="text-xl" aria-hidden="true">📢</span>
+        <h2 class="font-semibold text-primary text-sm">Announcement</h2>
+      </div>
+      <div class="text-secondary text-sm leading-relaxed whitespace-pre-wrap">
+        <%= room.description %>
+      </div>
+    </div>
+  <% end %>
+
+  <% messages.each do |message| %>
+    <%= render "messages/message", message: message %>
+  <% end %>
+
+  <%# Auto-scroll anchor %>
+  <div id="messages-end" aria-hidden="true"></div>
+</div>
+
+<%# Message input %>
+<% if room.chat? && room.member?(current_user) %>
+  <div class="channel-message-compose">
+    <form id="message-form"
+          method="post"
+          action="<%= room_messages_path(room) %>"
+          data-controller="message-input"
+          data-action="submit->message-input#send"
+          data-turbo="false"
+          aria-label="Send a message to <%= room.name %>">
+      <%= hidden_field_tag :authenticity_token, form_authenticity_token %>
+      <div class="channel-compose-row">
+        <div class="channel-compose-field">
+          <label for="message-body" class="sr-only">
+            Message <%= room.name %>
+          </label>
+          <textarea id="message-body"
+                    name="message[body]"
+                    rows="1"
+                    maxlength="4000"
+                    placeholder="Message <%= room.display_icon %><%= room.name %>"
+                    class="input-field w-full resize-none min-h-[44px] max-h-48 py-2.5 pr-12 leading-snug
+                           scrollbar-thin overflow-y-auto"
+                    aria-label="Message input"
+                    aria-describedby="message-hint"
+                    data-message-input-target="field"
+                    data-action="keydown->message-input#handleKeydown
+                                 input->message-input#autoResize"></textarea>
+          <span id="message-hint" class="sr-only">
+            Press Enter to send, Shift+Enter for new line
+          </span>
+        </div>
+        <button type="submit"
+                class="btn-accent channel-send-btn"
+                aria-label="Send message">
+          <svg aria-hidden="true" class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
+          </svg>
+        </button>
+      </div>
+    </form>
+  </div>
+<% end %>

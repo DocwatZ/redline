@@ -30,8 +30,14 @@
       <%# App Shell %>
       <div role="application" aria-label="REDLINE application" style="display:flex;height:100vh;overflow:hidden">
 
+        <%# Mobile sidebar overlay/backdrop %>
+        <div id="sidebar-backdrop"
+             class="sidebar-backdrop"
+             data-action="click->sidebar#close"
+             aria-hidden="true"></div>
+
         <%# Sidebar %>
-        <nav id="sidebar" aria-label="Main navigation">
+        <nav id="sidebar" aria-label="Main navigation" data-controller="sidebar">
           <%# Brand %>
           <div style="height:3.5rem;display:flex;align-items:center;padding:0 1rem;border-bottom:1px solid var(--rl-border);flex-shrink:0">
             <%= link_to rooms_path,

@@ -1,0 +1,59 @@
+<%# In-call text chat — for voice channels, shown as bottom sheet on mobile %>
+<% if room.voice_channel? %>
+  <div id="in-call-chat-panel"
+       class="channel-in-call-chat hidden"
+       data-controller="bottom-sheet"
+       data-bottom-sheet-panel-value="in-call-chat-panel"
+       aria-label="In-call text chat">
+
+    <%# Bottom sheet drag handle (mobile) %>
+    <div class="bottom-sheet-handle" data-action="pointerdown->bottom-sheet#startDrag" aria-hidden="true">
+      <div class="bottom-sheet-handle-bar"></div>
+    </div>
+
+    <div class="channel-in-call-chat-header">
+      <h3 class="text-xs font-semibold text-muted uppercase tracking-wider">In-Call Chat</h3>
+      <button class="btn-icon bottom-sheet-close-btn"
+              aria-label="Close chat panel"
+              data-action="click->bottom-sheet#close">
+        <svg aria-hidden="true" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+        </svg>
+      </button>
+    </div>
+
+    <div id="in-call-chat-messages"
+         class="channel-in-call-messages"
+         role="log"
+         aria-live="polite"
+         aria-label="In-call chat messages">
+      <% in_call_messages.each do |message| %>
+        <div class="in-call-message py-1 px-2 text-sm" role="listitem">
+          <span class="font-semibold text-xs text-primary"><%= message.user.display_name %></span>
+          <time class="text-xs text-muted ml-1"><%= message.created_at.strftime('%H:%M') %></time>
+          <div class="text-secondary text-sm break-words whitespace-pre-wrap" data-controller="link-preview"><%= message.display_body %></div>
+        </div>
+      <% end %>
+    </div>
+
+    <div class="channel-in-call-compose">
+      <div class="flex items-end gap-1">
+        <label for="in-call-chat-input" class="sr-only">In-call chat message</label>
+        <input id="in-call-chat-input"
+               type="text"
+               maxlength="500"
+               placeholder="Send a message..."
+               class="input-field w-full text-sm py-1.5"
+               aria-label="In-call chat message input"
+               data-action="keydown->channel#handleInCallChatKeydown" />
+        <button class="btn-accent channel-send-btn-sm"
+                aria-label="Send in-call message"
+                data-action="click->channel#sendInCallMessage">
+          <svg aria-hidden="true" class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </div>
+<% end %>

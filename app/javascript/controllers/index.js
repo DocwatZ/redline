@@ -8,6 +8,9 @@ import LivekitController      from "controllers/livekit_controller"
 import PasswordToggleController from "controllers/password_toggle_controller"
 import SidebarController      from "controllers/sidebar_controller"
 import LinkPreviewController  from "controllers/link_preview_controller"
+import ChannelController      from "controllers/channel_controller"
+import BottomSheetController  from "controllers/bottom_sheet_controller"
+import MediaControlsController from "controllers/media_controls_controller"
 
 application.register("chat",            ChatController)
 application.register("dm-chat",         DmChatController)
@@ -17,3 +20,6 @@ application.register("livekit",         LivekitController)
 application.register("password-toggle", PasswordToggleController)
 application.register("sidebar",         SidebarController)
 application.register("link-preview",    LinkPreviewController)
+application.register("channel",         ChannelController)
+application.register("bottom-sheet",    BottomSheetController)
+application.register("media-controls",  MediaControlsController)

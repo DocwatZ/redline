@@ -1,0 +1,61 @@
+<%# Channel header — top bar with channel info, join button, and toggles %>
+<header class="channel-header"
+        role="banner"
+        aria-label="<%= room.name %> channel header">
+
+  <%# Mobile hamburger menu %>
+  <button class="btn-icon sidebar-toggle-btn"
+          aria-label="Open navigation"
+          aria-expanded="false"
+          data-action="click->sidebar#toggle">
+    <svg aria-hidden="true" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/>
+    </svg>
+  </button>
+
+  <span class="text-xl" aria-hidden="true">
+    <%= room.display_icon %>
+  </span>
+  <div class="channel-header-info">
+    <h1 class="channel-header-title">
+      <%= room.name %>
+      <% if room.subchannel? %>
+        <span class="text-xs text-muted font-normal">
+          (subchannel of <%= room.parent.name %>)
+        </span>
+      <% end %>
+    </h1>
+    <% if room.description.present? && !room.announcement? %>
+      <p class="text-xs text-muted truncate"><%= room.description %></p>
+    <% end %>
+  </div>
+
+  <%# Voice/Video: Instant Join button %>
+  <% if room.voice_channel? %>
+    <button id="join-call-btn"
+            class="btn-accent channel-join-btn"
+            aria-label="Join voice channel <%= room.name %>"
+            data-action="click->channel#joinCall">
+      <svg aria-hidden="true" class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+        <path d="M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3z"/>
+        <path d="M19 10v2a7 7 0 01-14 0v-2"/>
+        <line x1="12" y1="19" x2="12" y2="23"/>
+        <line x1="8" y1="23" x2="16" y2="23"/>
+      </svg>
+      <span class="channel-join-btn-text">Join</span>
+    </button>
+  <% end %>
+
+  <%# Members toggle %>
+  <button class="btn-icon channel-members-toggle"
+          aria-label="Toggle member list, <%= members.count %> members"
+          aria-expanded="true"
+          aria-controls="members-panel"
+          data-action="click->channel#toggleMembers">
+    <svg aria-hidden="true" class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round"
+            d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
+    </svg>
+    <span class="channel-members-count"><%= members.count %></span>
+  </button>
+</header>

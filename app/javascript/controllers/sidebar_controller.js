@@ -1,33 +1,54 @@
 import { Controller } from "@hotwired/stimulus"
 
 /**
- * Sidebar controller — handles mobile sidebar toggle.
+ * Sidebar controller — handles mobile sidebar toggle with overlay.
  *
  * Accessibility:
  *  - aria-expanded on toggle button
- *  - Focus trapped in sidebar when open on mobile
+ *  - Backdrop click closes sidebar
  *  - Escape closes the sidebar
+ *  - Focus management
  */
 export default class extends Controller {
   connect() {
     this.sidebar = document.getElementById("sidebar")
-    this.handleEscape = this.close.bind(this)
+    this.backdrop = document.getElementById("sidebar-backdrop")
+    this._onKeydown = this.onKeydown.bind(this)
+    this._toggleButtons = document.querySelectorAll("[data-action*='sidebar#toggle']")
   }
 
   toggle() {
-    const isOpen = this.sidebar.classList.toggle("open")
-    const btn = document.querySelector("[data-action*='sidebar#toggle']")
-    if (btn) btn.setAttribute("aria-expanded", String(isOpen))
-
-    if (isOpen) {
-      document.addEventListener("keydown", this.onKeydown.bind(this))
+    if (this.sidebar?.classList.contains("open")) {
+      this.close()
     } else {
-      document.removeEventListener("keydown", this.onKeydown.bind(this))
+      this.open()
     }
   }
 
+  open() {
+    if (!this.sidebar) return
+    this.sidebar.classList.add("open")
+    if (this.backdrop) this.backdrop.classList.add("sidebar-backdrop-visible")
+
+    document.addEventListener("keydown", this._onKeydown)
+
+    // Update all toggle buttons
+    this._toggleButtons.forEach(btn => {
+      btn.setAttribute("aria-expanded", "true")
+    })
+  }
+
   close() {
-    this.sidebar?.classList.remove("open")
+    if (!this.sidebar) return
+    this.sidebar.classList.remove("open")
+    if (this.backdrop) this.backdrop.classList.remove("sidebar-backdrop-visible")
+
+    document.removeEventListener("keydown", this._onKeydown)
+
+    // Update all toggle buttons
+    this._toggleButtons.forEach(btn => {
+      btn.setAttribute("aria-expanded", "false")
+    })
   }
 
   onKeydown(event) {

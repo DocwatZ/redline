@@ -699,13 +699,14 @@ input[type="radio"]:focus-visible {
   gap: .5rem;
   padding: .75rem;
   background: var(--rl-surface);
-  border: 1px solid var(--rl-border);
+  border: 2px solid var(--rl-border);
   border-radius: var(--rl-radius-lg);
   min-width: 80px;
+  transition: border-color var(--rl-base-t), box-shadow var(--rl-base-t);
 }
 .participant-tile.speaking {
   border-color: var(--rl-success);
-  box-shadow: 0 0 0 2px rgba(72,187,120,.3);
+  box-shadow: 0 0 0 3px rgba(72,187,120,.25), 0 0 12px rgba(72,187,120,.15);
 }
 .participant-tile video {
   width: 120px; height: 80px;
@@ -713,19 +714,502 @@ input[type="radio"]:focus-visible {
   object-fit: cover;
   background: #000;
 }
+.participant-tile-avatar {
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 50%;
+  background: var(--rl-surface-elevated);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.participant-tile-name {
+  font-size: .75rem;
+  color: var(--rl-text-secondary);
+  text-align: center;
+  max-width: 100px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
 
-/* ─── Responsive ─────────────────────────────────────────────────────────── */
+/* ─── Channel Layout (unified) ──────────────────────────────────────────── */
+.channel-layout {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+  position: relative;
+}
+
+.channel-header {
+  height: 3.5rem;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: .75rem;
+  padding: 0 .75rem;
+  border-bottom: 1px solid var(--rl-border);
+  background: var(--rl-surface);
+  z-index: 10;
+}
+.channel-header-info {
+  flex: 1;
+  min-width: 0;
+}
+.channel-header-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--rl-text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.channel-join-btn {
+  display: flex;
+  align-items: center;
+  gap: .375rem;
+  font-size: .8125rem;
+  white-space: nowrap;
+}
+.channel-members-toggle {
+  display: flex;
+  align-items: center;
+  gap: .25rem;
+  color: var(--rl-text-muted);
+  transition: color var(--rl-base-t);
+}
+.channel-members-toggle:hover {
+  color: var(--rl-text-primary);
+}
+.channel-members-count {
+  font-size: .8125rem;
+}
+
+/* Body: flex row on desktop, column on mobile */
+.channel-body {
+  flex: 1;
+  display: flex;
+  overflow: hidden;
+  position: relative;
+}
+
+.channel-canvas {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  min-width: 0;
+}
+
+/* Chat wrapper */
+.channel-chat-wrapper {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* Messages area */
+.channel-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1rem;
+  scrollbar-width: thin;
+  scrollbar-color: var(--rl-border) transparent;
+}
+.channel-messages > .space-y-1 > * + * {
+  margin-top: .25rem;
+}
+
+/* Announcement block */
+.channel-announcement {
+  background: var(--rl-surface-elevated);
+  border: 1px solid var(--rl-border);
+  border-radius: var(--rl-radius-lg);
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+
+/* Message compose */
+.channel-message-compose {
+  border-top: 1px solid var(--rl-border);
+  padding: .75rem;
+  flex-shrink: 0;
+  background: var(--rl-surface);
+}
+.channel-compose-row {
+  display: flex;
+  align-items: flex-end;
+  gap: .5rem;
+}
+.channel-compose-field {
+  flex: 1;
+  position: relative;
+}
+.channel-send-btn {
+  width: 2.75rem;
+  height: 2.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  border-radius: var(--rl-radius-md);
+}
+.channel-send-btn-sm {
+  width: 2.25rem;
+  height: 2.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  border-radius: var(--rl-radius-md);
+}
+
+/* Call panel improvements */
+.channel-call-panel {
+  background: var(--rl-surface-elevated);
+  border-bottom: 1px solid var(--rl-border);
+  padding: 1rem;
+}
+.channel-call-panel.hidden { display: none; }
+
+.channel-call-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: .75rem;
+  padding: 2rem;
+}
+.channel-call-loading.hidden { display: none; }
+
+.call-loading-spinner {
+  width: 1.5rem;
+  height: 1.5rem;
+  border: 2px solid var(--rl-border);
+  border-top-color: var(--rl-accent);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.channel-participants-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .75rem;
+}
+
+.channel-subchannels {
+  margin-bottom: .75rem;
+  padding-bottom: .75rem;
+  border-bottom: 1px solid var(--rl-border);
+}
+.channel-subchannel-link {
+  display: flex;
+  align-items: center;
+  gap: .25rem;
+  padding: .25rem .5rem;
+  font-size: .75rem;
+  background: var(--rl-surface);
+  border: 1px solid var(--rl-border);
+  border-radius: var(--rl-radius-sm);
+  text-decoration: none;
+  transition: border-color var(--rl-base-t);
+}
+.channel-subchannel-link:hover {
+  border-color: rgba(229,62,62,.5);
+  text-decoration: none;
+}
+
+/* Members panel */
+.channel-members-panel {
+  width: 14rem;
+  border-left: 1px solid var(--rl-border);
+  flex-shrink: 0;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--rl-border) transparent;
+}
+.channel-members-panel.hidden { display: none; }
+.channel-member-item {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  padding: .375rem .5rem;
+  border-radius: var(--rl-radius-sm);
+  transition: background-color var(--rl-base-t);
+  text-decoration: none;
+  font-size: .875rem;
+}
+.channel-member-item:hover {
+  background: var(--rl-surface-elevated);
+  text-decoration: none;
+}
+
+/* In-call chat */
+.channel-in-call-chat {
+  display: flex;
+  flex-direction: column;
+  background: var(--rl-surface);
+  overflow: hidden;
+}
+.channel-in-call-chat.hidden { display: none; }
+
+.channel-in-call-chat-header {
+  height: 2.5rem;
+  border-bottom: 1px solid var(--rl-border);
+  padding: 0 .75rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+}
+.channel-in-call-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: .5rem;
+  scrollbar-width: thin;
+  scrollbar-color: var(--rl-border) transparent;
+}
+.channel-in-call-compose {
+  border-top: 1px solid var(--rl-border);
+  padding: .5rem;
+  flex-shrink: 0;
+}
+
+/* ─── Control Bar (bottom, persistent) ──────────────────────────────────── */
+.channel-control-bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: .5rem;
+  padding: .5rem .75rem;
+  background: var(--rl-surface);
+  border-top: 1px solid var(--rl-border);
+  flex-shrink: 0;
+  z-index: 20;
+}
+.channel-control-bar.hidden { display: none; }
+
+.control-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: .25rem;
+  padding: .5rem .75rem;
+  min-width: 3.5rem;
+  min-height: 3rem;
+  border: none;
+  border-radius: var(--rl-radius-lg);
+  background: var(--rl-surface-elevated);
+  color: var(--rl-text-secondary);
+  cursor: pointer;
+  transition: background-color var(--rl-base-t), color var(--rl-base-t),
+              transform 80ms ease;
+  font-family: inherit;
+}
+.control-btn:hover {
+  background: var(--rl-border);
+  color: var(--rl-text-primary);
+}
+.control-btn:focus-visible {
+  outline: 2px solid var(--rl-accent);
+  outline-offset: 2px;
+}
+.control-btn-pressed {
+  transform: scale(0.93);
+}
+.control-btn-active {
+  background: rgba(229,62,62,.15);
+  color: var(--rl-accent);
+}
+.control-btn-danger {
+  background: rgba(229,62,62,.12);
+  color: var(--rl-danger);
+}
+.control-btn-danger:hover {
+  background: rgba(229,62,62,.25);
+}
+.control-btn-icon {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+.control-btn-label {
+  font-size: .625rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+}
+
+/* ─── Bottom Sheet ──────────────────────────────────────────────────────── */
+.bottom-sheet-handle {
+  display: none; /* shown only on mobile */
+  padding: .5rem 0;
+  cursor: grab;
+  touch-action: none;
+}
+.bottom-sheet-handle-bar {
+  width: 2.5rem;
+  height: .25rem;
+  margin: 0 auto;
+  background: var(--rl-border);
+  border-radius: var(--rl-radius-full);
+}
+.bottom-sheet-close-btn {
+  display: none; /* shown only on mobile */
+}
+.bottom-sheet-backdrop {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.5);
+  z-index: 29;
+  opacity: 0;
+  transition: opacity 200ms ease;
+}
+.bottom-sheet-backdrop-visible {
+  display: block;
+  opacity: 1;
+}
+
+/* ─── Sidebar Backdrop ──────────────────────────────────────────────────── */
+.sidebar-backdrop {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.5);
+  z-index: 39;
+  opacity: 0;
+  transition: opacity 200ms ease;
+}
+.sidebar-backdrop-visible {
+  display: block;
+  opacity: 1;
+}
+
+/* Mobile hamburger button - hidden on desktop */
+.sidebar-toggle-btn {
+  display: none;
+}
+
+/* ─── Responsive: Mobile-first ──────────────────────────────────────────── */
 @media (max-width: 768px) {
+  /* Sidebar: slide-in drawer */
   #sidebar {
     position: fixed;
     left: -16rem;
     top: 0;
     bottom: 0;
     z-index: 40;
-    transition: left var(--rl-base-t);
+    transition: left 200ms ease;
+    box-shadow: none;
   }
-  #sidebar.open { left: 0; }
-  #members-panel { display: none; }
+  #sidebar.open {
+    left: 0;
+    box-shadow: 4px 0 24px rgba(0,0,0,.4);
+  }
+
+  /* Show hamburger menu */
+  .sidebar-toggle-btn {
+    display: flex;
+  }
+
+  /* Members panel: hidden on mobile */
+  .channel-layout .channel-members-panel,
+  .channel-layout #members-panel {
+    display: none;
+  }
+
+  /* Members toggle: hidden on mobile (use channel header actions) */
+  .channel-members-toggle {
+    display: none;
+  }
+
+  /* In-call chat: bottom sheet on mobile */
+  .channel-in-call-chat {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    top: auto;
+    max-height: 70vh;
+    z-index: 30;
+    border-radius: var(--rl-radius-xl) var(--rl-radius-xl) 0 0;
+    box-shadow: 0 -4px 24px rgba(0,0,0,.4);
+    transform: translateY(100%);
+    transition: transform 200ms ease;
+  }
+  .channel-in-call-chat.bottom-sheet-open {
+    transform: translateY(0);
+  }
+
+  .bottom-sheet-handle {
+    display: block;
+  }
+  .bottom-sheet-close-btn {
+    display: flex;
+  }
+
+  /* Control bar: full-width at bottom, thumb-friendly */
+  .channel-control-bar {
+    gap: .25rem;
+    padding: .5rem;
+    padding-bottom: max(.5rem, env(safe-area-inset-bottom));
+  }
+  .control-btn {
+    flex: 1;
+    min-width: 0;
+    padding: .5rem .25rem;
+    border-radius: var(--rl-radius-md);
+  }
+  .control-btn-icon {
+    width: 1.5rem;
+    height: 1.5rem;
+  }
+
+  /* Channel header: compact */
+  .channel-header {
+    padding: 0 .5rem;
+    gap: .5rem;
+  }
+  .channel-join-btn-text {
+    display: none;
+  }
+}
+
+/* ─── Desktop enhancements ──────────────────────────────────────────────── */
+@media (min-width: 769px) {
+  /* In-call chat: sidebar on desktop */
+  .channel-in-call-chat {
+    width: 18rem;
+    border-left: 1px solid var(--rl-border);
+    flex-shrink: 0;
+  }
+
+  /* Control bar: centered, compact */
+  .channel-control-bar {
+    gap: .75rem;
+    padding: .5rem 1rem;
+  }
+  .control-btn {
+    flex-direction: row;
+    gap: .375rem;
+    padding: .375rem .75rem;
+    min-width: auto;
+    border-radius: var(--rl-radius-md);
+  }
+  .control-btn-label {
+    font-size: .75rem;
+  }
+
+  /* Participant grid: larger tiles */
+  .participant-tile video {
+    width: 180px;
+    height: 120px;
+  }
 }
 
 /* ─── Utility classes used in ERB ────────────────────────────────────────── */
@@ -907,3 +1391,27 @@ input[type="radio"]:focus-visible {
 /* Disabled */
 .disabled\:opacity-50:disabled { opacity: .5; }
 .disabled\:cursor-not-allowed:disabled { cursor: not-allowed; }
+
+/* Online status dot colors */
+.bg-green-500 { background-color: #22c55e; }
+.bg-gray-500  { background-color: #6b7280; }
+
+/* Scrollbar thin (cross-browser) */
+.scrollbar-thin {
+  scrollbar-width: thin;
+  scrollbar-color: var(--rl-border) transparent;
+}
+
+/* Hidden responsive */
+@media (min-width: 640px) {
+  .sm\:block { display: block; }
+}
+
+/* Width utils */
+.w-2\.5 { width: .625rem; }
+.h-2\.5 { height: .625rem; }
+.h-10   { height: 2.5rem; }
+.w-72   { width: 18rem; }
+.h-14   { height: 3.5rem; }
+.pr-12  { padding-right: 3rem; }
+.p-2    { padding: .5rem; }

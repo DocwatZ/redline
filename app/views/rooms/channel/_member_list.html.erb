@@ -1,0 +1,45 @@
+<%# Member list panel — right sidebar on desktop, hidden on mobile %>
+<aside id="members-panel"
+       class="channel-members-panel"
+       aria-label="Channel members">
+  <div class="p-3">
+    <h2 class="text-xs font-semibold text-muted uppercase tracking-wider mb-3">
+      Members — <%= members.count %>
+    </h2>
+    <ul role="list" class="space-y-1">
+      <% members.each do |member| %>
+        <li>
+          <%= link_to user_path(member),
+                class: "channel-member-item",
+                aria: { label: "#{member.display_name}, #{member.status}" } do %>
+            <div class="relative flex-shrink-0">
+              <span class="w-7 h-7 rounded-full flex items-center justify-center
+                           text-white text-xs font-bold"
+                    style="background-color: <%= member.avatar_color %>"
+                    aria-hidden="true">
+                <%= member.initials %>
+              </span>
+              <span class="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border-2 border-base
+                           <%= member.online? ? 'bg-green-500' : 'bg-gray-500' %>"
+                    aria-hidden="true"></span>
+            </div>
+            <span class="truncate text-secondary"><%= member.display_name %></span>
+            <% membership = room.membership_for(member) %>
+            <% if membership&.admin? %>
+              <span class="ml-auto text-xs text-accent" aria-label="admin">★</span>
+            <% end %>
+          <% end %>
+        </li>
+      <% end %>
+    </ul>
+  </div>
+
+  <%# Leave channel %>
+  <div class="p-3 border-t border-border mt-2">
+    <%= button_to leave_room_path(room), method: :delete,
+          class: "btn-ghost w-full text-sm text-danger hover:bg-red-900/20",
+          aria: { label: "Leave #{room.name} channel" } do %>
+      Leave Channel
+    <% end %>
+  </div>
+</aside>
