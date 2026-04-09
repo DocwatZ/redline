@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 
 class RoomsController < ApplicationController
-  before_action :set_room, only: [ :show, :update, :destroy, :join, :leave ]
+  before_action :set_room, only: [ :show, :edit, :update, :destroy, :join, :leave ]
   before_action :require_membership!, only: [ :show ]
-  before_action :require_admin!, only: [ :update, :destroy ]
+  before_action :require_admin!, only: [ :edit, :update, :destroy ]
 
   def index
     @rooms = Room.public_rooms.top_level.by_position.includes(:owner, :room_memberships, :subchannels)
@@ -22,6 +22,10 @@ class RoomsController < ApplicationController
     @voice_channels = current_user.rooms.voice_channels.top_level.by_position
   end
 
+  def edit
+    @voice_channels = current_user.rooms.voice_channels.top_level.by_position
+  end
+
   def create
     @room = current_user.owned_rooms.build(room_params)
 
@@ -37,6 +41,7 @@ class RoomsController < ApplicationController
     if @room.update(room_params)
       redirect_to @room, notice: "Channel updated."
     else
+      @voice_channels = current_user.rooms.voice_channels.top_level.by_position
       render :edit, status: :unprocessable_entity
     end
   end
