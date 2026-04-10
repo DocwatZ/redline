@@ -16,6 +16,17 @@ Rails.application.routes.draw do
   # Link previews
   get "link_previews", to: "link_previews#show"
 
+  # Search
+  get "search", to: "search#index", as: :search
+
+  # Invite links
+  get  "invite/:code", to: "invites#show",   as: :invite
+  post "invite/:code", to: "invites#accept", as: :accept_invite
+  delete "invite/:code", to: "invites#destroy", as: :revoke_invite
+
+  # Push subscriptions
+  resources :push_subscriptions, only: [:create, :destroy]
+
   # Health check
   get "health", to: "health#show", as: :health
   get "up" => "rails/health#show", as: :rails_health_check
@@ -52,7 +63,13 @@ Rails.application.routes.draw do
       delete :leave
       get "livekit_token", to: "livekit#token", as: :livekit_token
     end
-    resources :messages, only: [ :create, :update, :destroy ]
+    resources :messages, only: [ :create, :update, :destroy ] do
+      member do
+        get :thread
+        post :reactions, to: "reactions#create"
+      end
+    end
+    resources :invites, only: [:index, :create]
   end
 
   # Individual direct-message actions (edit / delete)

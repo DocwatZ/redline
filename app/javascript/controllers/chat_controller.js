@@ -29,6 +29,7 @@ export default class extends Controller {
   }
 
   appendMessage(data) {
+    if (data.type === "reaction_update") { this.updateReactions(data); return }
     const wasAtBottom = this.isAtBottom()
     const existing = document.getElementById(`message-${data.id}`)
 
@@ -193,5 +194,36 @@ export default class extends Controller {
     const div = document.createElement("div")
     div.appendChild(document.createTextNode(String(str ?? "")))
     return div.innerHTML
+  }
+
+  updateReactions(data) {
+    const msg = document.getElementById(`message-${data.message_id}`)
+    if (!msg) return
+    let reactionsEl = msg.querySelector(".message-reactions")
+    if (!reactionsEl) {
+      reactionsEl = document.createElement("div")
+      reactionsEl.className = "message-reactions"
+      reactionsEl.setAttribute("data-message-id", data.message_id)
+      const bodyDiv = msg.querySelector(".message-body")
+      if (bodyDiv) bodyDiv.after(reactionsEl)
+      else return
+    }
+    const addBtn = reactionsEl.querySelector(".reaction-add-btn")
+    reactionsEl.innerHTML = ""
+    data.reactions.forEach(r => {
+      const btn = document.createElement("button")
+      btn.className = `reaction-pill${r.reacted ? " reaction-pill-active" : ""}`
+      btn.setAttribute("data-action", "click->message-actions#toggleReaction")
+      btn.setAttribute("data-emoji", r.emoji)
+      btn.setAttribute("aria-label", `${r.emoji} ${r.count}`)
+      btn.innerHTML = `${this.escapeHtml(r.emoji)} <span class="reaction-count">${r.count}</span>`
+      reactionsEl.appendChild(btn)
+    })
+    if (addBtn) reactionsEl.appendChild(addBtn)
+  }
+
+  highlightMentions(text) {
+    const escaped = this.escapeHtml(text)
+    return escaped.replace(/@([a-zA-Z0-9_\-]+)/g, (_m, u) => `<span class="mention-pill">@${u}</span>`)
   }
 }

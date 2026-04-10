@@ -138,4 +138,54 @@ export default class extends Controller {
     const slug  = idx >= 0 ? parts[idx + 1] : null
     return slug ? `/rooms/${slug}/messages/${this.messageIdValue}` : null
   }
+
+  // ── Reactions ─────────────────────────────────────────────────────────────
+  openEmojiPicker() {
+    document.querySelectorAll(".emoji-picker-popup").forEach(p => p.remove())
+    const EMOJI = ["👍","👎","❤️","😂","😮","😢","😡","🎉","🔥","💯","✅","❌","⚡","🚀","💪","🙏","👀","💀","😎","🤔"]
+    const picker = document.createElement("div")
+    picker.className = "emoji-picker-popup"
+    picker.setAttribute("role", "dialog")
+    picker.setAttribute("aria-label", "Pick an emoji")
+    EMOJI.forEach(emoji => {
+      const btn = document.createElement("button")
+      btn.type = "button"
+      btn.textContent = emoji
+      btn.setAttribute("aria-label", emoji)
+      btn.addEventListener("click", () => { this.sendReaction(emoji); picker.remove() })
+      picker.appendChild(btn)
+    })
+    this.element.style.position = "relative"
+    this.element.appendChild(picker)
+    setTimeout(() => {
+      const close = (e) => { if (!picker.contains(e.target)) { picker.remove(); document.removeEventListener("click", close) } }
+      document.addEventListener("click", close)
+    }, 0)
+  }
+
+  async toggleReaction(event) {
+    const emoji = event.currentTarget.dataset.emoji
+    if (emoji) await this.sendReaction(emoji)
+  }
+
+  async sendReaction(emoji) {
+    const parts = window.location.pathname.split("/").filter(Boolean)
+    const idx = parts.indexOf("rooms")
+    const slug = idx >= 0 ? parts[idx + 1] : null
+    if (!slug) return
+    const csrf = document.querySelector('meta[name="csrf-token"]')?.content
+    try {
+      await fetch(`/rooms/${slug}/messages/${this.messageIdValue}/reactions`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "Accept": "application/json", "X-CSRF-Token": csrf ?? "" },
+        body: JSON.stringify({ emoji })
+      })
+    } catch (err) { console.error("Reaction error:", err) }
+  }
+
+  openThread() {
+    document.dispatchEvent(new CustomEvent("message:open-thread", {
+      detail: { messageId: this.messageIdValue }
+    }))
+  }
 }
