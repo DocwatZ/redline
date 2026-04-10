@@ -1,6 +1,6 @@
 /*
  * REDLINE Design System
- * Dark-first, WCAG 2.1 AA accessible
+ * OLED Void, WCAG 2.1 AA accessible
  * Contrast ratios: primary text ~13:1, secondary ~7:1, muted ~3:1 (large/icons only)
  * All interactive elements meet WCAG 2.5.5 minimum 44x44 touch target
  */
@@ -8,15 +8,15 @@
 /* ─── Custom Properties ─────────────────────────────────────────────────── */
 :root {
   /* Backgrounds */
-  --rl-base:             #0f1117;
-  --rl-surface:          #161922;
-  --rl-surface-elevated: #1e2130;
-  --rl-border:           #2a2d3e;
+  --rl-base:             #000000;
+  --rl-surface:          #0a0a0a;
+  --rl-surface-elevated: #111111;
+  --rl-border:           rgba(255,255,255,0.08);
 
   /* Text (all ≥ 4.5:1 on --rl-base except muted which is large-text only) */
   --rl-text-primary:   #f0f2f7;   /* 13.1:1 */
-  --rl-text-secondary: #b0b8d4;   /*  7.2:1 */
-  --rl-text-muted:     #7280a8;   /*  3.8:1 — large text / icons only */
+  --rl-text-secondary: #e0e0e0;   /*  7.2:1 */
+  --rl-text-muted:     #888888;   /*  3.8:1 — large text / icons only */
 
   /* Brand */
   --rl-accent:          #e53e3e;   /* 4.6:1 on --rl-base */
