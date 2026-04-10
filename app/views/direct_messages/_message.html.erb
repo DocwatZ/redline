@@ -8,10 +8,13 @@
          data-message-actions-body-value="<%= dm.deleted? ? '' : dm.body %>"
          data-message-actions-type-value="dm">
   <div class="flex-shrink-0 mt-0.5" aria-hidden="true">
-    <div class="w-8 h-8 rounded-full flex items-center justify-center
-                text-white text-xs font-bold"
+    <div class="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold overflow-hidden"
          style="background-color: <%= dm.sender.avatar_color %>">
-      <%= dm.sender.initials %>
+      <% if dm.sender.avatar.attached? %>
+        <%= image_tag dm.sender.avatar.variant(resize_to_fill: [32, 32]), alt: dm.sender.display_name, class: "w-full h-full object-cover" %>
+      <% else %>
+        <%= dm.sender.initials %>
+      <% end %>
     </div>
   </div>
   <div class="flex-1 min-w-0">

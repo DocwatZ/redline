@@ -37,6 +37,12 @@ gem "faraday", "~> 2.7"
 # Security — rate limiting
 gem "rack-attack", "~> 6.7"
 
+# Image processing for ActiveStorage variants
+gem "image_processing", "~> 1.2"
+
+# Web push notifications
+gem "webpush", "~> 1.1"
+
 # Windows does not include zoneinfo files, so bundle the tzinfo-data gem
 gem "tzinfo-data", platforms: %i[ windows jruby ]
 

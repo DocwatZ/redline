@@ -9,10 +9,13 @@
          data-message-actions-type-value="channel">
   <%# Avatar %>
   <div class="flex-shrink-0 mt-0.5" aria-hidden="true">
-    <div class="w-8 h-8 rounded-full flex items-center justify-center
-                text-white text-xs font-bold"
+    <div class="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold overflow-hidden"
          style="background-color: <%= message.user.avatar_color %>">
-      <%= message.user.initials %>
+      <% if message.user.avatar.attached? %>
+        <%= image_tag message.user.avatar.variant(resize_to_fill: [32, 32]), alt: message.user.display_name, class: "w-full h-full object-cover" %>
+      <% else %>
+        <%= message.user.initials %>
+      <% end %>
     </div>
   </div>
 
