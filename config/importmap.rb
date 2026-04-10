@@ -24,6 +24,9 @@ pin "controllers/media_controls_controller", to: "controllers/media_controls_con
 pin "controllers/message_actions_controller", to: "controllers/message_actions_controller.js"
 pin "controllers/new_dm_controller",          to: "controllers/new_dm_controller.js"
 pin "controllers/status_picker_controller",   to: "controllers/status_picker_controller.js"
+pin "controllers/search_controller",          to: "controllers/search_controller.js"
+pin "controllers/invite_controller",          to: "controllers/invite_controller.js"
+pin "controllers/e2ee_controller",            to: "controllers/e2ee_controller.js"
 
 # Channels
 pin "channels/consumer", to: "channels/consumer.js"
