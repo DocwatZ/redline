@@ -82,7 +82,7 @@ export default class extends Controller {
     this.filePreviewTarget.classList.remove("hidden")
     this.filePreviewTarget.innerHTML = this._selectedFiles.map((f, i) => `
       <div class="file-chip" style="gap:.375rem">
-        <span style="max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${this.escapeHtml(f.name)}</span>
+        <span title="${this.escapeHtml(f.name)}" style="max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${this.escapeHtml(f.name)}</span>
         <button type="button" class="btn-icon btn-icon-xs" title="Remove"
                 data-action="click->message-input#removeFile" data-index="${i}"
                 aria-label="Remove ${this.escapeHtml(f.name)}" style="padding:0;min-height:auto;min-width:auto">
@@ -273,7 +273,7 @@ export default class extends Controller {
                style="max-width:320px;max-height:240px;border-radius:var(--rl-radius-sm);margin-top:.25rem;cursor:pointer">
         </a>`
       }
-      return `<a href="${this.escapeHtml(f.url)}" class="file-download-link" target="_blank" rel="noopener noreferrer" download="${this.escapeHtml(f.filename)}">
+      return `<a href="${this.escapeHtml(f.url)}" class="file-download-link" target="_blank" rel="noopener noreferrer" download="${this.escapeHtml(f.filename)}" aria-label="Download ${this.escapeHtml(f.filename)}">
         <svg aria-hidden="true" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
         </svg>

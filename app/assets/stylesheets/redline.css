@@ -915,6 +915,8 @@ input[type="radio"]:focus-visible {
 .channel-compose-field {
   flex: 1;
   position: relative;
+  display: flex;
+  align-items: center;
 }
 .channel-send-btn {
   width: 2.75rem;
@@ -1847,4 +1849,3 @@ input[type="radio"]:focus-visible {
 /* ─── File upload preview ──────────────────────────────────────────────── */
 .message-file-preview { display: flex; flex-wrap: wrap; gap: .375rem; padding: .375rem .75rem; border-top: 1px solid var(--rl-border); }
 .channel-attach-btn:hover { color: var(--rl-accent) !important; }
-.channel-compose-field { display: flex; align-items: center; }
