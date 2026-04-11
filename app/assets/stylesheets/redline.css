@@ -1843,3 +1843,8 @@ input[type="radio"]:focus-visible {
 /* ─── Reply count badge ────────────────────────────────────────────────── */
 .reply-count-link { font-size: .75rem; color: var(--rl-accent); font-weight: 500; cursor: pointer; border: none; background: none; padding: .125rem 0; text-decoration: none; display: inline-flex; align-items: center; gap: .25rem; }
 .reply-count-link:hover { text-decoration: underline; }
+
+/* ─── File upload preview ──────────────────────────────────────────────── */
+.message-file-preview { display: flex; flex-wrap: wrap; gap: .375rem; padding: .375rem .75rem; border-top: 1px solid var(--rl-border); }
+.channel-attach-btn:hover { color: var(--rl-accent) !important; }
+.channel-compose-field { display: flex; align-items: center; }

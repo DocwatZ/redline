@@ -11,10 +11,11 @@ import { Controller } from "@hotwired/stimulus"
  *  - Sends message via fetch, CSRF token included
  */
 export default class extends Controller {
-  static targets = ["field", "replyBanner", "replyAuthor", "replyPreview"]
+  static targets = ["field", "replyBanner", "replyAuthor", "replyPreview", "fileInput", "filePreview"]
 
   connect() {
     this._replyParentId = null
+    this._selectedFiles = []
     this._onReply = this.#handleReply.bind(this)
     document.addEventListener("message:reply", this._onReply)
   }
@@ -55,32 +56,91 @@ export default class extends Controller {
     }
   }
 
+  openFilePicker() {
+    if (this.hasFileInputTarget) this.fileInputTarget.click()
+  }
+
+  filesSelected() {
+    if (!this.hasFileInputTarget) return
+    this._selectedFiles = Array.from(this.fileInputTarget.files)
+    this.#renderFilePreview()
+  }
+
+  removeFile(event) {
+    const idx = parseInt(event.currentTarget.dataset.index, 10)
+    this._selectedFiles.splice(idx, 1)
+    this.#renderFilePreview()
+  }
+
+  #renderFilePreview() {
+    if (!this.hasFilePreviewTarget) return
+    if (this._selectedFiles.length === 0) {
+      this.filePreviewTarget.classList.add("hidden")
+      this.filePreviewTarget.innerHTML = ""
+      return
+    }
+    this.filePreviewTarget.classList.remove("hidden")
+    this.filePreviewTarget.innerHTML = this._selectedFiles.map((f, i) => `
+      <div class="file-chip" style="gap:.375rem">
+        <span style="max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${this.escapeHtml(f.name)}</span>
+        <button type="button" class="btn-icon btn-icon-xs" title="Remove"
+                data-action="click->message-input#removeFile" data-index="${i}"
+                aria-label="Remove ${this.escapeHtml(f.name)}" style="padding:0;min-height:auto;min-width:auto">
+          &times;
+        </button>
+      </div>
+    `).join("")
+  }
+
   async sendMessage() {
     const body = this.fieldTarget.value.trim()
-    if (!body) return
+    const hasFiles = this._selectedFiles && this._selectedFiles.length > 0
+    if (!body && !hasFiles) return
 
     const roomSlug = this.roomId
     if (!roomSlug) return
 
     const csrf = document.querySelector('meta[name="csrf-token"]')?.content
-    const payload = { body }
-    if (this._replyParentId) payload.parent_id = this._replyParentId
 
     try {
-      const response = await fetch(`/rooms/${roomSlug}/messages`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Accept": "application/json",
-          "X-CSRF-Token": csrf ?? ""
-        },
-        body: JSON.stringify({ message: payload })
-      })
+      let response
+      if (hasFiles) {
+        // Use FormData for file uploads
+        const formData = new FormData()
+        formData.append("message[body]", body)
+        if (this._replyParentId) formData.append("message[parent_id]", this._replyParentId)
+        this._selectedFiles.forEach(f => formData.append("message[files][]", f))
+
+        response = await fetch(`/rooms/${roomSlug}/messages`, {
+          method: "POST",
+          headers: {
+            "Accept": "application/json",
+            "X-CSRF-Token": csrf ?? ""
+          },
+          body: formData
+        })
+      } else {
+        const payload = { body }
+        if (this._replyParentId) payload.parent_id = this._replyParentId
+
+        response = await fetch(`/rooms/${roomSlug}/messages`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Accept": "application/json",
+            "X-CSRF-Token": csrf ?? ""
+          },
+          body: JSON.stringify({ message: payload })
+        })
+      }
 
       if (response.ok) {
         const data = await response.json()
         this.fieldTarget.value = ""
         this.fieldTarget.style.height = "auto"
+        this._selectedFiles = []
+        if (this.hasFileInputTarget) this.fileInputTarget.value = ""
+        this.#renderFilePreview()
         this.clearReply()
         this.displaySentMessage(data)
       } else {
@@ -149,6 +209,7 @@ export default class extends Controller {
              data-message-actions-target="bodyDiv">
           ${this.escapeHtml(data.body)}
         </div>
+        ${this.#renderFilesHtml(data.files || [])}
         <div class="hidden" data-message-actions-target="editForm">
           <textarea class="input-field w-full resize-none mt-1" rows="2" maxlength="4000"
                     aria-label="Edit message"
@@ -201,6 +262,25 @@ export default class extends Controller {
     const div = document.createElement("div")
     div.appendChild(document.createTextNode(String(str ?? "")))
     return div.innerHTML
+  }
+
+  #renderFilesHtml(files) {
+    if (!files || files.length === 0) return ""
+    const items = files.map(f => {
+      if (f.image) {
+        return `<a href="${this.escapeHtml(f.url)}" target="_blank" rel="noopener noreferrer">
+          <img src="${this.escapeHtml(f.url)}" alt="${this.escapeHtml(f.filename)}" loading="lazy"
+               style="max-width:320px;max-height:240px;border-radius:var(--rl-radius-sm);margin-top:.25rem;cursor:pointer">
+        </a>`
+      }
+      return `<a href="${this.escapeHtml(f.url)}" class="file-download-link" target="_blank" rel="noopener noreferrer" download="${this.escapeHtml(f.filename)}">
+        <svg aria-hidden="true" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+        </svg>
+        <span>${this.escapeHtml(f.filename)}</span>
+      </a>`
+    }).join("")
+    return `<div class="message-attachments">${items}</div>`
   }
 
   // ── Private ────────────────────────────────────────────────────────────────

@@ -88,7 +88,7 @@ class MessagesController < ApplicationController
   end
 
   def message_params
-    params.require(:message).permit(:body, :parent_id)
+    params.require(:message).permit(:body, :parent_id, files: [])
   end
 
   def render_message(message)
@@ -117,7 +117,16 @@ class MessagesController < ApplicationController
       reply_count: message.replies.count,
       reactions: message.message_reactions.group(:emoji).count.map { |e, c|
         { emoji: e, count: c, reacted: message.message_reactions.exists?(user: current_user, emoji: e) }
-      }
+      },
+      files: message.files.attached? ? message.files.map { |f|
+        {
+          id: f.id,
+          filename: f.filename.to_s,
+          content_type: f.content_type,
+          url: Rails.application.routes.url_helpers.rails_blob_path(f, only_path: true),
+          image: f.content_type&.start_with?("image/")
+        }
+      } : []
     }
   end
 
