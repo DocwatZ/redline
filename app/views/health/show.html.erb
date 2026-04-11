@@ -5,15 +5,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>REDLINE Health</title>
   <style>
-    body { font-family: system-ui, sans-serif; background: #0f1117; color: #f0f2f7; padding: 2rem; }
+    body { font-family: system-ui, sans-serif; background: #000000; color: #f0f2f7; padding: 2rem; }
     .container { max-width: 40rem; margin: 0 auto; }
     .status-badge { display: inline-block; padding: .25rem .75rem; border-radius: 9999px; font-size: .875rem; font-weight: 600; }
     .status-ok { background: rgba(72,187,120,.15); color: #48bb78; }
     .status-error { background: rgba(252,129,129,.15); color: #fc8181; }
     .status-warn { background: rgba(214,158,46,.15); color: #d69e2e; }
-    .service { padding: 1rem; background: #161922; border: 1px solid #2a2d3e; border-radius: 8px; margin-bottom: .75rem; display: flex; justify-content: space-between; align-items: center; }
+    .service { padding: 1rem; background: #0a0a0a; border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; margin-bottom: .75rem; display: flex; justify-content: space-between; align-items: center; }
     .service-name { font-weight: 500; text-transform: capitalize; }
-    .service-message { font-size: .875rem; color: #7280a8; }
+    .service-message { font-size: .875rem; color: #888888; }
   </style>
 </head>
 <body>
@@ -24,7 +24,7 @@
         <%= @healthy ? "Healthy" : "Degraded" %>
       </span>
     </h1>
-    <p style="color:#7280a8;font-size:.875rem;margin-bottom:2rem"><%= Time.current.iso8601 %></p>
+    <p style="color:#888888;font-size:.875rem;margin-bottom:2rem"><%= Time.current.iso8601 %></p>
 
     <% @results.each do |name, result| %>
       <div class="service">
