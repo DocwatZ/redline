@@ -1,4 +1,5 @@
 <% is_own = dm.sender == current_user %>
+<% last_read_sent_id ||= nil %>
 <article id="dm-<%= dm.id %>"
          class="flex gap-3 py-1 px-2 rounded hover:bg-surface-elevated/50 group relative"
          aria-label="Message from <%= dm.sender.display_name %> at <%= dm.created_at.strftime('%H:%M') %>"
@@ -8,10 +9,13 @@
          data-message-actions-body-value="<%= dm.deleted? ? '' : dm.body %>"
          data-message-actions-type-value="dm">
   <div class="flex-shrink-0 mt-0.5" aria-hidden="true">
-    <div class="w-8 h-8 rounded-full flex items-center justify-center
-                text-white text-xs font-bold"
+    <div class="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold overflow-hidden"
          style="background-color: <%= dm.sender.avatar_color %>">
-      <%= dm.sender.initials %>
+      <% if dm.sender.avatar.attached? %>
+        <%= image_tag dm.sender.avatar.variant(resize_to_fill: [32, 32]), alt: dm.sender.display_name, class: "w-full h-full object-cover" %>
+      <% else %>
+        <%= dm.sender.initials %>
+      <% end %>
     </div>
   </div>
   <div class="flex-1 min-w-0">
@@ -24,6 +28,11 @@
       </time>
       <% if dm.edited? && !dm.deleted? %>
         <span class="text-xs text-muted italic msg-edited" aria-label="edited">(edited)</span>
+      <% end %>
+      <% if is_own && last_read_sent_id && dm.id == last_read_sent_id %>
+        <span class="text-xs text-muted" aria-label="Read" title="Read by <%= dm.recipient.display_name %>">✓✓</span>
+      <% elsif is_own && !dm.deleted? && dm.id != last_read_sent_id %>
+        <span class="text-xs" style="color:var(--rl-border)" aria-label="Sent" title="Sent">✓</span>
       <% end %>
     </div>
     <div class="message-body text-sm text-secondary mt-0.5 leading-relaxed whitespace-pre-wrap break-words

@@ -11,7 +11,7 @@ import consumer from "channels/consumer"
  *  - Auto-scroll only fires when the user is already at the bottom.
  */
 export default class extends Controller {
-  static values = { roomId: Number, currentUserId: Number }
+  static values = { roomId: Number, roomSlug: String, currentUserId: Number }
 
   connect() {
     this.subscription = consumer.subscriptions.create(
@@ -22,13 +22,18 @@ export default class extends Controller {
       }
     )
     this.scrollToBottom(false)
+    this._threadMessageId = null
+    this._handleOpenThread = (e) => this.openThread(e.detail.messageId)
+    document.addEventListener("message:open-thread", this._handleOpenThread)
   }
 
   disconnect() {
     this.subscription?.unsubscribe()
+    document.removeEventListener("message:open-thread", this._handleOpenThread)
   }
 
   appendMessage(data) {
+    if (data.type === "reaction_update") { this.updateReactions(data); return }
     const wasAtBottom = this.isAtBottom()
     const existing = document.getElementById(`message-${data.id}`)
 
@@ -193,5 +198,130 @@ export default class extends Controller {
     const div = document.createElement("div")
     div.appendChild(document.createTextNode(String(str ?? "")))
     return div.innerHTML
+  }
+
+  updateReactions(data) {
+    const msg = document.getElementById(`message-${data.message_id}`)
+    if (!msg) return
+    let reactionsEl = msg.querySelector(".message-reactions")
+    if (!reactionsEl) {
+      reactionsEl = document.createElement("div")
+      reactionsEl.className = "message-reactions"
+      reactionsEl.setAttribute("data-message-id", data.message_id)
+      const bodyDiv = msg.querySelector(".message-body")
+      if (bodyDiv) bodyDiv.after(reactionsEl)
+      else return
+    }
+    const addBtn = reactionsEl.querySelector(".reaction-add-btn")
+    reactionsEl.innerHTML = ""
+    data.reactions.forEach(r => {
+      const btn = document.createElement("button")
+      btn.className = `reaction-pill${r.reacted ? " reaction-pill-active" : ""}`
+      btn.setAttribute("data-action", "click->message-actions#toggleReaction")
+      btn.setAttribute("data-emoji", r.emoji)
+      btn.setAttribute("aria-label", `${r.emoji} ${r.count}`)
+      btn.innerHTML = `${this.escapeHtml(r.emoji)} <span class="reaction-count">${r.count}</span>`
+      reactionsEl.appendChild(btn)
+    })
+    if (addBtn) reactionsEl.appendChild(addBtn)
+  }
+
+  highlightMentions(text) {
+    const escaped = this.escapeHtml(text)
+    return escaped.replace(/@([a-zA-Z0-9_\-]+)/g, (_m, u) => `<span class="mention-pill">@${u}</span>`)
+  }
+
+  // ── Thread panel ──────────────────────────────────────────────────────────
+
+  openThread(messageId) {
+    this._threadMessageId = messageId
+    const panel = document.getElementById("thread-panel")
+    if (!panel) return
+
+    fetch(`/rooms/${this.roomSlugValue}/messages/${messageId}/thread`, {
+      headers: { "Accept": "application/json", "X-Requested-With": "XMLHttpRequest" }
+    })
+      .then(r => r.json())
+      .then(data => {
+        this.renderThread(data)
+        panel.classList.add("open")
+        panel.setAttribute("aria-hidden", "false")
+      })
+      .catch(err => console.error("Thread load error:", err))
+  }
+
+  closeThread() {
+    const panel = document.getElementById("thread-panel")
+    if (!panel) return
+    panel.classList.remove("open")
+    panel.setAttribute("aria-hidden", "true")
+    this._threadMessageId = null
+  }
+
+  renderThread(data) {
+    const container = document.getElementById("thread-messages")
+    if (!container) return
+    container.innerHTML = ""
+
+    const all = [data.parent, ...data.replies]
+    all.forEach(msg => {
+      const el = this.buildThreadMessage(msg)
+      container.appendChild(el)
+    })
+    container.scrollTop = container.scrollHeight
+  }
+
+  buildThreadMessage(msg) {
+    const article = document.createElement("article")
+    article.className = "flex gap-2 py-1 px-1"
+    article.innerHTML = `
+      <div class="flex-shrink-0 mt-0.5" aria-hidden="true">
+        <div class="w-7 h-7 rounded-full flex items-center justify-center text-white text-xs font-bold"
+             style="background-color:${this.escapeHtml(msg.avatar_color)}">
+          ${this.escapeHtml(msg.initials)}
+        </div>
+      </div>
+      <div class="flex-1 min-w-0">
+        <div class="flex items-baseline gap-2">
+          <span class="font-semibold text-xs text-primary">${this.escapeHtml(msg.display_name)}</span>
+          <time class="text-xs text-muted">${this.formatTime(msg.created_at)}</time>
+        </div>
+        <div class="text-sm text-secondary mt-0.5 leading-relaxed whitespace-pre-wrap break-words">
+          ${this.highlightMentions(msg.body)}
+        </div>
+      </div>`
+    return article
+  }
+
+  handleThreadKeydown(e) {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault()
+      this.sendThreadReply()
+    }
+  }
+
+  sendThreadReply() {
+    if (!this._threadMessageId) return
+    const input = document.getElementById("thread-reply-input")
+    if (!input) return
+    const body = input.value.trim()
+    if (!body) return
+
+    const token = document.querySelector('meta[name="csrf-token"]')?.content
+    fetch(`/rooms/${this.roomSlugValue}/messages`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Accept": "application/json",
+        "X-CSRF-Token": token || ""
+      },
+      body: JSON.stringify({ message: { body, parent_id: this._threadMessageId } })
+    })
+      .then(r => r.json())
+      .then(() => {
+        input.value = ""
+        this.openThread(this._threadMessageId)
+      })
+      .catch(err => console.error("Thread reply error:", err))
   }
 }

@@ -7,6 +7,7 @@ class Room < ApplicationRecord
   has_many :messages, dependent: :destroy
   has_many :room_keys, dependent: :destroy
   has_many :channel_permissions, dependent: :destroy
+  has_many :invites, dependent: :destroy
 
   # Hierarchy: a room can be a subchannel of another room
   belongs_to :parent, class_name: "Room", optional: true

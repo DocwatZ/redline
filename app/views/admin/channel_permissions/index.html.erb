@@ -1,0 +1,51 @@
+<% content_for :title, "Permissions — #{@room.name}" %>
+
+<div style="margin-bottom:1.5rem">
+  <%= link_to "← Back to #{@room.name}", admin_room_path(@room), style: "font-size:.875rem;color:var(--rl-text-muted)" %>
+</div>
+
+<h1 style="font-size:1.5rem;font-weight:700;color:var(--rl-text-primary);margin-bottom:.25rem">
+  Channel Permissions — <%= @room.display_icon %> <%= @room.name %>
+</h1>
+<p style="color:var(--rl-text-muted);font-size:.875rem;margin-bottom:2rem">
+  Toggle per-member permissions for this channel.
+</p>
+
+<% if @memberships.empty? %>
+  <p style="color:var(--rl-text-muted)">No members in this channel.</p>
+<% else %>
+  <% @memberships.each do |membership| %>
+    <% perm = membership.channel_permissions.find { |cp| cp.room_id == @room.id } ||
+               ChannelPermission.new(ChannelPermission.send("#{membership.role}_defaults")) %>
+    <div style="background:var(--rl-surface);border:1px solid var(--rl-border);border-radius:var(--rl-radius-md);padding:1.25rem;margin-bottom:1rem">
+      <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:1rem">
+        <div class="avatar avatar-sm" style="background-color:<%= membership.user.avatar_color %>" aria-hidden="true">
+          <%= membership.user.initials %>
+        </div>
+        <div>
+          <div style="font-weight:600;color:var(--rl-text-primary);font-size:.875rem"><%= membership.user.display_name %></div>
+          <div style="color:var(--rl-text-muted);font-size:.75rem">@<%= membership.user.username %> · <%= membership.role %></div>
+        </div>
+      </div>
+
+      <%= form_with url: admin_room_channel_permission_path(@room, membership),
+                    method: :patch, data: { turbo: false } do |f| %>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:.5rem;margin-bottom:1rem">
+          <% ChannelPermission::ALL_PERMISSIONS.each do |permission| %>
+            <label style="display:flex;align-items:center;gap:.5rem;font-size:.8rem;color:var(--rl-text-secondary);cursor:pointer">
+              <input type="checkbox"
+                     name="permissions[<%= permission %>]"
+                     value="1"
+                     <%= perm.send(permission) ? "checked" : "" %>
+                     style="accent-color:var(--rl-accent)">
+              <%= permission.humanize %>
+            </label>
+          <% end %>
+        </div>
+        <button type="submit" class="btn btn-primary" style="font-size:.8rem;padding:.375rem .875rem;min-height:auto">
+          Save Permissions
+        </button>
+      <% end %>
+    </div>
+  <% end %>
+<% end %>

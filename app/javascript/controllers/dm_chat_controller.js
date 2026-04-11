@@ -23,6 +23,7 @@ export default class extends Controller {
   }
 
   appendMessage(data) {
+    if (data.type === "read_receipt") { this.markMessagesRead(data); return }
     const wasAtBottom = this.isAtBottom()
     const existing = document.getElementById(`dm-${data.id}`)
 
@@ -155,5 +156,33 @@ export default class extends Controller {
     const div = document.createElement("div")
     div.appendChild(document.createTextNode(String(str ?? "")))
     return div.innerHTML
+  }
+
+  markMessagesRead(data) {
+    // When the partner reads, upgrade single ✓ to ✓✓ on all own sent messages
+    const container = this.element
+    const ownMessages = container.querySelectorAll("article[id^='dm-']")
+    let lastOwn = null
+    ownMessages.forEach(article => {
+      const isOwn = article.dataset.messageActionsIsOwnValue === "true"
+      if (isOwn) lastOwn = article
+    })
+    if (!lastOwn) return
+
+    // Remove any existing single check from prior last message
+    container.querySelectorAll(".dm-single-check").forEach(el => el.remove())
+
+    // Set ✓✓ on the last own message
+    const timeRow = lastOwn.querySelector(".msg-time-row")
+    if (timeRow) {
+      let check = timeRow.querySelector(".dm-read-check")
+      if (!check) {
+        check = document.createElement("span")
+        check.className = "text-xs text-muted dm-read-check"
+        check.setAttribute("aria-label", "Read")
+        check.textContent = "✓✓"
+        timeRow.appendChild(check)
+      }
+    }
   }
 }

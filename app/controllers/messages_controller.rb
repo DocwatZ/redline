@@ -3,7 +3,7 @@
 class MessagesController < ApplicationController
   before_action :set_room
   before_action :require_membership!
-  before_action :set_message, only: [ :update, :destroy ]
+  before_action :set_message, only: [ :thread, :update, :destroy ]
 
   def create
     @message = @room.messages.build(message_params)
@@ -23,6 +23,7 @@ class MessagesController < ApplicationController
     if @message.save
       broadcast_channel = @message.in_call? ? "voice_chat_#{@room.id}" : "chat_#{@room.id}"
       ActionCable.server.broadcast(broadcast_channel, render_message(@message))
+      detect_mentions(@message)
       respond_to do |format|
         format.html { redirect_to room_path(@room) }
         format.json { render json: render_message(@message), status: :created }
@@ -43,6 +44,14 @@ class MessagesController < ApplicationController
     else
       head :forbidden
     end
+  end
+
+  def thread
+    @replies = @message.replies.includes(:user, :message_reactions).order(:created_at)
+    render json: {
+      parent: render_message(@message),
+      replies: @replies.map { |r| render_message(r) }
+    }
   end
 
   def destroy
@@ -104,7 +113,32 @@ class MessagesController < ApplicationController
       edited: message.edited,
       deleted: message.deleted,
       message_context: message.message_context,
-      parent: parent_data
+      parent: parent_data,
+      reply_count: message.replies.count,
+      reactions: message.message_reactions.group(:emoji).count.map { |e, c|
+        { emoji: e, count: c, reacted: message.message_reactions.exists?(user: current_user, emoji: e) }
+      }
     }
+  end
+
+  def detect_mentions(message)
+    message.body.to_s.scan(/@([a-zA-Z0-9_\-]+)/).flatten.uniq.each do |username|
+      user = User.find_by(username: username)
+      next unless user && user != current_user
+      ActionCable.server.broadcast("user_#{user.id}", {
+        type: "mention",
+        message_id: message.id,
+        room_slug: message.room.slug,
+        room_name: message.room.name,
+        sender_name: current_user.display_name,
+        body_preview: message.body.first(100)
+      })
+      PushNotificationService.send_to_user(
+        user,
+        title: "#{current_user.display_name} mentioned you in ##{message.room.name}",
+        body: message.body.first(100),
+        url: "/rooms/#{message.room.slug}"
+      )
+    end
   end
 end

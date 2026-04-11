@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="theme-color" content="#0f1117">
+    <meta name="theme-color" content="#000000">
     <meta name="description" content="REDLINE — Privacy-first, self-hosted real-time communication">
     <title><%= content_for?(:title) ? "#{yield :title} · REDLINE" : "REDLINE" %></title>
     <%= csrf_meta_tags %>
@@ -11,6 +11,9 @@
     <link rel="manifest" href="/manifest.json">
     <link rel="icon" type="image/svg+xml" href="/favicon.svg">
     <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
+    <% if ENV["VAPID_PUBLIC_KEY"].present? %>
+      <meta name="vapid-public-key" content="<%= ENV['VAPID_PUBLIC_KEY'] %>">
+    <% end %>
     <%= javascript_importmap_tags %>
     <script>
       // Register service worker for PWA
@@ -28,7 +31,7 @@
 
     <% if user_signed_in? %>
       <%# App Shell — sidebar controller on root so hamburger buttons anywhere in the tree can trigger it %>
-      <div role="application" aria-label="REDLINE application" data-controller="sidebar new-dm" style="display:flex;height:100vh;overflow:hidden">
+      <div role="application" aria-label="REDLINE application" data-controller="sidebar new-dm search" style="display:flex;height:100vh;overflow:hidden">
 
         <%# Mobile sidebar overlay/backdrop %>
         <div id="sidebar-backdrop"
@@ -344,6 +347,31 @@
 
           <%= yield %>
         </main>
+
+        <%# Search modal %>
+        <div class="search-modal hidden"
+             data-search-target="modal"
+             role="dialog"
+             aria-modal="true"
+             aria-label="Search"
+             aria-hidden="true">
+          <div class="search-modal-backdrop" data-action="click->search#close"></div>
+          <div class="search-modal-panel">
+            <div class="search-modal-input-row">
+              <svg aria-hidden="true" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="flex-shrink:0;color:var(--rl-text-muted)">
+                <circle cx="11" cy="11" r="8"/><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-4.35-4.35"/>
+              </svg>
+              <input type="search"
+                     class="search-modal-input"
+                     placeholder="Search messages, people…"
+                     data-search-target="input"
+                     data-action="input->search#handleInput keydown->search#handleInputKeydown"
+                     aria-label="Search">
+              <kbd class="search-kbd">Esc</kbd>
+            </div>
+            <div class="search-modal-results" data-search-target="results"></div>
+          </div>
+        </div>
       </div>
 
     <% else %>

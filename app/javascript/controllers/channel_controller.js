@@ -28,6 +28,7 @@ export default class extends Controller {
     this.localDeafened = false
     this.screenSharing = false
     this.canScreenShare = false
+    this.cameraEnabled = false
     this.inCall = false
     this._escapeEl = null
 
@@ -167,6 +168,10 @@ export default class extends Controller {
       // Show/hide screen share button
       const shareBtn = document.getElementById("toggle-screen-share")
       if (shareBtn) shareBtn.classList.toggle("hidden", !this.canScreenShare)
+
+      // Show/hide camera button
+      const cameraBtn = document.getElementById("toggle-camera")
+      if (cameraBtn) cameraBtn.classList.toggle("hidden", !data.can_video)
 
       // Show in-call chat panel for voice channels
       const chatPanel = document.getElementById("in-call-chat-panel")
@@ -376,6 +381,20 @@ export default class extends Controller {
     }
   }
 
+  toggleCamera() {
+    if (!this.livekitRoom) return
+    this.cameraEnabled = !this.cameraEnabled
+    this.livekitRoom.localParticipant.setCameraEnabled(this.cameraEnabled)
+    const btn = document.getElementById("toggle-camera")
+    if (btn) {
+      btn.setAttribute("aria-pressed", String(this.cameraEnabled))
+      btn.classList.toggle("control-btn-active", this.cameraEnabled)
+      const label = btn.querySelector(".control-btn-label")
+      if (label) label.textContent = this.cameraEnabled ? "Stop Cam" : "Camera"
+    }
+    this.announce(this.cameraEnabled ? "Camera on" : "Camera off")
+  }
+
   leaveCall() {
     this.livekitRoom?.disconnect()
     this.livekitRoom = null
@@ -383,6 +402,7 @@ export default class extends Controller {
     this.localMicMuted = false
     this.localDeafened = false
     this.screenSharing = false
+    this.cameraEnabled = false
     this.updateStatusDot("connected")
 
     document.getElementById("call-panel")?.classList.add("hidden")
@@ -403,6 +423,9 @@ export default class extends Controller {
     this.resetControlButton("toggle-mic", "Mute")
     this.resetControlButton("toggle-deafen", "Deafen")
     this.resetControlButton("toggle-screen-share", "Share")
+    this.resetControlButton("toggle-camera", "Camera")
+    const cameraBtn = document.getElementById("toggle-camera")
+    if (cameraBtn) cameraBtn.classList.add("hidden")
 
     this.announce("Left the voice channel")
   }

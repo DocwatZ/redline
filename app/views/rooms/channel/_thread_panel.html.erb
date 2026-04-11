@@ -1,0 +1,34 @@
+<%# Thread panel — slides in from the right when a message thread is opened %>
+<aside id="thread-panel"
+       class="thread-panel"
+       role="complementary"
+       aria-label="Thread"
+       aria-hidden="true">
+
+  <div class="thread-panel-header">
+    <h2 style="font-size:.875rem;font-weight:600;color:var(--rl-text-primary);margin:0">Thread</h2>
+    <button class="btn-icon btn-icon-xs"
+            aria-label="Close thread panel"
+            id="thread-panel-close"
+            data-action="click->chat#closeThread">
+      <svg aria-hidden="true" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+      </svg>
+    </button>
+  </div>
+
+  <div id="thread-messages" class="thread-messages" role="log" aria-live="polite" aria-label="Thread messages"></div>
+
+  <div class="thread-compose">
+    <textarea id="thread-reply-input"
+              class="input-field w-full resize-none"
+              rows="2"
+              maxlength="4000"
+              placeholder="Reply in thread…"
+              aria-label="Reply in thread"
+              data-action="keydown->chat#handleThreadKeydown"></textarea>
+    <button class="btn btn-primary" style="align-self:flex-end" data-action="click->chat#sendThreadReply">
+      Reply
+    </button>
+  </div>
+</aside>

@@ -9,10 +9,13 @@
          data-message-actions-type-value="channel">
   <%# Avatar %>
   <div class="flex-shrink-0 mt-0.5" aria-hidden="true">
-    <div class="w-8 h-8 rounded-full flex items-center justify-center
-                text-white text-xs font-bold"
+    <div class="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold overflow-hidden"
          style="background-color: <%= message.user.avatar_color %>">
-      <%= message.user.initials %>
+      <% if message.user.avatar.attached? %>
+        <%= image_tag message.user.avatar.variant(resize_to_fill: [32, 32]), alt: message.user.display_name, class: "w-full h-full object-cover" %>
+      <% else %>
+        <%= message.user.initials %>
+      <% end %>
     </div>
   </div>
 
@@ -48,6 +51,43 @@
       <%= message.display_body %>
     </div>
 
+    <%# Reactions %>
+    <% if message.message_reactions.any? %>
+      <div class="message-reactions" data-message-id="<%= message.id %>">
+        <% message.message_reactions.group(:emoji).count.each do |emoji, count| %>
+          <button class="reaction-pill <%= message.message_reactions.exists?(user: current_user, emoji: emoji) ? 'reaction-pill-active' : '' %>"
+                  data-action="click->message-actions#toggleReaction"
+                  data-emoji="<%= emoji %>"
+                  aria-label="<%= emoji %> <%= count %>">
+            <%= emoji %> <span class="reaction-count"><%= count %></span>
+          </button>
+        <% end %>
+        <button class="reaction-add-btn btn-icon btn-icon-xs" title="Add reaction"
+                data-action="click->message-actions#openEmojiPicker">
+          <svg aria-hidden="true" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="10"/><path d="M8 13s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/>
+          </svg>
+        </button>
+      </div>
+    <% else %>
+      <div class="message-reactions" data-message-id="<%= message.id %>">
+        <button class="reaction-add-btn btn-icon btn-icon-xs" title="Add reaction"
+                data-action="click->message-actions#openEmojiPicker">
+          <svg aria-hidden="true" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="10"/><path d="M8 13s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/>
+          </svg>
+        </button>
+      </div>
+    <% end %>
+
+    <%# Reply count %>
+    <% if message.replies.any? && !message.deleted? %>
+      <button class="reply-count-link" data-action="click->message-actions#openThread"
+              data-message-id="<%= message.id %>">
+        <%= message.replies.count %> <%= message.replies.count == 1 ? "reply" : "replies" %>
+      </button>
+    <% end %>
+
     <%# Inline edit form (hidden, own non-deleted messages only) %>
     <% if is_own && !message.deleted? %>
       <div class="hidden" data-message-actions-target="editForm">
@@ -72,6 +112,13 @@
   <%# Action buttons — visible on group hover, hidden for deleted messages %>
   <% unless message.deleted? %>
     <div class="message-actions-row" role="group" aria-label="Message actions">
+      <button type="button" class="btn-icon btn-icon-xs" title="React"
+              aria-label="Add reaction"
+              data-action="click->message-actions#openEmojiPicker">
+        <svg aria-hidden="true" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <circle cx="12" cy="12" r="10"/><path d="M8 13s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/>
+        </svg>
+      </button>
       <button type="button" class="btn-icon btn-icon-xs" title="Reply"
               aria-label="Reply to this message"
               data-action="click->message-actions#reply">

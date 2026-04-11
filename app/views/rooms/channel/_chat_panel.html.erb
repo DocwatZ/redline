@@ -12,6 +12,7 @@
      aria-relevant="additions"
      data-controller="chat"
      data-chat-room-id-value="<%= room.id %>"
+     data-chat-room-slug-value="<%= room.slug %>"
      data-chat-current-user-id-value="<%= current_user.id %>">
 
   <% if room.announcement? && room.description.present? %>

@@ -8,6 +8,18 @@ class DirectMessagesController < ApplicationController
     @messages = DirectMessage.conversation(current_user.id, @partner.id).last(50)
     @unread = DirectMessage.where(sender: @partner, recipient: current_user, read: false)
     @unread.update_all(read: true)
+    # Broadcast read receipt so partner sees ✓✓ indicator update in real time
+    if @unread.any?
+      conversation_key = [ current_user.id, @partner.id ].sort.join("_")
+      ActionCable.server.broadcast("dm_#{conversation_key}", {
+        type: "read_receipt",
+        reader_id: current_user.id
+      })
+    end
+    # ID of the last sent message from current_user that has been read by partner
+    @last_read_sent_id = DirectMessage
+      .where(sender: current_user, recipient: @partner, read: true)
+      .order(:id).last&.id
     # Exclude this partner's count from the sidebar badge for this page render
     @unread_dm_counts = @unread_dm_counts.except(@partner.id)
   end
@@ -27,6 +39,14 @@ class DirectMessagesController < ApplicationController
       type: "new_dm",
       sender_id: current_user.id
     })
+
+    # Web push notification for offline recipient
+    PushNotificationService.send_to_user(
+      @partner,
+      title: "New message from #{current_user.display_name}",
+      body: @dm.body.first(100),
+      url: "/users/#{current_user.id}/direct_messages"
+    )
 
     respond_to do |format|
       format.html { redirect_to user_direct_messages_path(@partner) }
