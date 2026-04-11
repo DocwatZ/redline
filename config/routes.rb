@@ -27,6 +27,9 @@ Rails.application.routes.draw do
   # Push subscriptions
   resources :push_subscriptions, only: [:create, :destroy]
 
+  # Notification preferences
+  resource :notification_preferences, only: [:update]
+
   # Health check
   get "health", to: "health#show", as: :health
   get "up" => "rails/health#show", as: :rails_health_check
@@ -50,7 +53,9 @@ Rails.application.routes.draw do
         post :reset_password
       end
     end
-    resources :rooms, only: [:index, :show, :destroy]
+    resources :rooms, only: [:index, :show, :destroy] do
+      resources :channel_permissions, only: [:index, :update], controller: "channel_permissions"
+    end
     resources :audit_logs, only: [:index]
     get  "system",   to: "system#show",    as: :system
     resource :settings, only: [:show, :update]

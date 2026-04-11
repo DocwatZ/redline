@@ -52,7 +52,8 @@
     <% end %>
 
     <% @messages.each do |dm| %>
-      <%= render "direct_messages/message", dm: dm, current_user: current_user %>
+      <%= render "direct_messages/message", dm: dm, current_user: current_user,
+                 last_read_sent_id: @last_read_sent_id %>
     <% end %>
 
     <div id="dm-messages-end" aria-hidden="true"></div>

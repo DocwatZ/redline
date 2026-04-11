@@ -120,6 +120,39 @@
   <% end %>
 
   <div style="margin-top:2rem;padding-top:1.5rem;border-top:1px solid var(--rl-border)">
+    <h2 style="font-size:.875rem;font-weight:600;color:var(--rl-text-primary);margin-bottom:.75rem">
+      Notification Preferences
+    </h2>
+    <% prefs = NotificationPreference.for_user(current_user) %>
+    <%= form_with url: notification_preferences_path, method: :patch, data: { turbo: false } do |f| %>
+      <div style="display:flex;flex-direction:column;gap:.75rem;margin-bottom:1rem">
+        <label style="display:flex;align-items:center;gap:.5rem;font-size:.875rem;color:var(--rl-text-secondary);cursor:pointer">
+          <input type="checkbox" name="notification_preference[dm_sounds]" value="1"
+                 <%= prefs.dm_sounds ? "checked" : "" %>
+                 style="accent-color:var(--rl-accent)">
+          DM sounds
+        </label>
+        <label style="display:flex;align-items:center;gap:.5rem;font-size:.875rem;color:var(--rl-text-secondary);cursor:pointer">
+          <input type="checkbox" name="notification_preference[mention_alerts]" value="1"
+                 <%= prefs.mention_alerts ? "checked" : "" %>
+                 style="accent-color:var(--rl-accent)">
+          Mention alerts (in-app toast)
+        </label>
+        <label style="display:flex;align-items:center;gap:.5rem;font-size:.875rem;color:var(--rl-text-secondary);cursor:pointer">
+          <input type="checkbox" name="notification_preference[push_enabled]" value="1"
+                 <%= prefs.push_enabled ? "checked" : "" %>
+                 style="accent-color:var(--rl-accent)"
+                 id="push-enabled-checkbox">
+          Browser push notifications
+        </label>
+      </div>
+      <button type="submit" class="btn btn-primary" style="font-size:.8rem;padding:.375rem .875rem;min-height:auto">
+        Save Notification Settings
+      </button>
+    <% end %>
+  </div>
+
+  <div style="margin-top:2rem;padding-top:1.5rem;border-top:1px solid var(--rl-border)">
     <h2 style="font-size:.875rem;font-weight:600;color:var(--rl-danger);margin-bottom:.75rem">
       Danger Zone
     </h2>

@@ -29,6 +29,7 @@ class User < ApplicationRecord
   has_many :audit_logs, dependent: :nullify
   has_one_attached :avatar
   has_many :push_subscriptions, dependent: :destroy
+  has_one :notification_preference, dependent: :destroy
 
   STATUSES = %w[online away busy offline].freeze
   AVATAR_COLORS = %w[#e53e3e #dd6b20 #d69e2e #38a169 #3182ce #805ad5 #d53f8c].freeze

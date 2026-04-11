@@ -11,6 +11,9 @@
     <link rel="manifest" href="/manifest.json">
     <link rel="icon" type="image/svg+xml" href="/favicon.svg">
     <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
+    <% if ENV["VAPID_PUBLIC_KEY"].present? %>
+      <meta name="vapid-public-key" content="<%= ENV['VAPID_PUBLIC_KEY'] %>">
+    <% end %>
     <%= javascript_importmap_tags %>
     <script>
       // Register service worker for PWA
