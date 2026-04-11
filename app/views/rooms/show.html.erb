@@ -34,6 +34,9 @@
     <%# Right sidebar: member list (desktop) %>
     <%= render "rooms/channel/member_list", room: @room, members: @members %>
 
+    <%# Thread panel (desktop, slides in from right) %>
+    <%= render "rooms/channel/thread_panel" %>
+
     <%# In-call chat (bottom sheet on mobile, sidebar on desktop) %>
     <%= render "rooms/channel/in_call_chat",
                room: @room,

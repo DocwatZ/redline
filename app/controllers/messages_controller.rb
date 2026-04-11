@@ -3,7 +3,7 @@
 class MessagesController < ApplicationController
   before_action :set_room
   before_action :require_membership!
-  before_action :set_message, only: [ :update, :destroy ]
+  before_action :set_message, only: [ :thread, :update, :destroy ]
 
   def create
     @message = @room.messages.build(message_params)
@@ -44,6 +44,14 @@ class MessagesController < ApplicationController
     else
       head :forbidden
     end
+  end
+
+  def thread
+    @replies = @message.replies.includes(:user, :message_reactions).order(:created_at)
+    render json: {
+      parent: render_message(@message),
+      replies: @replies.map { |r| render_message(r) }
+    }
   end
 
   def destroy
@@ -125,6 +133,12 @@ class MessagesController < ApplicationController
         sender_name: current_user.display_name,
         body_preview: message.body.first(100)
       })
+      PushNotificationService.send_to_user(
+        user,
+        title: "#{current_user.display_name} mentioned you in ##{message.room.name}",
+        body: message.body.first(100),
+        url: "/rooms/#{message.room.slug}"
+      )
     end
   end
 end

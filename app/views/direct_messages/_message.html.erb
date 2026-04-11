@@ -1,4 +1,5 @@
 <% is_own = dm.sender == current_user %>
+<% last_read_sent_id ||= nil %>
 <article id="dm-<%= dm.id %>"
          class="flex gap-3 py-1 px-2 rounded hover:bg-surface-elevated/50 group relative"
          aria-label="Message from <%= dm.sender.display_name %> at <%= dm.created_at.strftime('%H:%M') %>"
@@ -27,6 +28,11 @@
       </time>
       <% if dm.edited? && !dm.deleted? %>
         <span class="text-xs text-muted italic msg-edited" aria-label="edited">(edited)</span>
+      <% end %>
+      <% if is_own && last_read_sent_id && dm.id == last_read_sent_id %>
+        <span class="text-xs text-muted" aria-label="Read" title="Read by <%= dm.recipient.display_name %>">✓✓</span>
+      <% elsif is_own && !dm.deleted? && dm.id != last_read_sent_id %>
+        <span class="text-xs" style="color:var(--rl-border)" aria-label="Sent" title="Sent">✓</span>
       <% end %>
     </div>
     <div class="message-body text-sm text-secondary mt-0.5 leading-relaxed whitespace-pre-wrap break-words

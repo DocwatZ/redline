@@ -52,6 +52,9 @@
 
     <div style="background:var(--rl-surface);border:1px solid var(--rl-border);border-radius:var(--rl-radius-md);padding:1.25rem">
       <h2 style="font-size:.875rem;font-weight:600;color:var(--rl-text-primary);margin-bottom:1rem">Actions</h2>
+      <%= link_to "🔒 Manage Permissions", admin_room_channel_permissions_path(@room),
+            class: "btn",
+            style: "color:var(--rl-text-secondary);width:100%;justify-content:center;margin-bottom:.5rem;display:flex" %>
       <%= button_to "Delete Channel", admin_room_path(@room),
             method: :delete,
             class: "btn",
