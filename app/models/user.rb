@@ -30,6 +30,10 @@ class User < ApplicationRecord
   has_one_attached :avatar
   has_many :push_subscriptions, dependent: :destroy
   has_one :notification_preference, dependent: :destroy
+  has_many :blocks_given, class_name: "UserBlock", foreign_key: :blocker_id, dependent: :destroy
+  has_many :blocks_received, class_name: "UserBlock", foreign_key: :blocked_id, dependent: :destroy
+  has_many :blocked_users, through: :blocks_given, source: :blocked
+  has_many :blocked_by_users, through: :blocks_received, source: :blocker
 
   STATUSES = %w[online away busy offline].freeze
   AVATAR_COLORS = %w[#e53e3e #dd6b20 #d69e2e #38a169 #3182ce #805ad5 #d53f8c].freeze
@@ -48,6 +52,10 @@ class User < ApplicationRecord
 
   def online?
     status == "online"
+  end
+
+  def blocking?(other_user)
+    blocks_given.exists?(blocked_id: other_user.id)
   end
 
   def link_previews_enabled?

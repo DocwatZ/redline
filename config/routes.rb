@@ -27,6 +27,9 @@ Rails.application.routes.draw do
   # Push subscriptions
   resources :push_subscriptions, only: [:create, :destroy]
 
+  # User blocks
+  resources :user_blocks, only: [:create, :destroy], param: :blocked_user_id
+
   # Notification preferences
   resource :notification_preferences, only: [:update]
 

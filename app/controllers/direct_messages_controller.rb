@@ -6,6 +6,8 @@ class DirectMessagesController < ApplicationController
 
   def show
     @messages = DirectMessage.conversation(current_user.id, @partner.id).last(50)
+    blocked_ids = current_user.blocked_users.pluck(:id)
+    @messages = @messages.reject { |dm| blocked_ids.include?(dm.sender_id) }
     @unread = DirectMessage.where(sender: @partner, recipient: current_user, read: false)
     @unread.update_all(read: true)
     # Broadcast read receipt so partner sees ✓✓ indicator update in real time

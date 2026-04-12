@@ -11,7 +11,8 @@ class RoomsController < ApplicationController
   end
 
   def show
-    @messages = @room.messages.visible.standard_messages.recent.includes(:user).last(50)
+    blocked_ids = current_user.blocked_users.pluck(:id)
+    @messages = @room.messages.visible.standard_messages.where.not(user_id: blocked_ids).recent.includes(:user).last(50)
     @in_call_messages = @room.voice_channel? ? @room.messages.visible.in_call_messages.recent.includes(:user).last(20) : []
     @members = @room.members.order(:display_name)
     @subchannels = @room.subchannels.by_position if @room.voice_channel?

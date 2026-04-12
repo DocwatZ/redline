@@ -30,5 +30,18 @@
     <%= link_to "Send Message", user_direct_messages_path(@user),
           class: "btn btn-primary",
           aria: { label: "Send direct message to #{@user.display_name}" } %>
+    <% if user_signed_in? %>
+      <% is_blocking = current_user.blocking?(@user) %>
+      <% if is_blocking %>
+        <%= button_to "Unblock", user_block_path(@user.id), method: :delete,
+              class: "btn btn-ghost",
+              style: "color:var(--rl-text-muted);font-size:.875rem" %>
+      <% else %>
+        <%= button_to "Block", user_blocks_path(blocked_user_id: @user.id),
+              class: "btn btn-ghost",
+              style: "color:var(--rl-danger);font-size:.875rem",
+              data: { turbo_confirm: "Block #{@user.display_name}? You won't see their messages." } %>
+      <% end %>
+    <% end %>
   <% end %>
 </div>

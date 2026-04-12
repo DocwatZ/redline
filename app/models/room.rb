@@ -2,6 +2,7 @@
 
 class Room < ApplicationRecord
   belongs_to :owner, class_name: "User"
+  belongs_to :category, optional: true
   has_many :room_memberships, dependent: :destroy
   has_many :members, through: :room_memberships, source: :user
   has_many :messages, dependent: :destroy
@@ -44,6 +45,7 @@ class Room < ApplicationRecord
   scope :chats, -> { where(channel_type: %w[chat both]) }
   scope :voice_channels, -> { where(channel_type: "both") }
   scope :announcements, -> { where(channel_type: "announcement") }
+  scope :by_category, -> { includes(:category).order("categories.position ASC NULLS LAST, categories.name ASC NULLS LAST, rooms.name ASC") }
 
   # --- Channel type queries ---
 
