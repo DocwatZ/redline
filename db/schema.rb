@@ -10,9 +10,37 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_04_07_000003) do
+ActiveRecord::Schema[7.1].define(version: 2026_04_11_000002) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
+
+  create_table "active_storage_attachments", force: :cascade do |t|
+    t.string "name", null: false
+    t.string "record_type", null: false
+    t.bigint "record_id", null: false
+    t.bigint "blob_id", null: false
+    t.datetime "created_at", null: false
+    t.index ["blob_id"], name: "index_active_storage_attachments_on_blob_id"
+    t.index ["record_type", "record_id", "name", "blob_id"], name: "index_active_storage_attachments_uniqueness", unique: true
+  end
+
+  create_table "active_storage_blobs", force: :cascade do |t|
+    t.string "key", null: false
+    t.string "filename", null: false
+    t.string "content_type"
+    t.text "metadata"
+    t.string "service_name", null: false
+    t.bigint "byte_size", null: false
+    t.string "checksum"
+    t.datetime "created_at", null: false
+    t.index ["key"], name: "index_active_storage_blobs_on_key", unique: true
+  end
+
+  create_table "active_storage_variant_records", force: :cascade do |t|
+    t.bigint "blob_id", null: false
+    t.string "variation_digest", null: false
+    t.index ["blob_id", "variation_digest"], name: "index_active_storage_variant_records_uniqueness", unique: true
+  end
 
   create_table "app_settings", force: :cascade do |t|
     t.boolean "self_signup_enabled", default: true, null: false
@@ -81,6 +109,20 @@ ActiveRecord::Schema[7.1].define(version: 2026_04_07_000003) do
     t.index ["user_id"], name: "index_identities_on_user_id"
   end
 
+  create_table "invites", force: :cascade do |t|
+    t.bigint "room_id", null: false
+    t.bigint "user_id", null: false
+    t.string "code", null: false
+    t.integer "max_uses", default: 0
+    t.integer "uses", default: 0
+    t.datetime "expires_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["code"], name: "index_invites_on_code", unique: true
+    t.index ["room_id"], name: "index_invites_on_room_id"
+    t.index ["user_id"], name: "index_invites_on_user_id"
+  end
+
   create_table "link_previews", force: :cascade do |t|
     t.string "url", null: false
     t.string "title"
@@ -91,6 +133,17 @@ ActiveRecord::Schema[7.1].define(version: 2026_04_07_000003) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["url"], name: "index_link_previews_on_url", unique: true
+  end
+
+  create_table "message_reactions", force: :cascade do |t|
+    t.bigint "message_id", null: false
+    t.bigint "user_id", null: false
+    t.string "emoji", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["message_id", "user_id", "emoji"], name: "idx_reactions_unique", unique: true
+    t.index ["message_id"], name: "index_message_reactions_on_message_id"
+    t.index ["user_id"], name: "index_message_reactions_on_user_id"
   end
 
   create_table "messages", force: :cascade do |t|
@@ -109,6 +162,27 @@ ActiveRecord::Schema[7.1].define(version: 2026_04_07_000003) do
     t.index ["room_id", "created_at"], name: "index_messages_on_room_id_and_created_at"
     t.index ["room_id"], name: "index_messages_on_room_id"
     t.index ["user_id"], name: "index_messages_on_user_id"
+  end
+
+  create_table "notification_preferences", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.boolean "dm_sounds", default: true, null: false
+    t.boolean "mention_alerts", default: true, null: false
+    t.boolean "push_enabled", default: false, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["user_id"], name: "index_notification_preferences_on_user_id", unique: true
+  end
+
+  create_table "push_subscriptions", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.string "endpoint", null: false
+    t.string "p256dh", null: false
+    t.string "auth", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["user_id", "endpoint"], name: "index_push_subscriptions_on_user_id_and_endpoint", unique: true
+    t.index ["user_id"], name: "index_push_subscriptions_on_user_id"
   end
 
   create_table "recovery_codes", force: :cascade do |t|
@@ -199,15 +273,23 @@ ActiveRecord::Schema[7.1].define(version: 2026_04_07_000003) do
     t.index ["username"], name: "index_users_on_username", unique: true
   end
 
+  add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
+  add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
   add_foreign_key "audit_logs", "users"
   add_foreign_key "channel_permissions", "room_memberships"
   add_foreign_key "channel_permissions", "rooms"
   add_foreign_key "direct_messages", "users", column: "recipient_id"
   add_foreign_key "direct_messages", "users", column: "sender_id"
   add_foreign_key "identities", "users"
+  add_foreign_key "invites", "rooms"
+  add_foreign_key "invites", "users"
+  add_foreign_key "message_reactions", "messages"
+  add_foreign_key "message_reactions", "users"
   add_foreign_key "messages", "messages", column: "parent_id"
   add_foreign_key "messages", "rooms"
   add_foreign_key "messages", "users"
+  add_foreign_key "notification_preferences", "users"
+  add_foreign_key "push_subscriptions", "users"
   add_foreign_key "recovery_codes", "users"
   add_foreign_key "room_keys", "rooms"
   add_foreign_key "room_keys", "users"
