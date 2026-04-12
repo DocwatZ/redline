@@ -15,9 +15,11 @@ export default class extends Controller {
   connect() {
     this._users = null
     this._onKeydown = this.#onKeydown.bind(this)
+    this._triggerElement = null
   }
 
   async open() {
+    this._triggerElement = document.activeElement
     this.element.classList.remove("hidden")
     this.element.setAttribute("aria-hidden", "false")
     document.addEventListener("keydown", this._onKeydown)
@@ -35,6 +37,8 @@ export default class extends Controller {
     this.element.setAttribute("aria-hidden", "true")
     document.removeEventListener("keydown", this._onKeydown)
     if (this.hasSearchInputTarget) this.searchInputTarget.value = ""
+    this._triggerElement?.focus()
+    this._triggerElement = null
   }
 
   closeOnBackdrop(event) {

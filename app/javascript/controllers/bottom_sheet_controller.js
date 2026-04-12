@@ -77,12 +77,17 @@ export default class extends Controller {
     panel.removeAttribute("aria-modal")
     panel.removeAttribute("role")
 
-    // On mobile, hide after animation
-    setTimeout(() => {
-      if (!this.isOpen) {
-        panel.classList.add("hidden")
-      }
-    }, this.constructor.ANIMATION_MS)
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches
+    if (reducedMotion) {
+      panel.classList.add("hidden")
+    } else {
+      // On mobile, hide after animation
+      setTimeout(() => {
+        if (!this.isOpen) {
+          panel.classList.add("hidden")
+        }
+      }, this.constructor.ANIMATION_MS)
+    }
 
     this.removeBackdrop()
     document.removeEventListener("keydown", this._onKeydown)
@@ -160,8 +165,13 @@ export default class extends Controller {
     const backdrop = document.getElementById("bottom-sheet-backdrop")
     if (!backdrop) return
 
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches
     backdrop.classList.remove("bottom-sheet-backdrop-visible")
-    setTimeout(() => backdrop.remove(), this.constructor.ANIMATION_MS)
+    if (reducedMotion) {
+      backdrop.remove()
+    } else {
+      setTimeout(() => backdrop.remove(), this.constructor.ANIMATION_MS)
+    }
   }
 
   handleKeydown(event) {
