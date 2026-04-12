@@ -24,9 +24,9 @@ Priority tags: **P0** = blocking / regression, **P1** = high value, **P2** = med
 
 > Clean up the codebase before layering new features. These are low-risk, zero-dependency tasks.
 
-- [ ] **P1** Remove `livekit_controller.js` or convert it to a clearly-documented legacy fallback — it is registered but never connected to any view element; all voice functionality lives in `channel_controller.js`. If kept, add a comment explaining why. *(Audit: ⚠️ item 11)*
-- [ ] **P2** Wire `media_controls_controller.js` to the `#channel-control-bar` via `data-controller="media-controls"` in `_control_bar.html.erb`, or remove it if the press animation is undesired. *(Audit: ⚠️ item 12)*
-- [ ] **P2** Verify `icon-192.png` and `icon-512.png` exist in `public/`; generate them from the SVG favicon if missing so PWA installation shows a proper icon rather than a broken image. *(Audit: ⚠️ item 14)*
+- [x] **P1** Remove `livekit_controller.js` or convert it to a clearly-documented legacy fallback — it is registered but never connected to any view element; all voice functionality lives in `channel_controller.js`. If kept, add a comment explaining why. *(Audit: ⚠️ item 11)*
+- [x] **P2** Wire `media_controls_controller.js` to the `#channel-control-bar` via `data-controller="media-controls"` in `_control_bar.html.erb`, or remove it if the press animation is undesired. *(Audit: ⚠️ item 12)*
+- [x] **P2** Verify `icon-192.png` and `icon-512.png` exist in `public/`; generate them from the SVG favicon if missing so PWA installation shows a proper icon rather than a broken image. *(Audit: ⚠️ item 14)*
 
 ---
 
@@ -34,10 +34,10 @@ Priority tags: **P0** = blocking / regression, **P1** = high value, **P2** = med
 
 > Correct behaviours that are coded but silently wrong.
 
-- [ ] **P0** Fix presence "away on tab hide" never reverting to "online": add a `visibilitychange` listener in `presence_channel.js` that calls `this.perform("online")` (needs a corresponding `online` action in `PresenceChannel`) when `document.hidden` becomes `false`. *(Audit: ⚠️ item 19)*
-- [ ] **P1** Protect announcement channels in `ChatChannel#receive`: add a check for `@room.announcement?` and only allow the message if `membership.admin?` (mirrors the HTTP controller guard). *(Audit: ⚠️ item 13)*
-- [ ] **P1** Fix in-call DataChannel chat not persisting for late joiners: when `channel_controller.js` sends an in-call message, also POST it to `MessagesController` with `message_context: "in_call"` so it is stored in the DB and visible to participants who join later. *(Audit: ⚠️ item 10)*
-- [ ] **P2** Thread panel real-time updates: after sending a thread reply, subscribe to `chat_#{room_id}` messages and re-render the thread panel when a message with a matching `parent_id` arrives — without requiring the panel to be closed and reopened. *(Audit: ⚠️ item 9)*
+- [x] **P0** Fix presence "away on tab hide" never reverting to "online": add a `visibilitychange` listener in `presence_channel.js` that calls `this.perform("online")` (needs a corresponding `online` action in `PresenceChannel`) when `document.hidden` becomes `false`. *(Audit: ⚠️ item 19)*
+- [x] **P1** Protect announcement channels in `ChatChannel#receive`: add a check for `@room.announcement?` and only allow the message if `membership.admin?` (mirrors the HTTP controller guard). *(Audit: ⚠️ item 13)*
+- [x] **P1** Fix in-call DataChannel chat not persisting for late joiners: when `channel_controller.js` sends an in-call message, also POST it to `MessagesController` with `message_context: "in_call"` so it is stored in the DB and visible to participants who join later. *(Audit: ⚠️ item 10)*
+- [x] **P2** Thread panel real-time updates: after sending a thread reply, subscribe to `chat_#{room_id}` messages and re-render the thread panel when a message with a matching `parent_id` arrives — without requiring the panel to be closed and reopened. *(Audit: ⚠️ item 9)*
 
 ---
 
@@ -45,12 +45,12 @@ Priority tags: **P0** = blocking / regression, **P1** = high value, **P2** = med
 
 > The infrastructure (model, keys API, controller JS) exists but is never connected to the message flow.
 
-- [ ] **P1** Audit the current `e2ee_controller.js` implementation fully: confirm `encrypt()` and `decrypt()` are correct and that IndexedDB key storage/retrieval works end-to-end.
-- [ ] **P1** Wire `e2ee_controller.js` to the chat panel: add `data-controller="e2ee"` to the messages container in `_chat_panel.html.erb` when `room.e2ee?`, with the room slug as a value so the controller can fetch the correct room key.
-- [ ] **P1** Encrypt outgoing messages in `message_input_controller.js`: before sending, check if the room is E2EE (`data-e2ee` attribute on the form), call `e2ee.encrypt(body)`, and send `ciphertext` instead of `body`.
-- [ ] **P1** Decrypt incoming messages in `chat_controller.js`'s `appendMessage`: if `data.ciphertext` is present, call `e2ee.decrypt(ciphertext)` before rendering the message body.
-- [ ] **P2** Show a clear "[encrypted message — key not available]" fallback when decryption fails (e.g., key not yet exchanged).
-- [ ] **P2** Add key-exchange UX: when a user joins an E2EE room for the first time, prompt them to confirm key setup rather than silently failing. *(Audit: ⚠️ item 1)*
+- [x] **P1** Audit the current `e2ee_controller.js` implementation fully: confirm `encrypt()` and `decrypt()` are correct and that IndexedDB key storage/retrieval works end-to-end.
+- [x] **P1** Wire `e2ee_controller.js` to the chat panel: add `data-controller="e2ee"` to the messages container in `_chat_panel.html.erb` when `room.e2ee?`, with the room slug as a value so the controller can fetch the correct room key.
+- [x] **P1** Encrypt outgoing messages in `message_input_controller.js`: before sending, check if the room is E2EE (`data-e2ee` attribute on the form), call `e2ee.encrypt(body)`, and send `ciphertext` instead of `body`.
+- [x] **P1** Decrypt incoming messages in `chat_controller.js`'s `appendMessage`: if `data.ciphertext` is present, call `e2ee.decrypt(ciphertext)` before rendering the message body.
+- [x] **P2** Show a clear "[encrypted message — key not available]" fallback when decryption fails (e.g., key not yet exchanged).
+- [x] **P2** Add key-exchange UX: when a user joins an E2EE room for the first time, prompt them to confirm key setup rather than silently failing. *(Audit: ⚠️ item 1)*
 
 ---
 

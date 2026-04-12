@@ -198,7 +198,7 @@ export default class extends Controller {
       textEl.textContent = "Messages in this channel are encrypted. Your key is active."
       banner.style.borderLeftColor = "var(--rl-success, #22c55e)"
     } else {
-      textEl.textContent = "Encryption key not available. Ask a channel admin to set up your key."
+      textEl.textContent = "Encryption key not available. A channel admin must share the room key with you before you can read or send messages."
       banner.style.borderLeftColor = "var(--rl-warning, #f59e0b)"
     }
   }

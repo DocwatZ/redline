@@ -359,6 +359,10 @@ export default class extends Controller {
 
   // ── E2EE helpers ──────────────────────────────────────────────────────────
 
+  static E2EE_INIT_DELAY_MS = 500
+  static E2EE_KEY_POLL_INTERVAL_MS = 500
+  static E2EE_MAX_KEY_POLL_ATTEMPTS = 10
+
   _getE2eeController() {
     const app = this.application
     return app.getControllerForElementAndIdentifier(this.element, "e2ee")
@@ -383,15 +387,15 @@ export default class extends Controller {
     if (encryptedMessages.length === 0) return
 
     // Wait briefly for the e2ee controller to initialize
-    await new Promise(resolve => setTimeout(resolve, 500))
+    await new Promise(resolve => setTimeout(resolve, this.constructor.E2EE_INIT_DELAY_MS))
 
     const e2ee = this._getE2eeController()
     if (!e2ee) return
 
-    // Wait for the room key to load (poll for up to 5 seconds)
+    // Wait for the room key to load (poll with timeout)
     let attempts = 0
-    while (!e2ee.isReady() && attempts < 10) {
-      await new Promise(resolve => setTimeout(resolve, 500))
+    while (!e2ee.isReady() && attempts < this.constructor.E2EE_MAX_KEY_POLL_ATTEMPTS) {
+      await new Promise(resolve => setTimeout(resolve, this.constructor.E2EE_KEY_POLL_INTERVAL_MS))
       attempts++
     }
 
