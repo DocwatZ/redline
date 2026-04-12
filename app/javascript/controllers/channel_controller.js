@@ -78,6 +78,12 @@ export default class extends Controller {
     }
   }
 
+  showMembers() {
+    if (!this.membersVisible) {
+      this.toggleMembers()
+    }
+  }
+
   updateMembersPanel() {
     const panel = document.getElementById("members-panel")
     if (!panel) return

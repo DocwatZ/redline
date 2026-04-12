@@ -58,43 +58,14 @@
       </button>
     <% end %>
 
-    <%# Invite link button %>
-    <div data-controller="invite" data-invite-room-slug-value="<%= room.slug %>">
-      <button class="btn-icon" title="Create invite link"
-              aria-label="Create invite link"
-              data-action="click->invite#open">
-        <svg aria-hidden="true" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/>
-        </svg>
-      </button>
-
-      <%# Invite modal %>
-      <div class="invite-modal-backdrop hidden" data-invite-target="modal"
-           data-action="click->invite#close"
-           role="dialog" aria-modal="true" aria-label="Invite people">
-        <div class="invite-modal" data-action="click->invite#stopPropagation">
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.75rem">
-            <h3 style="font-size:1rem;font-weight:600;color:var(--rl-text-primary)">Invite People</h3>
-            <button type="button" class="btn-icon btn-icon-xs" aria-label="Close invite modal"
-                    data-action="click->invite#close">
-              <svg aria-hidden="true" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
-              </svg>
-            </button>
-          </div>
-          <p style="font-size:.8125rem;color:var(--rl-text-muted);margin-bottom:.5rem">Share this link to invite others to <strong>#<%= room.name %></strong></p>
-          <div class="invite-link-row">
-            <input type="text" readonly data-invite-target="link" aria-label="Invite link"
-                   style="font-family:monospace">
-            <button type="button" class="btn btn-accent" style="padding:.375rem .75rem;font-size:.8125rem;white-space:nowrap"
-                    data-invite-target="copyBtn"
-                    data-action="click->invite#copyLink">
-              Copy Link
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
+    <%# Invite — opens member panel to reveal invite section %>
+    <button class="btn-icon" title="Invite people"
+            aria-label="Invite people"
+            data-action="click->channel#showMembers">
+      <svg aria-hidden="true" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/>
+      </svg>
+    </button>
 
     <%# Members toggle %>
     <button class="btn-icon channel-members-toggle"

@@ -2,30 +2,10 @@ import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller {
   static values = { roomSlug: String }
-  static targets = ["modal", "link", "copyBtn"]
+  static targets = ["link", "copyBtn"]
 
   connect() {
-    this._onKeydown = (e) => { if (e.key === "Escape") this.close() }
-    document.addEventListener("keydown", this._onKeydown)
-  }
-
-  disconnect() {
-    document.removeEventListener("keydown", this._onKeydown)
-  }
-
-  async open() {
-    if (!this.hasModalTarget) return
-    this.modalTarget.classList.remove("hidden")
-    await this.fetchOrCreateInvite()
-  }
-
-  close() {
-    if (!this.hasModalTarget) return
-    this.modalTarget.classList.add("hidden")
-  }
-
-  stopPropagation(event) {
-    event.stopPropagation()
+    this.fetchOrCreateInvite()
   }
 
   async fetchOrCreateInvite() {
@@ -43,7 +23,7 @@ export default class extends Controller {
   }
 
   async copyLink() {
-    if (!this.hasLinkTarget) return
+    if (!this.hasLinkTarget || !this.linkTarget.value) return
     try {
       await navigator.clipboard.writeText(this.linkTarget.value)
       if (this.hasCopyBtnTarget) {
