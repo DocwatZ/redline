@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class CreateNotificationPreferences < ActiveRecord::Migration[7.2]
+class CreateNotificationPreferences < ActiveRecord::Migration[7.1]
   def change
     create_table :notification_preferences do |t|
       t.references :user, null: false, foreign_key: true, index: { unique: true }
