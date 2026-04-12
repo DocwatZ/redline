@@ -58,10 +58,10 @@ Priority tags: **P0** = blocking / regression, **P1** = high value, **P2** = med
 
 > Direct messages are functional but lag behind channel features in several areas.
 
-- [ ] **P1** DM file attachments UI: add a file picker button to `direct_messages/show.html.erb` (mirror the channel compose area); update `dm_input_controller.js` to send `FormData` when files are selected; render attached images/files in `direct_messages/_message.html.erb`. The `DirectMessage` model already has `has_many_attached :files`. *(Audit: ⚠️ item 2 / ❌ item 12)*
-- [ ] **P1** DM reply-to: add a reply button to `direct_messages/_message.html.erb` (mirror channel message actions); update `dm_input_controller.js` to listen for `message:reply` events, show a reply banner, and include `parent_id` in the POST; render the parent quote in `_message.html.erb`. *(Audit: ⚠️ item 7)*
-- [ ] **P2** DM sounds: when `UserNotificationsChannel` receives a `new_dm` event and `document.body.dataset.dmSounds === "true"`, play a short notification sound. Expose the user preference as a `data-dm-sounds` attribute on `<body>` (set from the session in `application.html.erb`). *(Audit: ⚠️ item 3)*
-- [ ] **P2** DM emoji reactions: add a `DirectMessageReaction` model (or reuse `MessageReaction` polymorphically), a `DirectMessageReactionsController`, and wire the emoji picker in `dm_chat_controller.js`/`message_actions_controller.js` to the new endpoint. *(Audit: ❌ item 2)*
+- [x] **P1** DM file attachments UI: add a file picker button to `direct_messages/show.html.erb` (mirror the channel compose area); update `dm_input_controller.js` to send `FormData` when files are selected; render attached images/files in `direct_messages/_message.html.erb`. The `DirectMessage` model already has `has_many_attached :files`. *(Audit: ⚠️ item 2 / ❌ item 12)*
+- [x] **P1** DM reply-to: add a reply button to `direct_messages/_message.html.erb` (mirror channel message actions); update `dm_input_controller.js` to listen for `message:reply` events, show a reply banner, and include `parent_id` in the POST; render the parent quote in `_message.html.erb`. *(Audit: ⚠️ item 7)*
+- [x] **P2** DM sounds: when `UserNotificationsChannel` receives a `new_dm` event and `document.body.dataset.dmSounds === "true"`, play a short notification sound. Expose the user preference as a `data-dm-sounds` attribute on `<body>` (set from the session in `application.html.erb`). *(Audit: ⚠️ item 3)*
+- [x] **P2** DM emoji reactions: add a `DirectMessageReaction` model (or reuse `MessageReaction` polymorphically), a `DirectMessageReactionsController`, and wire the emoji picker in `dm_chat_controller.js`/`message_actions_controller.js` to the new endpoint. *(Audit: ❌ item 2)*
 
 ---
 
@@ -69,12 +69,12 @@ Priority tags: **P0** = blocking / regression, **P1** = high value, **P2** = med
 
 > Quality-of-life features that raise the functional parity with comparable chat platforms.
 
-- [ ] **P1** Message formatting (Markdown-lite): render `**bold**`, `*italic*`, `` `code` ``, and fenced code blocks in message bodies. Use a small, zero-dependency parser (e.g., `marked` with only inline rules) or write a minimal custom renderer. Sanitise all output to prevent XSS. *(Audit: ❌ item 11)*
-- [ ] **P1** Unread channel badges: track the last-read message ID per user per room (new `RoomReadState` model or a column on `RoomMembership`); broadcast a badge count via `user_#{id}` channel; update the sidebar channel item badge in `user_notifications_channel.js`. *(Audit: ⚠️ item 17)*
-- [ ] **P2** Search jump-to-message: in `search_controller.js` and `search/index.html.erb`, link message results to `/rooms/:slug#message-:id`; in `chat_controller.js` on `connect()`, check for a hash fragment and scroll + briefly highlight the matching message. *(Audit: ⚠️ item 8 / ❌ item 4)*
-- [ ] **P2** Typing indicator: broadcast a `typing` event over ActionCable when the user is typing (debounced, cleared after 3 s); render a "X is typing…" line above the compose area. *(Audit: ❌ item 15)*
-- [ ] **P2** Message pinning: add a `pinned` boolean to `Message`; add a pin/unpin action to `MessagesController` (admin/moderator only); display pinned messages in a collapsible banner at the top of the chat panel. *(Audit: ❌ item 9)*
-- [ ] **P3** Message history pagination / infinite scroll: on scroll-to-top in `chat_controller.js` and `dm_chat_controller.js`, fetch older messages via `GET /rooms/:slug/messages?before=:id` (new controller action); prepend them without losing scroll position. *(Audit: ⚠️ item 16)*
+- [x] **P1** Message formatting (Markdown-lite): render `**bold**`, `*italic*`, `` `code` ``, and fenced code blocks in message bodies. Use a small, zero-dependency parser (e.g., `marked` with only inline rules) or write a minimal custom renderer. Sanitise all output to prevent XSS. *(Audit: ❌ item 11)*
+- [x] **P1** Unread channel badges: track the last-read message ID per user per room (new `RoomReadState` model or a column on `RoomMembership`); broadcast a badge count via `user_#{id}` channel; update the sidebar channel item badge in `user_notifications_channel.js`. *(Audit: ⚠️ item 17)*
+- [x] **P2** Search jump-to-message: in `search_controller.js` and `search/index.html.erb`, link message results to `/rooms/:slug#message-:id`; in `chat_controller.js` on `connect()`, check for a hash fragment and scroll + briefly highlight the matching message. *(Audit: ⚠️ item 8 / ❌ item 4)*
+- [x] **P2** Typing indicator: broadcast a `typing` event over ActionCable when the user is typing (debounced, cleared after 3 s); render a "X is typing…" line above the compose area. *(Audit: ❌ item 15)*
+- [x] **P2** Message pinning: add a `pinned` boolean to `Message`; add a pin/unpin action to `MessagesController` (admin/moderator only); display pinned messages in a collapsible banner at the top of the chat panel. *(Audit: ❌ item 9)*
+- [x] **P3** Message history pagination / infinite scroll: on scroll-to-top in `chat_controller.js` and `dm_chat_controller.js`, fetch older messages via `GET /rooms/:slug/messages?before=:id` (new controller action); prepend them without losing scroll position. *(Audit: ⚠️ item 16)*
 
 ---
 
@@ -82,10 +82,10 @@ Priority tags: **P0** = blocking / regression, **P1** = high value, **P2** = med
 
 > Build on the working LiveKit foundation to close the remaining gaps.
 
-- [ ] **P1** Device picker UI: before (or shortly after) joining a call, present a modal or dropdown allowing users to select from `navigator.mediaDevices.enumerateDevices()` results; pass the chosen `deviceId` to `room.localParticipant.switchActiveDevice()`. *(Audit: ⚠️ item 6)*
-- [ ] **P1** Pre-call device test: add a "Test audio/video" modal that briefly enables mic + camera preview before the user clicks "Join", so they can confirm devices are working. *(Audit: ❌ item 3)*
-- [ ] **P2** Persistent call across Turbo navigation: store the active `LiveKit.Room` instance in a module-level singleton; intercept `turbo:before-visit` to either warn the user they will be disconnected or keep the call alive by suppressing the navigation (show a confirmation). *(Audit: ⚠️ item 20)*
-- [ ] **P3** DM voice/video calls: add a "Start call" button on the DM page that creates a temporary private LiveKit room (slug = sorted user IDs); fetch a token and connect both participants. Requires a new controller action, client-side call panel, and signalling (via `UserNotificationsChannel`) to ring the recipient. *(Audit: ❌ item 1)*
+- [x] **P1** Device picker UI: before (or shortly after) joining a call, present a modal or dropdown allowing users to select from `navigator.mediaDevices.enumerateDevices()` results; pass the chosen `deviceId` to `room.localParticipant.switchActiveDevice()`. *(Audit: ⚠️ item 6)*
+- [x] **P1** Pre-call device test: add a "Test audio/video" modal that briefly enables mic + camera preview before the user clicks "Join", so they can confirm devices are working. *(Audit: ❌ item 3)*
+- [x] **P2** Persistent call across Turbo navigation: store the active `LiveKit.Room` instance in a module-level singleton; intercept `turbo:before-visit` to either warn the user they will be disconnected or keep the call alive by suppressing the navigation (show a confirmation). *(Audit: ⚠️ item 20)*
+- [ ] **P3** DM voice/video calls: add a "Start call" button on the DM page that creates a temporary private LiveKit room (slug = sorted user IDs); fetch a token and connect both participants. Requires a new controller action, client-side call panel, and signalling (via `UserNotificationsChannel`) to ring the recipient. *(Audit: ❌ item 1)* — Deferred to M6 follow-up
 
 ---
 

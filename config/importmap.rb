@@ -13,7 +13,7 @@ pin "controllers/chat_controller", to: "controllers/chat_controller.js"
 pin "controllers/dm_chat_controller", to: "controllers/dm_chat_controller.js"
 pin "controllers/message_input_controller", to: "controllers/message_input_controller.js"
 pin "controllers/dm_input_controller", to: "controllers/dm_input_controller.js"
-pin "controllers/livekit_controller", to: "controllers/livekit_controller.js"
+pin "controllers/markdown_controller", to: "controllers/markdown_controller.js"
 pin "controllers/password_toggle_controller", to: "controllers/password_toggle_controller.js"
 pin "controllers/sidebar_controller", to: "controllers/sidebar_controller.js"
 pin "controllers/link_preview_controller", to: "controllers/link_preview_controller.js"
@@ -27,6 +27,9 @@ pin "controllers/status_picker_controller",   to: "controllers/status_picker_con
 pin "controllers/search_controller",          to: "controllers/search_controller.js"
 pin "controllers/invite_controller",          to: "controllers/invite_controller.js"
 pin "controllers/e2ee_controller",            to: "controllers/e2ee_controller.js"
+
+# Services
+pin "services/livekit_singleton", to: "services/livekit_singleton.js"
 
 # Channels
 pin "channels/consumer", to: "channels/consumer.js"
