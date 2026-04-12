@@ -1,5 +1,6 @@
 import { Controller } from "@hotwired/stimulus"
 import consumer from "channels/consumer"
+import { formatMessage } from "controllers/markdown_controller"
 
 /**
  * DM Chat controller — mirrors ChatController but for direct messages.
@@ -162,7 +163,7 @@ export default class extends Controller {
         </div>
         <div class="${bodyClass}"${bodyLp}
              data-message-actions-target="bodyDiv">
-          ${this.escapeHtml(data.body)}
+          ${data.deleted ? this.escapeHtml(data.body) : formatMessage(data.body)}
         </div>
         ${filesHtml}
         ${reactionsHtml}

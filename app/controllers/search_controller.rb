@@ -20,7 +20,8 @@ class SearchController < ApplicationController
         render json: {
           messages: @messages.map { |m|
             { id: m.id, body: m.display_body, room_slug: m.room.slug, room_name: m.room.name,
-              display_name: m.user.display_name, created_at: m.created_at.iso8601 }
+              display_name: m.user.display_name, created_at: m.created_at.iso8601,
+              message_id: m.id }
           },
           users: @users.map { |u|
             { id: u.id, display_name: u.display_name, username: u.username,

@@ -33,7 +33,7 @@
       <section>
         <h2 style="font-size:.75rem;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--rl-text-muted);margin-bottom:.5rem">Messages</h2>
         <% @messages.each do |msg| %>
-          <%= link_to room_path(msg.room), class: "search-result-item" do %>
+          <%= link_to "#{room_path(msg.room)}#message-#{msg.id}", class: "search-result-item" do %>
             <div style="flex:1;min-width:0">
               <div style="font-size:.75rem;color:var(--rl-text-muted)">#<%= msg.room.name %> · <%= msg.user.display_name %></div>
               <div style="font-size:.875rem;color:var(--rl-text-secondary);overflow:hidden;text-overflow:ellipsis;white-space:nowrap"><%= msg.display_body %></div>

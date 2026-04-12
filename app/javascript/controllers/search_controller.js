@@ -68,7 +68,7 @@ export default class extends Controller {
     if (data.messages?.length) {
       html += `<div class="search-result-section"><div class="search-result-section-title">Messages</div>`
       data.messages.forEach(m => {
-        html += `<a href="/rooms/${m.room_slug}" class="search-result-item">
+        html += `<a href="/rooms/${m.room_slug}#message-${m.id}" class="search-result-item">
           <div style="flex:1;min-width:0">
             <div style="font-size:.75rem;color:var(--rl-text-muted)">#${m.room_name} · ${m.display_name}</div>
             <div style="font-size:.875rem;color:var(--rl-text-secondary);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${m.body}</div>

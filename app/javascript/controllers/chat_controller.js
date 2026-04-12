@@ -1,5 +1,6 @@
 import { Controller } from "@hotwired/stimulus"
 import consumer from "channels/consumer"
+import { formatMessage } from "controllers/markdown_controller"
 
 /**
  * Chat controller — manages the room's ActionCable subscription,
@@ -22,6 +23,7 @@ export default class extends Controller {
       }
     )
     this.scrollToBottom(false)
+    this._highlightAnchoredMessage()
     this._threadMessageId = null
     this._handleOpenThread = (e) => this.openThread(e.detail.messageId)
     document.addEventListener("message:open-thread", this._handleOpenThread)
@@ -202,7 +204,7 @@ export default class extends Controller {
         </div>
         <div class="${bodyClass}"${bodyLp}
              data-message-actions-target="bodyDiv">
-          ${this.escapeHtml(data.body)}
+          ${data.deleted ? this.escapeHtml(data.body) : formatMessage(data.body)}
         </div>
         ${editForm}
       </div>
@@ -214,6 +216,17 @@ export default class extends Controller {
   scrollToBottom(smooth = true) {
     const el = this.element
     el.scrollTo({ top: el.scrollHeight, behavior: smooth ? "smooth" : "instant" })
+  }
+
+  _highlightAnchoredMessage() {
+    const hash = window.location.hash
+    if (!hash.startsWith("#message-")) return
+    const id = hash.replace("#message-", "")
+    const el = document.getElementById(`message-${id}`)
+    if (!el) return
+    el.scrollIntoView({ behavior: "smooth", block: "center" })
+    el.classList.add("message-highlight")
+    setTimeout(() => el.classList.remove("message-highlight"), 2000)
   }
 
   isAtBottom() {
@@ -319,7 +332,7 @@ export default class extends Controller {
           <time class="text-xs text-muted">${this.formatTime(msg.created_at)}</time>
         </div>
         <div class="text-sm text-secondary mt-0.5 leading-relaxed whitespace-pre-wrap break-words">
-          ${this.highlightMentions(msg.body)}
+          ${formatMessage(msg.body)}
         </div>
       </div>`
     return article
