@@ -65,4 +65,9 @@ class RoomMembership < ApplicationRecord
   def can_screen_share?(channel = room)
     has_permission?(channel, :screen_share)
   end
+
+  def unread?(room)
+    return false if last_read_at.nil?
+    room.messages.where("created_at > ?", last_read_at).exists?
+  end
 end

@@ -3,7 +3,17 @@
 class MessagesController < ApplicationController
   before_action :set_room
   before_action :require_membership!
-  before_action :set_message, only: [ :thread, :update, :destroy ]
+  before_action :set_message, only: [ :thread, :update, :destroy, :pin, :unpin ]
+
+  def index
+    before_id = params[:before].to_i
+    @messages = if before_id > 0
+      @room.messages.visible.standard_messages.where("id < ?", before_id).order(id: :desc).limit(30).reverse
+    else
+      @room.messages.visible.standard_messages.order(id: :desc).limit(30).reverse
+    end
+    render json: @messages.map { |m| render_message(m) }
+  end
 
   def create
     @message = @room.messages.build(message_params)
@@ -66,6 +76,36 @@ class MessagesController < ApplicationController
     else
       head :forbidden
     end
+  end
+
+  def pin
+    membership = @room.membership_for(current_user)
+    unless membership&.moderator?
+      render json: { error: "Forbidden" }, status: :forbidden and return
+    end
+    @message.update!(pinned: true)
+    ActionCable.server.broadcast("chat_#{@room.id}", {
+      type: "pin_update",
+      message_id: @message.id,
+      pinned: true,
+      body: @message.display_body,
+      display_name: @message.user.display_name
+    })
+    head :ok
+  end
+
+  def unpin
+    membership = @room.membership_for(current_user)
+    unless membership&.moderator?
+      render json: { error: "Forbidden" }, status: :forbidden and return
+    end
+    @message.update!(pinned: false)
+    ActionCable.server.broadcast("chat_#{@room.id}", {
+      type: "pin_update",
+      message_id: @message.id,
+      pinned: false
+    })
+    head :ok
   end
 
   private

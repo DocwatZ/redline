@@ -15,6 +15,9 @@ class RoomsController < ApplicationController
     @in_call_messages = @room.voice_channel? ? @room.messages.visible.in_call_messages.recent.includes(:user).last(20) : []
     @members = @room.members.order(:display_name)
     @subchannels = @room.subchannels.by_position if @room.voice_channel?
+    @pinned_messages = @room.messages.where(pinned: true).includes(:user).limit(5)
+    membership = @room.membership_for(current_user)
+    membership&.update_column(:last_read_at, Time.current)
   end
 
   def new

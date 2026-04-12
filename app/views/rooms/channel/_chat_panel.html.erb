@@ -3,6 +3,24 @@
 <%# On desktop for voice channels: right sidebar %>
 <%# For chat-only channels: always visible as main content %>
 
+<%# Pinned messages banner %>
+<div id="pinned-banner" class="pinned-banner<%= ' hidden' unless @pinned_messages&.any? %>"
+     role="region" aria-label="Pinned messages"
+     <% unless @pinned_messages&.any? %>style="display:none"<% end %>>
+  <div class="flex items-center gap-2 mb-1">
+    <svg aria-hidden="true" width="12" height="12" fill="currentColor" viewBox="0 0 24 24">
+      <path d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"/>
+    </svg>
+    <span class="text-xs font-semibold" style="color:var(--rl-text-primary)">Pinned</span>
+  </div>
+  <% @pinned_messages&.each do |pm| %>
+    <div class="pinned-message-item" data-pinned-msg-id="<%= pm.id %>">
+      <span class="text-xs" style="color:var(--rl-text-muted)"><%= h(pm.user.display_name) %>:</span>
+      <span class="text-xs" style="color:var(--rl-text-secondary);overflow:hidden;text-overflow:ellipsis;white-space:nowrap"><%= h(pm.display_body.truncate(80)) %></span>
+    </div>
+  <% end %>
+</div>
+
 <%# Main messages area %>
 <div id="messages"
      class="channel-messages"
@@ -49,6 +67,9 @@
   <% messages.each do |message| %>
     <%= render "messages/message", message: message %>
   <% end %>
+
+  <%# Typing indicator %>
+  <div id="typing-indicator" class="typing-indicator" aria-live="polite" aria-atomic="true"></div>
 
   <%# Auto-scroll anchor %>
   <div id="messages-end" aria-hidden="true"></div>

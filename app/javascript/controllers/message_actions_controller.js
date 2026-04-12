@@ -229,4 +229,24 @@ export default class extends Controller {
       })
     } catch (err) { console.error("DM reaction error:", err) }
   }
+
+  // ── Pin ────────────────────────────────────────────────────────────────────
+  async togglePin() {
+    const url = window.location.pathname
+    const parts = url.split("/").filter(Boolean)
+    const roomIdx = parts.indexOf("rooms")
+    const roomSlug = roomIdx >= 0 ? parts[roomIdx + 1] : null
+    if (!roomSlug) return
+
+    const isPinned = this.element.dataset.messagePinned === "true"
+    const action = isPinned ? "unpin" : "pin"
+    const csrf = document.querySelector('meta[name="csrf-token"]')?.content
+    try {
+      await fetch(`/rooms/${roomSlug}/messages/${this.messageIdValue}/${action}`, {
+        method: "PATCH",
+        headers: { "X-CSRF-Token": csrf ?? "", "Accept": "application/json" }
+      })
+      this.element.dataset.messagePinned = isPinned ? "false" : "true"
+    } catch (err) { console.error("Pin error:", err) }
+  }
 }

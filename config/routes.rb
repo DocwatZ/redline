@@ -69,10 +69,12 @@ Rails.application.routes.draw do
       delete :leave
       get "livekit_token", to: "livekit#token", as: :livekit_token
     end
-    resources :messages, only: [ :create, :update, :destroy ] do
+    resources :messages, only: [ :index, :create, :update, :destroy ] do
       member do
         get :thread
         post :reactions, to: "reactions#create"
+        patch :pin
+        patch :unpin
       end
     end
     resources :invites, only: [:index, :create]

@@ -42,6 +42,27 @@ class ChatChannel < ApplicationCable::Channel
     broadcast_channel = message.in_call? ? "voice_chat_#{@room.id}" : "chat_#{@room.id}"
     ActionCable.server.broadcast(broadcast_channel, render_message(message))
     detect_mentions(message)
+
+    # Broadcast unread count to other members
+    @room.room_memberships.each do |m|
+      next if m.user_id == current_user.id
+      count = @room.messages.where("created_at > ?", m.last_read_at || Time.at(0)).count
+      ActionCable.server.broadcast("user_#{m.user_id}", {
+        type: "channel_unread",
+        room_slug: @room.slug,
+        room_id: @room.id,
+        count: count
+      })
+    end
+  end
+
+  def typing
+    return unless @room
+    ActionCable.server.broadcast("chat_#{@room.id}", {
+      type: "typing",
+      user_id: current_user.id,
+      display_name: current_user.display_name
+    })
   end
 
   def unsubscribed

@@ -7,6 +7,7 @@
          data-message-actions-is-own-value="<%= is_own %>"
          data-message-actions-body-value="<%= message.deleted? ? '' : message.body %>"
          data-message-actions-type-value="channel"
+         data-message-pinned="<%= message.pinned? %>"
          <% if message.ciphertext.present? %>data-ciphertext="<%= message.ciphertext %>"<% end %>>
   <%# Avatar %>
   <div class="flex-shrink-0 mt-0.5" aria-hidden="true">
@@ -156,6 +157,15 @@
           <path stroke-linecap="round" stroke-linejoin="round" d="M3 10h10a8 8 0 018 8v2M3 10l6 6M3 10l6-6"/>
         </svg>
       </button>
+      <% if @room && @room.membership_for(current_user)&.moderator? %>
+        <button type="button" class="btn-icon btn-icon-xs" title="<%= message.pinned? ? 'Unpin' : 'Pin' %>"
+                aria-label="<%= message.pinned? ? 'Unpin message' : 'Pin message' %>"
+                data-action="click->message-actions#togglePin">
+          <svg aria-hidden="true" width="14" height="14" fill="<%= message.pinned? ? 'currentColor' : 'none' %>" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"/>
+          </svg>
+        </button>
+      <% end %>
       <% if is_own %>
         <button type="button" class="btn-icon btn-icon-xs" title="Edit"
                 aria-label="Edit this message"

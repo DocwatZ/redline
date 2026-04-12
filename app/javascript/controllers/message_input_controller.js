@@ -42,6 +42,14 @@ export default class extends Controller {
     const field = this.fieldTarget
     field.style.height = "auto"
     field.style.height = Math.min(field.scrollHeight, 192) + "px"
+    this.onTyping()
+  }
+
+  onTyping() {
+    clearTimeout(this._typingDebounce)
+    this._typingDebounce = setTimeout(() => {
+      document.dispatchEvent(new CustomEvent("message:typing"))
+    }, 500)
   }
 
   send(event) {

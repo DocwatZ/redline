@@ -28,6 +28,14 @@ export default class extends Controller {
     this._handleOpenThread = (e) => this.openThread(e.detail.messageId)
     document.addEventListener("message:open-thread", this._handleOpenThread)
 
+    this._onTyping = () => this.subscription?.perform("typing")
+    document.addEventListener("message:typing", this._onTyping)
+
+    this._loadingMore = false
+    this._noMoreMessages = false
+    this._onScroll = this.#handleScroll.bind(this)
+    this.element.addEventListener("scroll", this._onScroll)
+
     // Decrypt any server-rendered E2EE messages on initial page load
     this._decryptExistingMessages()
   }
@@ -35,10 +43,14 @@ export default class extends Controller {
   disconnect() {
     this.subscription?.unsubscribe()
     document.removeEventListener("message:open-thread", this._handleOpenThread)
+    document.removeEventListener("message:typing", this._onTyping)
+    this.element.removeEventListener("scroll", this._onScroll)
   }
 
   appendMessage(data) {
     if (data.type === "reaction_update") { this.updateReactions(data); return }
+    if (data.type === "typing") { this.showTypingIndicator(data.user_id, data.display_name); return }
+    if (data.type === "pin_update") { this.handlePinUpdate(data); return }
 
     // If the thread panel is open and this message is a reply to the thread's parent, append it
     if (this._threadMessageId && data.parent_id === this._threadMessageId) {
@@ -227,6 +239,72 @@ export default class extends Controller {
     el.scrollIntoView({ behavior: "smooth", block: "center" })
     el.classList.add("message-highlight")
     setTimeout(() => el.classList.remove("message-highlight"), 2000)
+  }
+
+  showTypingIndicator(userId, displayName) {
+    if (userId === this.currentUserIdValue) return
+    const indicator = document.getElementById("typing-indicator")
+    if (!indicator) return
+    indicator.textContent = `${displayName} is typing…`
+    clearTimeout(this._typingClear)
+    this._typingClear = setTimeout(() => { indicator.textContent = "" }, 3000)
+  }
+
+  handlePinUpdate(data) {
+    const banner = document.getElementById("pinned-banner")
+    if (!banner) return
+    if (data.pinned) {
+      banner.style.removeProperty("display")
+      banner.classList.remove("hidden")
+      let item = banner.querySelector(`[data-pinned-msg-id="${data.message_id}"]`)
+      if (!item) {
+        item = document.createElement("div")
+        item.className = "pinned-message-item"
+        item.setAttribute("data-pinned-msg-id", data.message_id)
+        banner.appendChild(item)
+      }
+      item.innerHTML = `<span class="text-xs" style="color:var(--rl-text-muted)">${this.escapeHtml(data.display_name || "")}:</span> <span class="text-xs" style="color:var(--rl-text-secondary)">${this.escapeHtml(data.body || "")}</span>`
+    } else {
+      const item = banner.querySelector(`[data-pinned-msg-id="${data.message_id}"]`)
+      if (item) item.remove()
+      if (!banner.querySelector(".pinned-message-item")) {
+        banner.classList.add("hidden")
+      }
+    }
+  }
+
+  #handleScroll() {
+    if (this.element.scrollTop < 50 && !this._loadingMore && !this._noMoreMessages) {
+      this.loadOlderMessages()
+    }
+  }
+
+  async loadOlderMessages() {
+    this._loadingMore = true
+    const firstMsg = this.element.querySelector("article[id^='message-']")
+    if (!firstMsg) { this._loadingMore = false; return }
+    const firstId = firstMsg.id.replace("message-", "")
+    const prevScrollHeight = this.element.scrollHeight
+    try {
+      const token = document.querySelector('meta[name="csrf-token"]')?.content
+      const resp = await fetch(`/rooms/${this.roomSlugValue}/messages?before=${firstId}`, {
+        headers: { "Accept": "application/json", "X-CSRF-Token": token ?? "" }
+      })
+      if (!resp.ok) { this._loadingMore = false; return }
+      const messages = await resp.json()
+      if (messages.length === 0) { this._noMoreMessages = true; this._loadingMore = false; return }
+      messages.forEach(data => {
+        if (document.getElementById(`message-${data.id}`)) return
+        const el = this.buildMessageElement(data)
+        const firstChild = this.element.querySelector("article[id^='message-']")
+        if (firstChild) firstChild.before(el)
+      })
+      const newScrollHeight = this.element.scrollHeight
+      this.element.scrollTop = newScrollHeight - prevScrollHeight
+    } catch (err) {
+      console.error("Load older messages error:", err)
+    }
+    this._loadingMore = false
   }
 
   isAtBottom() {

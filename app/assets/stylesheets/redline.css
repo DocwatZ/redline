@@ -1694,6 +1694,47 @@ input[type="radio"]:focus-visible {
   flex-shrink: 0;
 }
 
+/* ─── Channel Unread Badge ───────────────────────────────────────────────── */
+.channel-unread-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.125rem;
+  height: 1.125rem;
+  padding: 0 .2rem;
+  font-size: .625rem;
+  font-weight: 700;
+  line-height: 1;
+  background: var(--rl-accent);
+  color: #fff;
+  border-radius: var(--rl-radius-full);
+  flex-shrink: 0;
+}
+
+/* ─── Typing Indicator ──────────────────────────────────────────────────── */
+.typing-indicator {
+  min-height: 1.25rem;
+  font-size: .75rem;
+  color: var(--rl-text-muted);
+  font-style: italic;
+  padding: 0 .5rem;
+}
+
+/* ─── Pinned Banner ─────────────────────────────────────────────────────── */
+.pinned-banner {
+  background: var(--rl-surface-elevated);
+  border-bottom: 1px solid var(--rl-border);
+  padding: .5rem .75rem;
+  flex-shrink: 0;
+}
+.pinned-message-item {
+  display: flex;
+  align-items: baseline;
+  gap: .375rem;
+  margin-top: .25rem;
+  overflow: hidden;
+}
+
 /* ─── New DM Modal ──────────────────────────────────────────────────────── */
 .new-dm-modal-backdrop {
   position: fixed;
