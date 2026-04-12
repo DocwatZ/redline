@@ -49,6 +49,9 @@ RUN apt-get update -qq && \
 COPY --from=build /usr/local/bundle /usr/local/bundle
 COPY --from=build /rails /rails
 
+# Ensure Rails serves static files (CSS/JS) from public/assets without a proxy
+ENV RAILS_SERVE_STATIC_FILES="true"
+
 # Run and own only the runtime files as a non-root user for security
 RUN useradd rails --create-home --shell /bin/bash && \
     chown -R rails:rails db log storage tmp public
