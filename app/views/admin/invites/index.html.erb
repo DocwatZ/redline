@@ -1,0 +1,68 @@
+<% content_for :title, "Invite Links" %>
+
+<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem">
+  <h1 style="font-size:1.25rem;font-weight:700;color:var(--rl-text-primary);margin:0">Invite Links</h1>
+  <% if @expired_invites.any? %>
+    <%= button_to purge_expired_admin_invites_path,
+          method: :post,
+          class: "btn",
+          style: "color:var(--rl-danger);font-size:.875rem",
+          data: { turbo_confirm: "Purge all #{@expired_invites.count} expired / exhausted invites?" } do %>
+      Purge <%= @expired_invites.count %> expired
+    <% end %>
+  <% end %>
+</div>
+
+<%# Active invites %>
+<section style="margin-bottom:2rem">
+  <h2 style="font-size:.875rem;font-weight:600;color:var(--rl-text-secondary);text-transform:uppercase;letter-spacing:.05em;margin-bottom:.75rem">
+    Active (<%= @active_invites.count %>)
+  </h2>
+  <% if @active_invites.any? %>
+    <div style="background:var(--rl-surface);border:1px solid var(--rl-border);border-radius:var(--rl-radius-md);overflow:hidden">
+      <% @active_invites.each do |inv| %>
+        <div style="padding:.75rem 1rem;border-bottom:1px solid var(--rl-border);display:flex;align-items:center;gap:.75rem;flex-wrap:wrap">
+          <code style="font-size:.75rem;background:var(--rl-surface-elevated);padding:.2rem .45rem;border-radius:.25rem;color:var(--rl-accent)"><%= inv.code %></code>
+          <span style="font-size:.875rem;color:var(--rl-text-primary)"># <%= inv.room.name %></span>
+          <span style="font-size:.75rem;color:var(--rl-text-muted)">by <%= inv.user.display_name %></span>
+          <span style="font-size:.75rem;color:var(--rl-text-muted);margin-left:auto">
+            <%= inv.uses %><% if inv.max_uses&.positive? %>/<%= inv.max_uses %><% end %> uses
+          </span>
+          <% if inv.expires_at %>
+            <span style="font-size:.75rem;color:var(--rl-text-muted)">Expires <%= inv.expires_at.strftime("%b %-d %Y") %></span>
+          <% else %>
+            <span style="font-size:.75rem;color:var(--rl-text-muted)">No expiry</span>
+          <% end %>
+        </div>
+      <% end %>
+    </div>
+  <% else %>
+    <p style="color:var(--rl-text-muted);font-size:.875rem">No active invite links.</p>
+  <% end %>
+</section>
+
+<%# Expired invites %>
+<section>
+  <h2 style="font-size:.875rem;font-weight:600;color:var(--rl-text-secondary);text-transform:uppercase;letter-spacing:.05em;margin-bottom:.75rem">
+    Expired / Exhausted (<%= @expired_invites.count %>)
+  </h2>
+  <% if @expired_invites.any? %>
+    <div style="background:var(--rl-surface);border:1px solid var(--rl-border);border-radius:var(--rl-radius-md);overflow:hidden;opacity:.7">
+      <% @expired_invites.each do |inv| %>
+        <div style="padding:.75rem 1rem;border-bottom:1px solid var(--rl-border);display:flex;align-items:center;gap:.75rem;flex-wrap:wrap">
+          <code style="font-size:.75rem;background:var(--rl-surface-elevated);padding:.2rem .45rem;border-radius:.25rem;color:var(--rl-text-muted)"><%= inv.code %></code>
+          <span style="font-size:.875rem;color:var(--rl-text-secondary)"># <%= inv.room.name %></span>
+          <span style="font-size:.75rem;color:var(--rl-text-muted)">by <%= inv.user.display_name %></span>
+          <span style="font-size:.75rem;color:var(--rl-text-muted);margin-left:auto">
+            <%= inv.uses %><% if inv.max_uses&.positive? %>/<%= inv.max_uses %><% end %> uses
+          </span>
+          <span style="font-size:.75rem;color:var(--rl-danger)">
+            <%= inv.exhausted? ? "Exhausted" : "Expired #{inv.expires_at&.strftime("%b %-d %Y")}" %>
+          </span>
+        </div>
+      <% end %>
+    </div>
+  <% else %>
+    <p style="color:var(--rl-text-muted);font-size:.875rem">No expired invite links.</p>
+  <% end %>
+</section>

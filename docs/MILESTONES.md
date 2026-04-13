@@ -93,10 +93,10 @@ Priority tags: **P0** = blocking / regression, **P1** = high value, **P2** = med
 
 > Account and moderation features that are missing or incomplete.
 
-- [ ] **P1** Username change in account settings: add `:username` to the `devise/registrations/edit.html.erb` form and to `users/registrations_controller.rb`'s permitted params. Validate uniqueness in real time with a debounced fetch. *(Audit: ❌ item 5)*
-- [ ] **P1** Role promotion/demotion in channel member list: add "Make admin", "Make moderator", "Remove role" actions to the member list (visible to channel admins); wire to a new `RoomMembershipsController` PATCH endpoint. *(Audit: ❌ item 8)*
-- [ ] **P2** User blocking: add a `UserBlock` model (`blocker_id`, `blocked_id`); filter blocked users' messages from DMs and channels; add block/unblock action to user profile page. *(Audit: ❌ item 6)*
-- [ ] **P3** Channel categories: add a `Category` model with a `name` and `position`; `Room` belongs_to `:category, optional: true`; render grouped sections in the sidebar and rooms index. *(Audit: ❌ item 7)*
+- [x] **P1** Username change in account settings: add `:username` to the `devise/registrations/edit.html.erb` form and to `users/registrations_controller.rb`'s permitted params. Validate uniqueness in real time with a debounced fetch. *(Audit: ❌ item 5)*
+- [x] **P1** Role promotion/demotion in channel member list: add "Make admin", "Make moderator", "Remove role" actions to the member list (visible to channel admins); wire to a new `RoomMembershipsController` PATCH endpoint. *(Audit: ❌ item 8)*
+- [x] **P2** User blocking: add a `UserBlock` model (`blocker_id`, `blocked_id`); filter blocked users' messages from DMs and channels; add block/unblock action to user profile page. *(Audit: ❌ item 6)*
+- [x] **P3** Channel categories: add a `Category` model with a `name` and `position`; `Room` belongs_to `:category, optional: true`; render grouped sections in the sidebar and rooms index. *(Audit: ❌ item 7)*
 
 ---
 
@@ -104,9 +104,9 @@ Priority tags: **P0** = blocking / regression, **P1** = high value, **P2** = med
 
 > Complete the notification system.
 
-- [ ] **P1** `mention_alerts` preference respected in JS: read a `data-mention-alerts` attribute from `<body>` in `user_notifications_channel.js` and suppress the toast if the preference is off. Currently the preference is saved but never read client-side.
-- [ ] **P2** Channel mention notifications (desktop push): extend the push notification path in `detect_mentions` (already exists for DMs) to also send a push notification for `@username` mentions in channels — this is already done in `MessagesController#detect_mentions`, verify it works end-to-end with VAPID keys configured.
-- [ ] **P2** Push notification opt-in flow: show a "Enable notifications" prompt in the sidebar footer (once per session, only if `Notification.permission === "default"`) rather than silently requesting in the layout `<head>` script where user gesture is often not guaranteed. *(Related to Audit: ⚠️ push setup)*
+- [x] **P1** `mention_alerts` preference respected in JS: read a `data-mention-alerts` attribute from `<body>` in `user_notifications_channel.js` and suppress the toast if the preference is off. Currently the preference is saved but never read client-side.
+- [x] **P2** Channel mention notifications (desktop push): extend the push notification path in `detect_mentions` (already exists for DMs) to also send a push notification for `@username` mentions in channels — this is already done in `MessagesController#detect_mentions`, verify it works end-to-end with VAPID keys configured.
+- [x] **P2** Push notification opt-in flow: show a "Enable notifications" prompt in the sidebar footer (once per session, only if `Notification.permission === "default"`) rather than silently requesting in the layout `<head>` script where user gesture is often not guaranteed. *(Related to Audit: ⚠️ push setup)*
 
 ---
 
@@ -114,9 +114,9 @@ Priority tags: **P0** = blocking / regression, **P1** = high value, **P2** = med
 
 > Extend the admin panel to cover gaps identified in the audit.
 
-- [ ] **P2** Audit log coverage: ensure `AuditService.log` is called for all significant admin actions — user lock/unlock, password reset, room deletion, permission changes. Review `admin_service.rb` and add missing calls.
-- [ ] **P2** Admin: view and delete individual messages (for moderation) — link from audit log entries to the offending message in context.
-- [ ] **P3** Admin: scheduled/pending invite cleanup — list expired invites and provide a "Purge expired" action.
+- [x] **P2** Audit log coverage: ensure `AuditService.log` is called for all significant admin actions — user lock/unlock, password reset, room deletion, permission changes. Review `admin_service.rb` and add missing calls.
+- [x] **P2** Admin: view and delete individual messages (for moderation) — link from audit log entries to the offending message in context.
+- [x] **P3** Admin: scheduled/pending invite cleanup — list expired invites and provide a "Purge expired" action.
 
 ---
 
@@ -124,12 +124,12 @@ Priority tags: **P0** = blocking / regression, **P1** = high value, **P2** = med
 
 > Final pass on UX consistency and WCAG compliance.
 
-- [ ] **P2** Consistent page title format: verify all views call `content_for :title` with a sensible value; pages that currently fall back to just "REDLINE" (e.g., user profile) should include the user's display name.
-- [ ] **P2** Focus management after modal close: verify the search modal, new-DM modal, and bottom sheet all return focus to the trigger element on close. `bottom_sheet_controller.js` already tracks `_triggerElement`; confirm the others do too.
-- [ ] **P2** Keyboard navigation within search results: add `ArrowDown`/`ArrowUp` to move between result items and `Enter` to follow the link, matching the Cmd+K palette UX pattern.
-- [ ] **P2** `prefers-reduced-motion`: audit all CSS transitions and JS animations (bottom sheet slide, sidebar backdrop, toast fade) and wrap in `@media (prefers-reduced-motion: reduce)` or gate behind a JS check.
-- [ ] **P3** Consistent empty-state illustrations: pages with empty states (no messages, no channels, no DMs) currently show plain text. Add a subtle SVG illustration for visual consistency.
-- [ ] **P3** Loading skeleton for messages: on initial channel page load, show a skeleton loader while the 50 historical messages render, rather than a flash of blank space.
+- [x] **P2** Consistent page title format: verify all views call `content_for :title` with a sensible value; pages that currently fall back to just "REDLINE" (e.g., user profile) should include the user's display name.
+- [x] **P2** Focus management after modal close: verify the search modal, new-DM modal, and bottom sheet all return focus to the trigger element on close. `bottom_sheet_controller.js` already tracks `_triggerElement`; confirm the others do too.
+- [x] **P2** Keyboard navigation within search results: add `ArrowDown`/`ArrowUp` to move between result items and `Enter` to follow the link, matching the Cmd+K palette UX pattern.
+- [x] **P2** `prefers-reduced-motion`: audit all CSS transitions and JS animations (bottom sheet slide, sidebar backdrop, toast fade) and wrap in `@media (prefers-reduced-motion: reduce)` or gate behind a JS check.
+- [x] **P3** Consistent empty-state illustrations: pages with empty states (no messages, no channels, no DMs) currently show plain text. Add a subtle SVG illustration for visual consistency.
+- [x] **P3** Loading skeleton for messages: on initial channel page load, show a skeleton loader while the 50 historical messages render, rather than a flash of blank space.
 
 ---
 

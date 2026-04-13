@@ -24,6 +24,7 @@ export default class extends Controller {
     )
     this.scrollToBottom(false)
     this._highlightAnchoredMessage()
+    this._removeSkeleton()
     this._threadMessageId = null
     this._handleOpenThread = (e) => this.openThread(e.detail.messageId)
     document.addEventListener("message:open-thread", this._handleOpenThread)
@@ -228,6 +229,11 @@ export default class extends Controller {
   scrollToBottom(smooth = true) {
     const el = this.element
     el.scrollTo({ top: el.scrollHeight, behavior: smooth ? "smooth" : "instant" })
+  }
+
+  _removeSkeleton() {
+    const skeleton = document.getElementById("chat-skeleton")
+    if (skeleton) skeleton.remove()
   }
 
   _highlightAnchoredMessage() {

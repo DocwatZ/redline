@@ -19,6 +19,7 @@ import E2eeController         from "controllers/e2ee_controller"
 import MarkdownController     from "controllers/markdown_controller"
 import UsernameCheckController from "controllers/username_check_controller"
 import MemberRoleController    from "controllers/member_role_controller"
+import PushOptinController    from "controllers/push_optin_controller"
 
 application.register("chat",            ChatController)
 application.register("dm-chat",         DmChatController)
@@ -39,3 +40,4 @@ application.register("e2ee",            E2eeController)
 application.register("markdown",        MarkdownController)
 application.register("username-check",  UsernameCheckController)
 application.register("member-role",     MemberRoleController)
+application.register("push-optin",      PushOptinController)

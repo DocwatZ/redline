@@ -55,6 +55,9 @@
       <%= link_to "🔒 Manage Permissions", admin_room_channel_permissions_path(@room),
             class: "btn",
             style: "color:var(--rl-text-secondary);width:100%;justify-content:center;margin-bottom:.5rem;display:flex" %>
+      <%= link_to "💬 Moderate Messages", admin_room_messages_path(@room),
+            class: "btn",
+            style: "color:var(--rl-text-secondary);width:100%;justify-content:center;margin-bottom:.5rem;display:flex" %>
       <%= button_to "Delete Channel", admin_room_path(@room),
             method: :delete,
             class: "btn",

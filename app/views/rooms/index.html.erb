@@ -92,59 +92,70 @@
       </section>
     <% end %>
 
-    <%# Discover public channels %>
+    <%# Discover public channels — grouped by category %>
     <section aria-labelledby="public-channels-heading">
       <h2 id="public-channels-heading" class="text-sm font-semibold text-muted uppercase tracking-wider mb-3">
         Public Channels
       </h2>
       <% public_rooms = @rooms.reject { |r| current_user.rooms.include?(r) } %>
       <% if public_rooms.any? %>
-        <ul role="list" class="space-y-2">
-          <% public_rooms.each do |room| %>
-            <li>
-              <div class="bg-surface-elevated border border-border rounded-lg p-4
-                          hover:border-accent/30 transition-colors">
-                <div class="flex items-start gap-3">
-                  <span class="text-2xl" aria-hidden="true">
-                    <%= room.display_icon %>
-                  </span>
-                  <div class="flex-1 min-w-0">
-                    <p class="font-medium text-primary truncate"><%= room.name %></p>
-                    <% if room.description.present? %>
-                      <p class="text-sm text-muted truncate mt-1"><%= room.description %></p>
-                    <% end %>
-                    <div class="flex items-center gap-2 mt-2">
-                      <span class="text-xs text-muted">
-                        <%= room.members.count %> <%= "member".pluralize(room.members.count) %>
-                      </span>
-                      <% if room.combined? %>
-                        <span class="text-xs bg-purple-900/50 text-purple-300 px-1.5 py-0.5 rounded"
-                              aria-label="voice channel with persistent text chat">🔊 Channel</span>
+        <%
+          pub_by_cat = public_rooms.includes(:category).group_by(&:category)
+          pub_sorted_cats = pub_by_cat.keys.sort_by { |c| c ? [0, c.position.to_i, c.name] : [1, 0, ""] }
+        %>
+        <% pub_sorted_cats.each do |cat| %>
+          <% if cat %>
+            <h3 style="font-size:.75rem;font-weight:600;color:var(--rl-text-muted);text-transform:uppercase;letter-spacing:.05em;margin:1.25rem 0 .5rem">
+              <%= cat.name %>
+            </h3>
+          <% end %>
+          <ul role="list" class="space-y-2">
+            <% pub_by_cat[cat].each do |room| %>
+              <li>
+                <div class="bg-surface-elevated border border-border rounded-lg p-4
+                            hover:border-accent/30 transition-colors">
+                  <div class="flex items-start gap-3">
+                    <span class="text-2xl" aria-hidden="true">
+                      <%= room.display_icon %>
+                    </span>
+                    <div class="flex-1 min-w-0">
+                      <p class="font-medium text-primary truncate"><%= room.name %></p>
+                      <% if room.description.present? %>
+                        <p class="text-sm text-muted truncate mt-1"><%= room.description %></p>
                       <% end %>
+                      <div class="flex items-center gap-2 mt-2">
+                        <span class="text-xs text-muted">
+                          <%= room.members.count %> <%= "member".pluralize(room.members.count) %>
+                        </span>
+                        <% if room.combined? %>
+                          <span class="text-xs bg-purple-900/50 text-purple-300 px-1.5 py-0.5 rounded"
+                                aria-label="voice channel with persistent text chat">🔊 Channel</span>
+                        <% end %>
+                      </div>
                     </div>
                   </div>
-                </div>
-                <%= button_to join_room_path(room), method: :post,
-                      class: "btn-ghost w-full text-sm mt-3",
-                      aria: { label: "Join #{room.name} channel" } do %>
-                  Join Channel
-                <% end %>
+                  <%= button_to join_room_path(room), method: :post,
+                        class: "btn-ghost w-full text-sm mt-3",
+                        aria: { label: "Join #{room.name} channel" } do %>
+                    Join Channel
+                  <% end %>
 
-                <%# Show subchannels for voice channels %>
-                <% if room.voice_channel? && room.subchannels.any? %>
-                  <div class="ml-8 mt-2 space-y-1 border-l-2 pl-3">
-                    <% room.subchannels.by_position.each do |sub| %>
-                      <div class="flex items-center gap-2 p-2 text-xs text-muted">
-                        <span aria-hidden="true">🔊</span>
-                        <span><%= sub.name %></span>
-                      </div>
-                    <% end %>
-                  </div>
-                <% end %>
-              </div>
-            </li>
-          <% end %>
-        </ul>
+                  <%# Show subchannels for voice channels %>
+                  <% if room.voice_channel? && room.subchannels.any? %>
+                    <div class="ml-8 mt-2 space-y-1 border-l-2 pl-3">
+                      <% room.subchannels.by_position.each do |sub| %>
+                        <div class="flex items-center gap-2 p-2 text-xs text-muted">
+                          <span aria-hidden="true">🔊</span>
+                          <span><%= sub.name %></span>
+                        </div>
+                      <% end %>
+                    </div>
+                  <% end %>
+                </div>
+              </li>
+            <% end %>
+          </ul>
+        <% end %>
       <% else %>
         <div class="text-center py-12" role="status">
           <p class="text-muted text-lg">No public channels yet.</p>

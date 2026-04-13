@@ -1,0 +1,49 @@
+<% content_for :title, "Messages — #{@room.name}" %>
+
+<div style="margin-bottom:1.5rem;display:flex;align-items:center;gap:1rem">
+  <%= link_to "← #{@room.name}", admin_room_path(@room), style: "font-size:.875rem;color:var(--rl-text-muted)" %>
+</div>
+
+<h1 style="font-size:1.25rem;font-weight:700;color:var(--rl-text-primary);margin-bottom:.25rem">
+  Messages — <%= @room.display_icon %> <%= @room.name %>
+</h1>
+<p style="color:var(--rl-text-muted);font-size:.875rem;margin-bottom:1.5rem">
+  Showing last 100 non-deleted messages. Deletion is permanent from the user's perspective.
+</p>
+
+<% if @messages.any? %>
+  <div style="background:var(--rl-surface);border:1px solid var(--rl-border);border-radius:var(--rl-radius-md);overflow:hidden">
+    <% @messages.each do |msg| %>
+      <div style="padding:.875rem 1rem;border-bottom:1px solid var(--rl-border);display:flex;align-items:flex-start;gap:.75rem">
+        <div class="avatar avatar-sm" style="background-color:<%= msg.user.avatar_color %>;flex-shrink:0" aria-hidden="true">
+          <%= msg.user.initials %>
+        </div>
+        <div style="flex:1;min-width:0">
+          <div style="display:flex;align-items:baseline;gap:.5rem;flex-wrap:wrap">
+            <span style="font-size:.875rem;font-weight:600;color:var(--rl-text-primary)"><%= msg.user.display_name %></span>
+            <span style="font-size:.75rem;color:var(--rl-text-muted)"><%= msg.created_at.strftime("%b %-d %Y, %H:%M UTC") %></span>
+            <% if msg.edited? %><span style="font-size:.7rem;color:var(--rl-text-muted)">(edited)</span><% end %>
+          </div>
+          <p style="font-size:.875rem;color:var(--rl-text-secondary);margin:.25rem 0 0;word-break:break-word">
+            <%= h(msg.body.to_s.truncate(300)) %>
+          </p>
+        </div>
+        <%= button_to admin_room_message_path(@room, msg),
+              method: :delete,
+              class: "btn",
+              style: "color:var(--rl-danger);flex-shrink:0;align-self:center;font-size:.75rem;padding:.3rem .65rem",
+              data: { turbo_confirm: "Delete this message? It will be replaced with '[deleted by moderator]'." },
+              aria: { label: "Delete message by #{msg.user.display_name}" } do %>
+          Delete
+        <% end %>
+      </div>
+    <% end %>
+  </div>
+<% else %>
+  <div style="text-align:center;padding:3rem;color:var(--rl-text-muted)">
+    <svg aria-hidden="true" width="40" height="40" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" style="margin:0 auto .75rem;opacity:.4">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
+    </svg>
+    <p style="font-size:.875rem">No messages found.</p>
+  </div>
+<% end %>

@@ -37,6 +37,23 @@
      data-e2ee-e2ee-enabled-value="true"
      <% end %>>
 
+  <%# Skeleton loader — removed by chat_controller.js after initial messages load %>
+  <% if messages.any? %>
+    <%# Messages present; no skeleton needed — chat_controller will still call removeSkeleton safely %>
+  <% else %>
+    <div id="chat-skeleton" class="chat-skeleton" aria-hidden="true" aria-label="Loading messages">
+      <% 5.times do |i| %>
+        <div class="chat-skeleton-row">
+          <div class="chat-skeleton-avatar"></div>
+          <div class="chat-skeleton-lines">
+            <div class="chat-skeleton-line" style="width:<%= [35, 55, 42, 60, 48][i % 5] %>%"></div>
+            <div class="chat-skeleton-line" style="width:<%= [80, 65, 90, 70, 85][i % 5] %>%"></div>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  <% end %>
+
   <% if room.e2ee? %>
     <div id="e2ee-status-banner" class="channel-announcement" role="status" aria-live="polite"
          style="border-left:3px solid var(--rl-accent);margin-bottom:0.5rem">
@@ -61,6 +78,29 @@
       <div class="text-secondary text-sm leading-relaxed whitespace-pre-wrap">
         <%= room.description %>
       </div>
+    </div>
+  <% end %>
+
+  <% if messages.empty? %>
+    <div id="chat-empty-state"
+         style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;padding:2rem;text-align:center"
+         role="status"
+         aria-label="No messages yet">
+      <svg aria-hidden="true" width="56" height="56" fill="none" viewBox="0 0 56 56"
+           style="margin-bottom:1rem;opacity:.25">
+        <rect width="56" height="56" rx="28" fill="var(--rl-surface-elevated)"/>
+        <path d="M14 20a4 4 0 0 1 4-4h20a4 4 0 0 1 4 4v12a4 4 0 0 1-4 4H22l-8 4V20z"
+              stroke="var(--rl-text-muted)" stroke-width="2" stroke-linejoin="round"/>
+        <circle cx="21" cy="26" r="1.5" fill="var(--rl-text-muted)"/>
+        <circle cx="28" cy="26" r="1.5" fill="var(--rl-text-muted)"/>
+        <circle cx="35" cy="26" r="1.5" fill="var(--rl-text-muted)"/>
+      </svg>
+      <p style="font-size:.9375rem;font-weight:600;color:var(--rl-text-primary);margin:0 0 .25rem">
+        No messages yet
+      </p>
+      <p style="font-size:.8125rem;color:var(--rl-text-muted);margin:0">
+        Be the first to say something in <strong><%= room.name %></strong>!
+      </p>
     </div>
   <% end %>
 

@@ -59,6 +59,12 @@ Rails.application.routes.draw do
     end
     resources :rooms, only: [:index, :show, :destroy] do
       resources :channel_permissions, only: [:index, :update], controller: "channel_permissions"
+      resources :messages, only: [:index, :destroy], controller: "messages"
+    end
+    resources :invites, only: [:index] do
+      collection do
+        post :purge_expired
+      end
     end
     resources :audit_logs, only: [:index]
     get  "system",   to: "system#show",    as: :system

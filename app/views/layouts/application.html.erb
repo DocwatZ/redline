@@ -16,57 +16,11 @@
     <% end %>
     <%= javascript_importmap_tags %>
     <script>
-      // Register service worker for PWA + Web Push subscription
+      // Register service worker for PWA support
       if ('serviceWorker' in navigator) {
-        window.addEventListener('load', async () => {
-          try {
-            const reg = await navigator.serviceWorker.register('/sw.js')
-
-            // Push subscription: only attempt if VAPID key is present and user is logged in
-            const vapidMeta = document.querySelector('meta[name="vapid-public-key"]')
-            const csrfMeta = document.querySelector('meta[name="csrf-token"]')
-            if (vapidMeta && vapidMeta.content && csrfMeta && 'PushManager' in window) {
-              // Check if already subscribed
-              const existing = await reg.pushManager.getSubscription()
-              if (!existing && Notification.permission !== 'denied') {
-                // Request permission
-                const permission = await Notification.requestPermission()
-                if (permission === 'granted') {
-                  // Subscribe to push
-                  const sub = await reg.pushManager.subscribe({
-                    userVisibleOnly: true,
-                    applicationServerKey: urlBase64ToUint8Array(vapidMeta.content)
-                  })
-                  // Send subscription to server
-                  const json = sub.toJSON()
-                  await fetch('/push_subscriptions', {
-                    method: 'POST',
-                    headers: {
-                      'Content-Type': 'application/json',
-                      'X-CSRF-Token': csrfMeta.content
-                    },
-                    body: JSON.stringify({
-                      endpoint: json.endpoint,
-                      p256dh: json.keys.p256dh,
-                      auth: json.keys.auth
-                    })
-                  })
-                }
-              }
-            }
-          } catch (e) {
-            // Silently ignore push subscription errors
-          }
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/sw.js').catch(() => {})
         })
-      }
-
-      function urlBase64ToUint8Array(base64String) {
-        const padding = '='.repeat((4 - base64String.length % 4) % 4)
-        const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/')
-        const raw = atob(base64)
-        const arr = new Uint8Array(raw.length)
-        for (let i = 0; i < raw.length; i++) arr[i] = raw.charCodeAt(i)
-        return arr
       }
     </script>
   </head>
@@ -109,11 +63,16 @@
           <div class="scroll-area" style="flex:1;padding:.5rem 0">
             <%
               # Categorise user's top-level rooms
-              user_rooms   = current_user.rooms.top_level.by_position.includes(:subchannels)
+              user_rooms   = current_user.rooms.top_level.by_position.includes(:subchannels, :category)
               announcement_rooms = user_rooms.select { |r| r.announcement? }
               private_rooms = user_rooms.select { |r| (r.private? || r.e2ee?) && !r.announcement? }
               voice_rooms   = user_rooms.select { |r| r.voice_channel? && !r.private? && !r.e2ee? && !r.announcement? }
               chat_rooms    = user_rooms.select { |r| r.chat? && !r.voice_channel? && !r.private? && !r.e2ee? && !r.announcement? }
+
+              # Group public chat/voice rooms by category
+              categorised_rooms = (voice_rooms + chat_rooms).group_by { |r| r.category }
+              # Sort: named categories by position then name, nil (uncategorised) last
+              sorted_categories = categorised_rooms.keys.sort_by { |c| c ? [0, c.position.to_i, c.name] : [1, 0, ""] }
             %>
 
             <%# Announcements — pinned to the top %>
@@ -162,70 +121,57 @@
               </section>
             <% end %>
 
-            <%# Channels (voice) with subchannels %>
-            <section aria-labelledby="nav-channels-heading" style="<%= 'margin-top:1rem' if private_rooms.any? || announcement_rooms.any? %>">
-              <div style="display:flex;align-items:center;justify-content:space-between;padding:.25rem .75rem">
-                <h2 id="nav-channels-heading" class="nav-section-heading" style="margin:0">Channels <span aria-hidden="true">🔊</span></h2>
-                <%= link_to new_room_path,
-                      style: "color:var(--rl-text-muted);display:flex;border-radius:4px",
-                      aria: { label: "Create new channel" } do %>
-                  <svg aria-hidden="true" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
-                  </svg>
-                <% end %>
-              </div>
-              <ul role="list" style="margin:.25rem 0 0;padding:0 .5rem;list-style:none">
-                <% voice_rooms.each do |room| %>
-                  <li>
-                    <%= link_to room_path(room),
-                          class: "nav-item #{"active" if @room&.slug == room.slug}",
-                          data: { room_slug: room.slug },
-                          aria: { current: @room&.slug == room.slug ? "page" : nil,
-                                  label: "Channel: #{room.name}" } do %>
-                      <span aria-hidden="true" style="flex-shrink:0">🔊</span>
-                      <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap"><%= room.name %></span>
+            <%# Channels & Chats — grouped by category (uncategorised rooms appear under their type heading) %>
+            <% has_above = private_rooms.any? || announcement_rooms.any? %>
+            <% sorted_categories.each_with_index do |category, idx| %>
+              <% rooms_in_cat = categorised_rooms[category] %>
+              <% cat_id = category ? "nav-cat-#{category.id}-heading" : "nav-channels-heading" %>
+              <% cat_label = category ? category.name : "Channels" %>
+              <section aria-labelledby="<%= cat_id %>" style="<%= 'margin-top:1rem' if idx > 0 || has_above %>">
+                <div style="display:flex;align-items:center;justify-content:space-between;padding:.25rem .75rem">
+                  <h2 id="<%= cat_id %>" class="nav-section-heading" style="margin:0"><%= cat_label %></h2>
+                  <% if idx == 0 && !category %>
+                    <%= link_to new_room_path,
+                          style: "color:var(--rl-text-muted);display:flex;border-radius:4px",
+                          aria: { label: "Create new channel" } do %>
+                      <svg aria-hidden="true" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
+                      </svg>
                     <% end %>
-                    <% if room.subchannels.any? %>
-                      <ul role="list" style="margin:0;padding:0 0 0 1.25rem;list-style:none">
-                        <% room.subchannels.by_position.each do |sub| %>
-                          <li>
-                            <%= link_to room_path(sub),
-                                  class: "nav-item #{"active" if @room&.slug == sub.slug}",
-                                  data: { room_slug: sub.slug },
-                                  aria: { current: @room&.slug == sub.slug ? "page" : nil,
-                                          label: "Subchannel: #{sub.name}" } do %>
-                              <span aria-hidden="true" style="flex-shrink:0">🔊</span>
-                              <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap"><%= sub.name %></span>
-                            <% end %>
-                          </li>
-                        <% end %>
-                      </ul>
-                    <% end %>
-                  </li>
-                <% end %>
-              </ul>
-            </section>
-
-            <%# Chats (text) %>
-            <section aria-labelledby="nav-chats-heading" style="margin-top:1rem">
-              <div style="display:flex;align-items:center;justify-content:space-between;padding:.25rem .75rem">
-                <h2 id="nav-chats-heading" class="nav-section-heading" style="margin:0">Chats <span aria-hidden="true">#️⃣</span></h2>
-              </div>
-              <ul role="list" style="margin:.25rem 0 0;padding:0 .5rem;list-style:none">
-                <% chat_rooms.each do |room| %>
-                  <li>
-                    <%= link_to room_path(room),
-                          class: "nav-item #{"active" if @room&.slug == room.slug}",
-                          data: { room_slug: room.slug },
-                          aria: { current: @room&.slug == room.slug ? "page" : nil,
-                                  label: "Chat: #{room.name}" } do %>
-                      <span aria-hidden="true" style="flex-shrink:0">#️⃣</span>
-                      <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap"><%= room.name %></span>
-                    <% end %>
-                  </li>
-                <% end %>
-              </ul>
-            </section>
+                  <% end %>
+                </div>
+                <ul role="list" style="margin:.25rem 0 0;padding:0 .5rem;list-style:none">
+                  <% rooms_in_cat.each do |room| %>
+                    <li>
+                      <%= link_to room_path(room),
+                            class: "nav-item #{"active" if @room&.slug == room.slug}",
+                            data: { room_slug: room.slug },
+                            aria: { current: @room&.slug == room.slug ? "page" : nil,
+                                    label: "#{room.voice_channel? ? 'Channel' : 'Chat'}: #{room.name}" } do %>
+                        <span aria-hidden="true" style="flex-shrink:0"><%= room.display_icon %></span>
+                        <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap"><%= room.name %></span>
+                      <% end %>
+                      <% if room.voice_channel? && room.subchannels.any? %>
+                        <ul role="list" style="margin:0;padding:0 0 0 1.25rem;list-style:none">
+                          <% room.subchannels.by_position.each do |sub| %>
+                            <li>
+                              <%= link_to room_path(sub),
+                                    class: "nav-item #{"active" if @room&.slug == sub.slug}",
+                                    data: { room_slug: sub.slug },
+                                    aria: { current: @room&.slug == sub.slug ? "page" : nil,
+                                            label: "Subchannel: #{sub.name}" } do %>
+                                <span aria-hidden="true" style="flex-shrink:0">🔊</span>
+                                <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap"><%= sub.name %></span>
+                              <% end %>
+                            </li>
+                          <% end %>
+                        </ul>
+                      <% end %>
+                    </li>
+                  <% end %>
+                </ul>
+              </section>
+            <% end %>
 
             <%# Direct Messages %>
             <section aria-labelledby="nav-dms-heading" style="margin-top:1.5rem">
@@ -335,6 +281,37 @@
               <% end %>
             </div>
           </div>
+
+          <%# Push notification opt-in banner — shown once per session if permission not yet granted %>
+          <% if ENV["VAPID_PUBLIC_KEY"].present? %>
+            <div class="hidden"
+                 style="padding:.5rem .75rem;border-top:1px solid var(--rl-border);flex-shrink:0"
+                 data-controller="push-optin"
+                 data-push-optin-vapid-key-value="<%= ENV['VAPID_PUBLIC_KEY'] %>"
+                 role="complementary"
+                 aria-label="Notification opt-in">
+              <div style="font-size:.75rem;color:var(--rl-text-secondary);margin-bottom:.375rem">
+                🔔 Enable push notifications?
+              </div>
+              <div style="display:flex;gap:.375rem">
+                <button type="button"
+                        class="btn"
+                        style="flex:1;font-size:.75rem;padding:.3rem .5rem;justify-content:center;color:var(--rl-accent)"
+                        data-action="click->push-optin#enable">
+                  Enable
+                </button>
+                <button type="button"
+                        class="btn-icon"
+                        style="font-size:.75rem;color:var(--rl-text-muted)"
+                        aria-label="Dismiss notification prompt"
+                        data-action="click->push-optin#dismiss">
+                  <svg aria-hidden="true" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+                  </svg>
+                </button>
+              </div>
+            </div>
+          <% end %>
         </nav>
 
         <%# New DM user picker modal %>

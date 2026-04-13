@@ -63,6 +63,11 @@ class RoomsController < ApplicationController
 
     unless @room.member?(current_user)
       @room.room_memberships.create!(user: current_user, role: "member")
+      AuditService.log(
+        action: "room.joined",
+        user: current_user,
+        metadata: { room_id: @room.id, room_slug: @room.slug, room_name: @room.name }
+      )
     end
 
     redirect_to @room
@@ -75,7 +80,14 @@ class RoomsController < ApplicationController
       return
     end
 
-    membership&.destroy
+    if membership
+      AuditService.log(
+        action: "room.left",
+        user: current_user,
+        metadata: { room_id: @room.id, room_slug: @room.slug, room_name: @room.name }
+      )
+      membership.destroy
+    end
     redirect_to rooms_path, notice: "You left #{@room.name}."
   end
 
