@@ -1,12 +1,5 @@
 import { Controller } from "@hotwired/stimulus"
-
-// Common emoji set for the insert picker (not reactions)
-const INSERT_EMOJI = [
-  "😀","😂","😍","🥰","😎","🤔","😢","😡","🤩","🥳",
-  "👍","👎","❤️","🔥","✅","❌","⚡","🎉","🚀","💯",
-  "👋","🙏","💪","👀","💀","😴","🤝","🎊","😅","🤗",
-  "🌟","💡","📌","🔔","🎯","💬","📎","🖊️","📷","🎵"
-]
+import { openComposeEmojiPicker, insertAtCursor } from "controllers/compose_helpers"
 
 /**
  * DM input controller — same as message-input but for direct messages.
@@ -96,50 +89,10 @@ export default class extends Controller {
 
   // ── Emoji insert picker ───────────────────────────────────────────────────
   openEmojiPicker(event) {
-    document.querySelectorAll(".compose-emoji-picker").forEach(p => p.remove())
-
-    const picker = document.createElement("div")
-    picker.className = "compose-emoji-picker"
-    picker.setAttribute("role", "dialog")
-    picker.setAttribute("aria-label", "Insert emoji")
-
-    INSERT_EMOJI.forEach(emoji => {
-      const btn = document.createElement("button")
-      btn.type = "button"
-      btn.textContent = emoji
-      btn.setAttribute("aria-label", `Insert ${emoji}`)
-      btn.className = "compose-emoji-btn"
-      btn.addEventListener("click", () => {
-        this.#insertAtCursor(emoji)
-        picker.remove()
-      })
-      picker.appendChild(btn)
+    openComposeEmojiPicker(event.currentTarget, (emoji) => {
+      insertAtCursor(this.fieldTarget, emoji)
+      this.autoResize()
     })
-
-    const trigger = event.currentTarget
-    trigger.style.position = "relative"
-    trigger.parentElement.appendChild(picker)
-
-    setTimeout(() => {
-      const close = (e) => {
-        if (!picker.contains(e.target) && e.target !== trigger) {
-          picker.remove()
-          document.removeEventListener("click", close)
-        }
-      }
-      document.addEventListener("click", close)
-    }, 0)
-  }
-
-  #insertAtCursor(text) {
-    const field = this.fieldTarget
-    const start = field.selectionStart ?? field.value.length
-    const end   = field.selectionEnd   ?? field.value.length
-    field.value = field.value.slice(0, start) + text + field.value.slice(end)
-    const newPos = start + text.length
-    field.setSelectionRange(newPos, newPos)
-    field.focus()
-    this.autoResize()
   }
 
   #renderFilePreview() {

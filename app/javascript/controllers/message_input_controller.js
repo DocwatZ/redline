@@ -1,13 +1,6 @@
 import { Controller } from "@hotwired/stimulus"
 import { formatMessage } from "controllers/markdown_controller"
-
-// Common emoji set for the insert picker (not reactions)
-const INSERT_EMOJI = [
-  "😀","😂","😍","🥰","😎","🤔","😢","😡","🤩","🥳",
-  "👍","👎","❤️","🔥","✅","❌","⚡","🎉","🚀","💯",
-  "👋","🙏","💪","👀","💀","😴","🤝","🎊","😅","🤗",
-  "🌟","💡","📌","🔔","🎯","💬","📎","🖊️","📷","🎵"
-]
+import { openComposeEmojiPicker, insertAtCursor } from "controllers/compose_helpers"
 
 /**
  * Message input controller — handles:
@@ -35,8 +28,6 @@ export default class extends Controller {
     document.removeEventListener("message:reply", this._onReply)
     document.querySelectorAll(".compose-emoji-picker").forEach(p => p.remove())
   }
-
-  get roomId() {
     const url = window.location.pathname
     const parts = url.split("/").filter(Boolean)
     const idx = parts.indexOf("rooms")
@@ -116,53 +107,10 @@ export default class extends Controller {
 
   // ── Emoji insert picker ───────────────────────────────────────────────────
   openEmojiPicker(event) {
-    // Close any open pickers first
-    document.querySelectorAll(".compose-emoji-picker").forEach(p => p.remove())
-
-    const picker = document.createElement("div")
-    picker.className = "compose-emoji-picker"
-    picker.setAttribute("role", "dialog")
-    picker.setAttribute("aria-label", "Insert emoji")
-
-    INSERT_EMOJI.forEach(emoji => {
-      const btn = document.createElement("button")
-      btn.type = "button"
-      btn.textContent = emoji
-      btn.setAttribute("aria-label", `Insert ${emoji}`)
-      btn.className = "compose-emoji-btn"
-      btn.addEventListener("click", () => {
-        this.#insertAtCursor(emoji)
-        picker.remove()
-      })
-      picker.appendChild(btn)
+    openComposeEmojiPicker(event.currentTarget, (emoji) => {
+      insertAtCursor(this.fieldTarget, emoji)
+      this.autoResize()
     })
-
-    // Position above the button
-    const trigger = event.currentTarget
-    trigger.style.position = "relative"
-    trigger.parentElement.appendChild(picker)
-
-    // Close on outside click
-    setTimeout(() => {
-      const close = (e) => {
-        if (!picker.contains(e.target) && e.target !== trigger) {
-          picker.remove()
-          document.removeEventListener("click", close)
-        }
-      }
-      document.addEventListener("click", close)
-    }, 0)
-  }
-
-  #insertAtCursor(text) {
-    const field = this.fieldTarget
-    const start = field.selectionStart ?? field.value.length
-    const end   = field.selectionEnd   ?? field.value.length
-    field.value = field.value.slice(0, start) + text + field.value.slice(end)
-    const newPos = start + text.length
-    field.setSelectionRange(newPos, newPos)
-    field.focus()
-    this.autoResize()
   }
 
   #renderFilePreview() {

@@ -1,6 +1,6 @@
 import { Controller } from "@hotwired/stimulus"
 
-// URL pattern — matches http(s) URLs (shared with link_preview_controller)
+// URL pattern used by formatMessage for linkification
 const MSG_URL_PATTERN = /https?:\/\/(?:[a-zA-Z0-9\-]+\.)+[a-zA-Z]{2,}(?::\d{1,5})?(?:\/[^\s<>")\]\}]*)?/g
 
 // Delimiter used to protect code blocks from URL linkification.

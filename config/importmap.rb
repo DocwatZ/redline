@@ -39,6 +39,7 @@ pin "channels/index", to: "channels/index.js"
 pin "channels/presence_channel", to: "channels/presence_channel.js"
 pin "channels/user_notifications_channel", to: "channels/user_notifications_channel.js"
 pin "controllers", to: "controllers/index.js"
+pin "controllers/compose_helpers",           to: "controllers/compose_helpers.js"
 pin "channels", to: "channels/index.js"
 
 # LiveKit client (loaded dynamically by livekit_controller)
