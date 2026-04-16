@@ -92,6 +92,7 @@
                         <span aria-hidden="true" style="flex-shrink:0"><%= room.display_icon %></span>
                         <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap"><%= room.name %></span>
                       <% end %>
+                      <div class="nav-room-viewers hidden" data-room-slug="<%= room.slug %>" aria-label="Active viewers"></div>
                     </li>
                   <% end %>
                 </ul>
@@ -115,6 +116,7 @@
                         <span aria-hidden="true" style="flex-shrink:0"><%= room.display_icon %></span>
                         <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap"><%= room.name %></span>
                       <% end %>
+                      <div class="nav-room-viewers hidden" data-room-slug="<%= room.slug %>" aria-label="Active viewers"></div>
                     </li>
                   <% end %>
                 </ul>
@@ -151,6 +153,7 @@
                         <span aria-hidden="true" style="flex-shrink:0"><%= room.display_icon %></span>
                         <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap"><%= room.name %></span>
                       <% end %>
+                      <div class="nav-room-viewers hidden" data-room-slug="<%= room.slug %>" aria-label="Active viewers"></div>
                       <% if room.voice_channel? && room.subchannels.any? %>
                         <ul role="list" style="margin:0;padding:0 0 0 1.25rem;list-style:none">
                           <% room.subchannels.by_position.each do |sub| %>
@@ -163,6 +166,7 @@
                                 <span aria-hidden="true" style="flex-shrink:0">🔊</span>
                                 <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap"><%= sub.name %></span>
                               <% end %>
+                              <div class="nav-room-viewers hidden" data-room-slug="<%= sub.slug %>" aria-label="Active viewers"></div>
                             </li>
                           <% end %>
                         </ul>

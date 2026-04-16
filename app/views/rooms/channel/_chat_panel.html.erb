@@ -154,21 +154,6 @@
           <label for="message-body" class="sr-only">
             Message <%= room.name %>
           </label>
-          <%# File upload button %>
-          <button type="button"
-                  class="btn-icon channel-attach-btn"
-                  aria-label="Attach files"
-                  title="Attach files"
-                  data-action="click->message-input#openFilePicker"
-                  style="flex-shrink:0;margin-right:.25rem;color:var(--rl-text-muted)">
-            <svg aria-hidden="true" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"/>
-            </svg>
-          </button>
-          <input type="file" multiple class="hidden"
-                 data-message-input-target="fileInput"
-                 data-action="change->message-input#filesSelected"
-                 aria-label="Select files to attach">
           <textarea id="message-body"
                     name="message[body]"
                     rows="1"
@@ -193,8 +178,6 @@
           </svg>
         </button>
       </div>
-      <%# File preview area %>
-      <div class="message-file-preview hidden" data-message-input-target="filePreview" aria-live="polite"></div>
     </form>
   </div>
 <% end %>

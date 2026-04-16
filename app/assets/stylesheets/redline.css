@@ -215,6 +215,28 @@ body > main[id="main-content"] {
   padding: .25rem .75rem;
 }
 
+/* ─── Room presence viewers (sidebar) ───────────────────────────────────── */
+.nav-room-viewers {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .2rem;
+  padding: .125rem .5rem .25rem 1.75rem;
+}
+.nav-presence-avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.25rem;
+  height: 1.25rem;
+  border-radius: 50%;
+  font-size: .5rem;
+  font-weight: 700;
+  color: #fff;
+  border: 1px solid var(--rl-surface);
+  cursor: default;
+  flex-shrink: 0;
+}
+
 /* ─── Header bar ─────────────────────────────────────────────────────────── */
 .page-header {
   height: 3.5rem;
@@ -1353,7 +1375,7 @@ input[type="radio"]:focus-visible {
 .h-full        { height: 100%; }
 .h-screen      { height: 100vh; }
 .w-full        { width: 100%; }
-.hidden        { display: none; }
+.hidden        { display: none !important; }
 .block         { display: block; }
 .relative      { position: relative; }
 .absolute      { position: absolute; }
