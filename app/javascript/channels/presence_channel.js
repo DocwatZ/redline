@@ -51,7 +51,7 @@ function handleRoomPresence(data) {
   } else if (data.action === "leave") {
     const avatar = container.querySelector(`[data-presence-user-id="${data.user_id}"]`)
     if (avatar) avatar.remove()
-    if (container.children.length === 0) container.classList.add("hidden")
+    if (container.querySelectorAll("[data-presence-user-id]").length === 0) container.classList.add("hidden")
   }
 }
 
