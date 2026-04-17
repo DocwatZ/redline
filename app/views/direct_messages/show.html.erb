@@ -62,7 +62,8 @@
   <%# Input %>
   <div class="channel-message-compose"
        data-controller="dm-input"
-       aria-label="Compose direct message">
+       aria-label="Compose direct message"
+       data-action="dragover->dm-input#dragOver drop->dm-input#drop dragleave->dm-input#dragLeave">
     <%# Reply-to banner (hidden until a reply is triggered) %>
     <div class="message-reply-banner hidden"
          data-dm-input-target="replyBanner"
@@ -85,6 +86,12 @@
       </button>
     </div>
 
+    <%# File preview strip (hidden until files are selected) %>
+    <div class="message-file-preview hidden"
+         data-dm-input-target="filePreview"
+         aria-live="polite"
+         aria-label="Selected files"></div>
+
     <form id="dm-form"
           method="post"
           action="<%= user_direct_messages_path(@partner) %>"
@@ -92,26 +99,33 @@
           data-turbo="false"
           aria-label="Send a direct message to <%= @partner.display_name %>">
       <%= hidden_field_tag :authenticity_token, form_authenticity_token %>
+
+      <%# Hidden file input %>
+      <input type="file"
+             id="dm-file-input"
+             multiple
+             accept="image/*,video/*,audio/*,.pdf,.doc,.docx,.txt,.zip"
+             class="sr-only"
+             aria-label="Attach files"
+             data-dm-input-target="fileInput"
+             data-action="change->dm-input#filesSelected">
+
       <div class="channel-compose-row">
+        <%# Attach button %>
+        <button type="button"
+                class="btn-icon channel-attach-btn"
+                aria-label="Attach file"
+                title="Attach file"
+                data-action="click->dm-input#openFilePicker">
+          <svg aria-hidden="true" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"/>
+          </svg>
+        </button>
+
         <div class="channel-compose-field">
           <label for="dm-body" class="sr-only">
             Message <%= @partner.display_name %>
           </label>
-          <button type="button"
-                  class="btn-icon channel-attach-btn"
-                  aria-label="Attach files"
-                  title="Attach files"
-                  data-action="click->dm-input#openFilePicker"
-                  style="flex-shrink:0;margin-right:.25rem;color:var(--rl-text-muted)">
-            <svg aria-hidden="true" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"/>
-            </svg>
-          </button>
-          <input type="file" multiple class="hidden"
-                 id="dm-file-input"
-                 data-dm-input-target="fileInput"
-                 data-action="change->dm-input#filesSelected"
-                 aria-label="Select files to attach">
           <textarea id="dm-body"
                     name="direct_message[body]"
                     rows="1"
@@ -126,6 +140,21 @@
                                  input->dm-input#autoResize"></textarea>
           <span id="dm-hint" class="sr-only">Press Enter to send, Shift+Enter for new line</span>
         </div>
+
+        <%# Emoji button %>
+        <button type="button"
+                class="btn-icon channel-emoji-btn"
+                aria-label="Insert emoji"
+                title="Insert emoji"
+                data-action="click->dm-input#openEmojiPicker">
+          <svg aria-hidden="true" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="10"/>
+            <path stroke-linecap="round" d="M8 13s1.5 2 4 2 4-2 4-2"/>
+            <line x1="9" y1="9" x2="9.01" y2="9"/>
+            <line x1="15" y1="9" x2="15.01" y2="9"/>
+          </svg>
+        </button>
+
         <button type="submit"
                 class="btn-accent channel-send-btn"
                 aria-label="Send direct message">
@@ -134,8 +163,6 @@
           </svg>
         </button>
       </div>
-      <%# File preview area %>
-      <div id="dm-file-preview" class="message-file-preview hidden" data-dm-input-target="filePreview" aria-live="polite"></div>
     </form>
   </div>
 </div>

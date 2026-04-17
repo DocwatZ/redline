@@ -2,27 +2,8 @@
 <aside id="members-panel"
        class="channel-members-panel"
        aria-label="Channel members"
-       data-controller="invite member-role"
-       data-invite-room-slug-value="<%= room.slug %>"
+       data-controller="member-role"
        data-member-role-room-slug-value="<%= room.slug %>">
-
-  <%# Invite section — inline menu option %>
-  <div class="invite-section p-3 border-b border-border">
-    <h2 class="text-xs font-semibold text-muted uppercase tracking-wider mb-2">
-      Invite People
-    </h2>
-    <p class="text-xs text-muted mb-2">Share this link to invite others to <strong>#<%= room.name %></strong></p>
-    <div class="invite-link-row">
-      <input type="text" readonly data-invite-target="link" aria-label="Invite link"
-             placeholder="Generating link…"
-             class="invite-link-input">
-      <button type="button" class="btn btn-accent invite-copy-btn"
-              data-invite-target="copyBtn"
-              data-action="click->invite#copyLink">
-        Copy Link
-      </button>
-    </div>
-  </div>
 
   <% current_membership = room.membership_for(current_user) %>
   <div class="p-3">

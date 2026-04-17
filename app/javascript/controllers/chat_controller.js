@@ -90,7 +90,7 @@ export default class extends Controller {
         const newBody = document.createElement("div")
         newBody.className = data.deleted ? "message-body deleted" : "message-body"
         if (!data.deleted) newBody.setAttribute("data-controller", "link-preview")
-        newBody.textContent = data.body
+        newBody.innerHTML = data.deleted ? this.escapeHtml(data.body || "") : formatMessage(data.body)
         oldBody.replaceWith(newBody)
         // Sync body value on the message-actions controller
         existing.setAttribute("data-message-actions-body-value", data.deleted ? "" : data.body)

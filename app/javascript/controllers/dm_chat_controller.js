@@ -36,8 +36,8 @@ export default class extends Controller {
       if (oldBody) {
         const newBody = document.createElement("div")
         newBody.className = data.deleted ? "message-body deleted" : "message-body"
-        if (!data.deleted) newBody.setAttribute("data-controller", "markdown link-preview")
-        newBody.textContent = data.body
+        if (!data.deleted) newBody.setAttribute("data-controller", "link-preview")
+        newBody.innerHTML = data.deleted ? this.escapeHtml(data.body || "") : formatMessage(data.body)
         oldBody.replaceWith(newBody)
         existing.setAttribute("data-message-actions-body-value", data.deleted ? "" : data.body)
       }
@@ -94,7 +94,7 @@ export default class extends Controller {
     const bodyClass = data.deleted
       ? "message-body text-sm text-secondary mt-0.5 leading-relaxed whitespace-pre-wrap break-words italic text-muted"
       : "message-body text-sm text-secondary mt-0.5 leading-relaxed whitespace-pre-wrap break-words"
-    const bodyLp = data.deleted ? "" : ' data-controller="markdown link-preview"'
+    const bodyLp = data.deleted ? "" : ' data-controller="link-preview"'
 
     const filesHtml = this.#renderFilesHtml(data.files)
 

@@ -119,7 +119,8 @@
 <% if room.chat? && room.member?(current_user) %>
   <div class="channel-message-compose"
        data-controller="message-input"
-       aria-label="Compose message">
+       aria-label="Compose message"
+       data-action="dragover->message-input#dragOver drop->message-input#drop dragleave->message-input#dragLeave">
     <%# Reply-to banner (hidden until a reply is triggered) %>
     <div class="message-reply-banner hidden"
          data-message-input-target="replyBanner"
@@ -142,6 +143,12 @@
       </button>
     </div>
 
+    <%# File preview strip (hidden until files are selected) %>
+    <div class="message-file-preview hidden"
+         data-message-input-target="filePreview"
+         aria-live="polite"
+         aria-label="Selected files"></div>
+
     <form id="message-form"
           method="post"
           action="<%= room_messages_path(room) %>"
@@ -149,32 +156,39 @@
           data-turbo="false"
           aria-label="Send a message to <%= room.name %>">
       <%= hidden_field_tag :authenticity_token, form_authenticity_token %>
+
+      <%# Hidden file input %>
+      <input type="file"
+             id="message-file-input"
+             multiple
+             accept="image/*,video/*,audio/*,.pdf,.doc,.docx,.txt,.zip"
+             class="sr-only"
+             aria-label="Attach files"
+             data-message-input-target="fileInput"
+             data-action="change->message-input#filesSelected">
+
       <div class="channel-compose-row">
+        <%# Attach button %>
+        <button type="button"
+                class="btn-icon channel-attach-btn"
+                aria-label="Attach file"
+                title="Attach file"
+                data-action="click->message-input#openFilePicker">
+          <svg aria-hidden="true" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"/>
+          </svg>
+        </button>
+
         <div class="channel-compose-field">
           <label for="message-body" class="sr-only">
             Message <%= room.name %>
           </label>
-          <%# File upload button %>
-          <button type="button"
-                  class="btn-icon channel-attach-btn"
-                  aria-label="Attach files"
-                  title="Attach files"
-                  data-action="click->message-input#openFilePicker"
-                  style="flex-shrink:0;margin-right:.25rem;color:var(--rl-text-muted)">
-            <svg aria-hidden="true" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"/>
-            </svg>
-          </button>
-          <input type="file" multiple class="hidden"
-                 data-message-input-target="fileInput"
-                 data-action="change->message-input#filesSelected"
-                 aria-label="Select files to attach">
           <textarea id="message-body"
                     name="message[body]"
                     rows="1"
                     maxlength="4000"
                     placeholder="Message <%= room.display_icon %><%= room.name %>"
-                    class="input-field w-full resize-none min-h-[44px] max-h-48 py-2.5 pr-12 leading-snug
+                    class="input-field w-full resize-none min-h-[44px] max-h-48 py-2.5 leading-snug
                            scrollbar-thin overflow-y-auto"
                     aria-label="Message input"
                     aria-describedby="message-hint"
@@ -185,6 +199,21 @@
             Press Enter to send, Shift+Enter for new line
           </span>
         </div>
+
+        <%# Emoji button %>
+        <button type="button"
+                class="btn-icon channel-emoji-btn"
+                aria-label="Insert emoji"
+                title="Insert emoji"
+                data-action="click->message-input#openEmojiPicker">
+          <svg aria-hidden="true" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="10"/>
+            <path stroke-linecap="round" d="M8 13s1.5 2 4 2 4-2 4-2"/>
+            <line x1="9" y1="9" x2="9.01" y2="9"/>
+            <line x1="15" y1="9" x2="15.01" y2="9"/>
+          </svg>
+        </button>
+
         <button type="submit"
                 class="btn-accent channel-send-btn"
                 aria-label="Send message">
@@ -193,8 +222,6 @@
           </svg>
         </button>
       </div>
-      <%# File preview area %>
-      <div class="message-file-preview hidden" data-message-input-target="filePreview" aria-live="polite"></div>
     </form>
   </div>
 <% end %>

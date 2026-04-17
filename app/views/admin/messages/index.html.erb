@@ -5,7 +5,7 @@
 </div>
 
 <h1 style="font-size:1.25rem;font-weight:700;color:var(--rl-text-primary);margin-bottom:.25rem">
-  Messages — <%= @room.display_icon %> <%= @room.name %>
+  Messages — <%= channel_icon_svg(@room) %> <%= @room.name %>
 </h1>
 <p style="color:var(--rl-text-muted);font-size:.875rem;margin-bottom:1.5rem">
   Showing last 100 non-deleted messages. Deletion is permanent from the user's perspective.

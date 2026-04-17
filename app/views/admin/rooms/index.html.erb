@@ -26,7 +26,7 @@
             <%= link_to room.name, admin_room_path(room), style: "color:var(--rl-accent)" %>
           </td>
           <td style="padding:.5rem 1rem;color:var(--rl-text-secondary)">
-            <%= room.channel_icon %> <%= room.channel_type || "—" %>
+            <%= channel_icon_svg(room) %> <%= room.channel_type || "—" %>
           </td>
           <td style="padding:.5rem 1rem;color:var(--rl-text-secondary)"><%= room.room_type %></td>
           <td style="padding:.5rem 1rem;color:var(--rl-text-secondary)">

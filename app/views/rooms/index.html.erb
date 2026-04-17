@@ -36,7 +36,7 @@
                     aria: { label: "#{room.name} channel, #{room.channel_type || room.room_type} type" } do %>
                 <div class="flex items-start gap-3">
                   <span class="text-2xl" aria-hidden="true">
-                    <%= room.display_icon %>
+                    <%= channel_icon_svg(room) %>
                   </span>
                   <div class="flex-1 min-w-0">
                     <p class="font-medium text-primary truncate"><%= room.name %></p>
@@ -58,7 +58,7 @@
                       <% end %>
                       <% if room.combined? %>
                         <span class="text-xs bg-purple-900/50 text-purple-300 px-1.5 py-0.5 rounded"
-                              aria-label="voice channel with persistent text chat">🔊 Channel</span>
+                              aria-label="voice channel with persistent text chat"><%= channel_icon_svg(room) %> Channel</span>
                       <% end %>
                     </div>
                   </div>
@@ -76,7 +76,7 @@
                                     hover:border-accent/50 transition-colors text-sm
                                     focus:outline-none focus:ring-2 focus:ring-accent",
                             aria: { label: "Subchannel #{sub.name}" } do %>
-                        <span class="text-sm" aria-hidden="true">🔊</span>
+                        <span class="text-sm" aria-hidden="true"><%= channel_icon_svg(sub) %></span>
                         <span class="text-secondary truncate"><%= sub.name %></span>
                         <span class="ml-auto text-xs text-muted">
                           <%= sub.members.count %> <%= "member".pluralize(sub.members.count) %>
@@ -116,7 +116,7 @@
                             hover:border-accent/30 transition-colors">
                   <div class="flex items-start gap-3">
                     <span class="text-2xl" aria-hidden="true">
-                      <%= room.display_icon %>
+                      <%= channel_icon_svg(room) %>
                     </span>
                     <div class="flex-1 min-w-0">
                       <p class="font-medium text-primary truncate"><%= room.name %></p>
@@ -129,7 +129,7 @@
                         </span>
                         <% if room.combined? %>
                           <span class="text-xs bg-purple-900/50 text-purple-300 px-1.5 py-0.5 rounded"
-                                aria-label="voice channel with persistent text chat">🔊 Channel</span>
+                                aria-label="voice channel with persistent text chat"><%= channel_icon_svg(room) %> Channel</span>
                         <% end %>
                       </div>
                     </div>
@@ -145,7 +145,7 @@
                     <div class="ml-8 mt-2 space-y-1 border-l-2 pl-3">
                       <% room.subchannels.by_position.each do |sub| %>
                         <div class="flex items-center gap-2 p-2 text-xs text-muted">
-                          <span aria-hidden="true">🔊</span>
+                          <span aria-hidden="true"><%= channel_icon_svg(sub) %></span>
                           <span><%= sub.name %></span>
                         </div>
                       <% end %>

@@ -5,7 +5,7 @@
 </div>
 
 <h1 style="font-size:1.5rem;font-weight:700;color:var(--rl-text-primary);margin-bottom:.25rem">
-  Channel Permissions — <%= @room.display_icon %> <%= @room.name %>
+  Channel Permissions — <%= channel_icon_svg(@room) %> <%= @room.name %>
 </h1>
 <p style="color:var(--rl-text-muted);font-size:.875rem;margin-bottom:2rem">
   Toggle per-member permissions for this channel.

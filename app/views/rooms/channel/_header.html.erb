@@ -16,7 +16,7 @@
     </button>
 
     <span class="text-xl" aria-hidden="true">
-      <%= room.display_icon %>
+      <%= channel_icon_svg(room) %>
     </span>
     <div class="channel-header-info">
       <div class="channel-header-title-row">
@@ -40,33 +40,8 @@
     </div>
   </div>
 
-  <%# Right group: join button + invite + members + settings %>
+  <%# Right group: members + settings %>
   <div class="channel-header-right">
-    <%# Voice/Video: Instant Join button %>
-    <% if room.voice_channel? %>
-      <button id="join-call-btn"
-              class="btn-accent channel-join-btn"
-              aria-label="Join voice channel <%= room.name %>"
-              data-action="click->channel#joinCall">
-        <svg aria-hidden="true" class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-          <path d="M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3z"/>
-          <path d="M19 10v2a7 7 0 01-14 0v-2"/>
-          <line x1="12" y1="19" x2="12" y2="23"/>
-          <line x1="8" y1="23" x2="16" y2="23"/>
-        </svg>
-        <span class="channel-join-btn-text">Join</span>
-      </button>
-    <% end %>
-
-    <%# Invite — opens member panel to reveal invite section %>
-    <button class="btn-icon" title="Invite people"
-            aria-label="Invite people"
-            data-action="click->channel#showMembers">
-      <svg aria-hidden="true" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/>
-      </svg>
-    </button>
-
     <%# Members toggle %>
     <button class="btn-icon channel-members-toggle"
             aria-label="Toggle member list, <%= members.count %> members"

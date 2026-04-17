@@ -52,7 +52,7 @@
             <%= link_to room_path(sub),
                   class: "channel-subchannel-link",
                   aria: { label: "Join subchannel #{sub.name}" } do %>
-              <span aria-hidden="true">🔊</span>
+              <span aria-hidden="true"><%= channel_icon_svg(sub) %></span>
               <span class="text-secondary"><%= sub.name %></span>
             <% end %>
           <% end %>

@@ -11,6 +11,8 @@ class ChatChannel < ApplicationCable::Channel
     if @room.voice_channel?
       stream_from "voice_chat_#{@room.id}"
     end
+
+    broadcast_room_presence("enter")
   end
 
   def receive(data)
@@ -66,10 +68,24 @@ class ChatChannel < ApplicationCable::Channel
   end
 
   def unsubscribed
+    broadcast_room_presence("leave") if @room
     stop_all_streams
   end
 
   private
+
+  def broadcast_room_presence(action)
+    ActionCable.server.broadcast("presence", {
+      type: "room_presence",
+      action: action,
+      room_id: @room.id,
+      room_slug: @room.slug,
+      user_id: current_user.id,
+      display_name: current_user.display_name,
+      initials: current_user.initials,
+      avatar_color: current_user.avatar_color
+    })
+  end
 
   def render_message(message)
     parent_data = nil

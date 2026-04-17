@@ -47,10 +47,10 @@
     <fieldset class="mt-2 space-y-2">
       <legend class="sr-only">Channel type</legend>
       <% [
-        ["chat", "#️⃣ Chat", "Persistent text chat — messages, links, GIFs, and emojis"],
-        ["both", "🔊 Channel", "Real-time voice & video with persistent text chat"],
-        ["announcement", "📢 Announcement", "One-way broadcasts only"]
-      ].each do |value, label, desc| %>
+        ["chat",         "Chat",         "Persistent text chat — messages, links, GIFs, and emojis"],
+        ["both",         "Channel",      "Real-time voice & video with persistent text chat"],
+        ["announcement", "Announcement", "One-way broadcasts only"]
+      ].each do |value, label_text, desc| %>
         <label class="flex items-start gap-3 p-3 bg-surface-elevated border border-border rounded-lg
                       cursor-pointer hover:border-accent/50 transition-colors
                       has-[:checked]:border-accent has-[:checked]:bg-accent/5">
@@ -59,7 +59,7 @@
                         focus:ring-2 focus:ring-accent focus:ring-offset-2 focus:ring-offset-base",
                 "aria-describedby": "channel-#{value}-desc" %>
           <div>
-            <span class="font-medium text-primary text-sm"><%= label %></span>
+            <span class="font-medium text-primary text-sm"><%= channel_type_icon_svg(value) %> <%= label_text %></span>
             <p id="channel-<%= value %>-desc" class="text-xs text-muted"><%= desc %></p>
           </div>
         </label>

@@ -1,18 +1,22 @@
 import { Controller } from "@hotwired/stimulus"
 
 /**
- * Link Preview controller — auto-links URLs in message text and fetches
- * rich previews (Open Graph metadata) for each URL.
+ * Link Preview controller — fetches rich Open Graph previews for URLs found
+ * in a message element and appends preview cards below the message text.
+ *
+ * URL linkification (turning plain URLs into clickable anchors) is handled
+ * upstream by formatMessage() in markdown_controller.js so that this
+ * controller never needs to mutate the message text itself.
  *
  * Usage: Add data-controller="link-preview" to any element containing
  * message text. The controller will:
- *   1. Detect URLs in the text content
- *   2. Make them clickable links
- *   3. Fetch and render preview cards with title, description, image, favicon
+ *   1. Detect URLs in the element's text content
+ *   2. Fetch Open Graph metadata for each URL
+ *   3. Render and append preview cards (title, description, image, favicon)
  *
- * Discord-style features:
+ * Discord-style feature:
  *   - Wrapping a URL in angle brackets <https://example.com> prevents the
- *     preview from appearing (URL is still clickable).
+ *     preview card from appearing (the URL is still a clickable link).
  *   - Users can disable link previews in Settings > Text & Images.
  */
 export default class extends Controller {
@@ -41,14 +45,11 @@ export default class extends Controller {
 
     if (urlData.length === 0) return
 
-    // Auto-link URLs in the text
-    this.linkifyText(text, urlData)
-
     // Check if user has link previews enabled
     const previewsEnabled = document.body.getAttribute("data-link-previews") !== "false"
     if (!previewsEnabled) return
 
-    // Fetch previews only for non-suppressed URLs
+    // Fetch preview cards only for non-suppressed URLs
     const previewableUrls = [...new Set(
       urlData.filter(u => !u.suppressed).map(u => u.url)
     )]
@@ -64,7 +65,7 @@ export default class extends Controller {
     const results = []
     const seen = new Set()
 
-    // Find angle-bracket-wrapped URLs (suppressed)
+    // Find angle-bracket-wrapped URLs (suppressed — no preview card)
     const suppressedPattern = /<(https?:\/\/(?:[a-zA-Z0-9\-]+\.)+[a-zA-Z]{2,}(?::\d{1,5})?(?:\/[^\s<>")\]\}]*)?)>/g
     let match
     while ((match = suppressedPattern.exec(text)) !== null) {
@@ -83,44 +84,6 @@ export default class extends Controller {
     }
 
     return results
-  }
-
-  linkifyText(text, urlData) {
-    const fragment = document.createDocumentFragment()
-    const allUrls = urlData.map(u => u.url)
-
-    // Build regex that matches both bare URLs and <URL> wrapped URLs
-    const escapedUrls = allUrls.map(u => u.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"))
-    // Match angle-bracket-wrapped URLs or bare URLs
-    const splitPattern = new RegExp(`(<(?:${escapedUrls.join("|")})>|${escapedUrls.join("|")})`)
-    const parts = text.split(splitPattern)
-
-    parts.forEach(part => {
-      // Check if this is an angle-bracket-wrapped URL
-      const bracketMatch = part.match(/^<(https?:\/\/.+)>$/)
-      if (bracketMatch && allUrls.includes(bracketMatch[1])) {
-        const a = document.createElement("a")
-        a.href = bracketMatch[1]
-        a.textContent = bracketMatch[1]
-        a.target = "_blank"
-        a.rel = "noopener noreferrer"
-        a.className = "link-preview-url"
-        fragment.appendChild(a)
-      } else if (allUrls.includes(part)) {
-        const a = document.createElement("a")
-        a.href = part
-        a.textContent = part
-        a.target = "_blank"
-        a.rel = "noopener noreferrer"
-        a.className = "link-preview-url"
-        fragment.appendChild(a)
-      } else {
-        fragment.appendChild(document.createTextNode(part))
-      }
-    })
-
-    this.element.textContent = ""
-    this.element.appendChild(fragment)
   }
 
   async fetchPreview(url) {
@@ -145,6 +108,11 @@ export default class extends Controller {
   }
 
   renderPreviewCard(data) {
+    // Guard: don't append to a detached element (can happen if the message
+    // body was replaced by the optimistic-render update path before the
+    // async fetch resolved).
+    if (!this.element.isConnected) return
+
     const card = document.createElement("a")
     card.href = data.url
     card.target = "_blank"

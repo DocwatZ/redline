@@ -7,10 +7,10 @@ require "openssl"
 require "ipaddr"
 
 class LinkPreviewService
-  FETCH_TIMEOUT = 3 # seconds
+  FETCH_TIMEOUT = 5 # seconds
   MAX_BODY_SIZE = 50_000 # bytes — only read enough HTML for meta tags
   MAX_REDIRECTS = 3
-  USER_AGENT = "Redline LinkPreview/1.0"
+  USER_AGENT = "Mozilla/5.0 (compatible; RedlineBot/1.0)"
 
   # URL pattern for extracting URLs from text.
   # Matches http:// and https:// URLs.

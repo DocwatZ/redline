@@ -1,4 +1,5 @@
 import { Controller } from "@hotwired/stimulus"
+import { openComposeEmojiPicker, insertAtCursor } from "controllers/compose_helpers"
 
 /**
  * DM input controller — same as message-input but for direct messages.
@@ -15,6 +16,7 @@ export default class extends Controller {
 
   disconnect() {
     document.removeEventListener("message:reply", this._onReply)
+    document.querySelectorAll(".compose-emoji-picker").forEach(p => p.remove())
   }
 
   get partnerId() {
@@ -62,6 +64,35 @@ export default class extends Controller {
     const idx = parseInt(event.currentTarget.dataset.index, 10)
     this._selectedFiles.splice(idx, 1)
     this.#renderFilePreview()
+  }
+
+  // ── Drag-and-drop ─────────────────────────────────────────────────────────
+  dragOver(event) {
+    event.preventDefault()
+    this.element.classList.add("compose-drag-over")
+  }
+
+  dragLeave(event) {
+    if (!this.element.contains(event.relatedTarget)) {
+      this.element.classList.remove("compose-drag-over")
+    }
+  }
+
+  drop(event) {
+    event.preventDefault()
+    this.element.classList.remove("compose-drag-over")
+    const files = Array.from(event.dataTransfer?.files ?? [])
+    if (files.length === 0) return
+    this._selectedFiles = [...this._selectedFiles, ...files]
+    this.#renderFilePreview()
+  }
+
+  // ── Emoji insert picker ───────────────────────────────────────────────────
+  openEmojiPicker(event) {
+    openComposeEmojiPicker(event.currentTarget, (emoji) => {
+      insertAtCursor(this.fieldTarget, emoji)
+      this.autoResize()
+    })
   }
 
   #renderFilePreview() {

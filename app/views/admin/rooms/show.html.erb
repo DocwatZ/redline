@@ -5,7 +5,7 @@
 </div>
 
 <h1 style="font-size:1.5rem;font-weight:700;color:var(--rl-text-primary);margin-bottom:.25rem">
-  <%= @room.display_icon %> <%= @room.name %>
+  <%= channel_icon_svg(@room) %> <%= @room.name %>
 </h1>
 <p style="color:var(--rl-text-muted);font-size:.875rem;margin-bottom:2rem">
   <%= @room.channel_type || @room.room_type %> · <%= @room.private? ? "Private 🗝️" : "Public" %> · <%= @message_count %> messages
@@ -42,7 +42,7 @@
         <ul style="list-style:none;padding:0;margin:0">
           <% subchannels.each do |sub| %>
             <li style="padding:.375rem 0;display:flex;align-items:center;gap:.5rem;border-bottom:1px solid var(--rl-border)">
-              <span>🔊</span>
+              <span><%= channel_icon_svg(sub) %></span>
               <%= link_to sub.name, admin_room_path(sub), style: "color:var(--rl-accent);font-size:.875rem" %>
             </li>
           <% end %>
